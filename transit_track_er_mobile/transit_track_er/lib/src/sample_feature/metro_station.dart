@@ -11,7 +11,7 @@ class Station {
   final Coordonnees coordonnees;
   final DateTime arriveeFirstTrain;
   final DateTime departFirstTrain;
-  final int idFirstTrain;
+  final int? idFirstTrain;
   final DateTime arriveeSecondTrain;
   final DateTime departSecondTrain;
   final String heureExtraction;
@@ -27,7 +27,7 @@ class Station {
     required this.coordonnees,
     required this.arriveeFirstTrain,
     required this.departFirstTrain,
-    required this.idFirstTrain,
+    this.idFirstTrain,
     required this.arriveeSecondTrain,
     required this.departSecondTrain,
     required this.heureExtraction
@@ -47,7 +47,7 @@ class Station {
         "coordonnees": Map<String, dynamic> coordonnees,
         "arriveefirsttrain": String arriveeFirstTrain,
         "departfirsttrain": String departFirstTrain,
-        "idfirsttrain": int idFirstTrain,
+        "idfirsttrain": int? idFirstTrain,
         "arriveesecondtrain": String arriveeSecondTrain,
         "departsecondtrain": String departSecondTrain,
         "heureextraction": String heureExtraction
@@ -68,7 +68,7 @@ class Station {
           departSecondTrain: DateTime.parse(departSecondTrain),
           heureExtraction: heureExtraction
         ),
-      _ => throw const FormatException('Failed to load album.'),
+      _ => throw const FormatException('Invalid JSON format for Station'),
     };
   }
 }

@@ -1,0 +1,27 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Transit Track_er FR",
+  "@appTitle": {
+    "description": "Le titre de l'application"
+  },
+  "username": "Nom d'utilisateur",
+  "@username": {
+    "description": "Label pour le champ de saisie du nom d'utilisateur"
+  },
+  "password": "Mot de passe",
+  "@password": {
+    "description": "Label pour le champ de saisie du mot de passe"
+  },
+  "connect": "Se connecter",
+  "@connect": {
+    "description": "Bouton pour se connecter"
+  },
+  "loginSuccess": "Connexion réussie",
+  "@loginSuccess": {
+    "description": "Message affiché lors d'une connexion réussie"
+  },
+  "guest": "Invité",
+  "@guest": {
+    "description": "Label pour l'utilisateur invité"
+  }
+}

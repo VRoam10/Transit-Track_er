@@ -40,7 +40,7 @@ class SampleItemDetailsView extends StatelessWidget {
                 child: MetroDetailsView(metro: station)
               );
             } else {
-              return const Center(child: Text('Failed to load album'));
+              return Center(child: Text('Failed to load station data. Status code: ${response}'));
             }
           }
 

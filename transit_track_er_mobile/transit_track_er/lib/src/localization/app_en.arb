@@ -1,6 +1,27 @@
 {
-  "appTitle": "star_arceleu",
+  "@@locale": "en",
+  "appTitle": "Transit Track_er EN",
   "@appTitle": {
     "description": "The title of the application"
+  },
+  "username": "Username",
+  "@username": {
+    "description": "Label for the username input field"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Label for the password input field"
+  },
+  "connect": "Sign In",
+  "@connect": {
+    "description": "Button to connect"
+  },
+  "loginSuccess": "Login successful",
+  "@loginSuccess": {
+    "description": "Message displayed on successful login"
+  },
+  "guest": "Guest",
+  "@guest": {
+    "description": "Label for guest user"
   }
 }
