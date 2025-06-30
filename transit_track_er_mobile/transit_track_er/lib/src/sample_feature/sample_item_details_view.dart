@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transit_track_er/src/sample_feature/metro_station.dart';
 import 'package:transit_track_er/src/sample_feature/test.dart'; // Ensure fetchMetro is imported
 
@@ -15,9 +17,11 @@ class SampleItemDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  final Box stationBox = Hive.box('stationsBox');
     return Scaffold(
       appBar: AppBar(
         title: Text('Details for Station #$id'),
+        actions: [IconButton(onPressed: () => stationBox.add(id), icon: const Icon(Icons.alarm_on))],
       ),
       body: FutureBuilder<http.Response>(
         future: fetchTestMetro(id), // Call the fetchAlbum() function
