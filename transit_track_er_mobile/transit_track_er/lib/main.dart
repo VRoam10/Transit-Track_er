@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
@@ -17,7 +18,8 @@ void main() async {
 
   // Initialize Hive and open a box
   await Hive.initFlutter();
-  await Hive.openBox('stationsBox');
+  Hive.registerAdapter(FavoriteStationAdapter());
+  await Hive.openBox<FavoriteStation>('stationsBox');
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
