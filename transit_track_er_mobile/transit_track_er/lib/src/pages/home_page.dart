@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:transit_track_er/src/sample_feature/sample_item_list_view.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station_list_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
@@ -46,7 +46,8 @@ class HomePage extends StatelessWidget {
                       );
                       Navigator.pushNamed(
                           context,
-                          SampleItemListView.routeName // navigates to /sample_list
+                          MetroStationListView
+                              .routeName // navigates to /metro_station_list
                           );
                     },
                     child: Text(localizations.connect),
@@ -56,8 +57,8 @@ class HomePage extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamed(
                         context,
-                        SampleItemListView
-                            .routeName, // navigates to /sample_list
+                        MetroStationListView
+                            .routeName, // navigates to /metro_station_list
                       );
                     },
                     child: Text(localizations.guest),

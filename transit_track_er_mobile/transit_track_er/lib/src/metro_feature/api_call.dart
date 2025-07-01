@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:transit_track_er/src/metro_feature/metro_station_short.dart';
 
 Future<http.Response> fetchTestMetro(String id) async {
   final response = await http.get(Uri.parse(
@@ -17,19 +18,5 @@ Future<List<MetroStation>> fetchAllMetro() async {
     return data.map((e) => MetroStation.fromJson(e)).toList();
   } else {
     throw Exception('Failed to load stations');
-  }
-}
-
-class MetroStation {
-  final String id;
-  final String name;
-
-  MetroStation({required this.id, required this.name});
-
-  factory MetroStation.fromJson(Map<String, dynamic> json) {
-    return MetroStation(
-      id: json['idjdd'],
-      name: json['nomarret'],
-    );
   }
 }

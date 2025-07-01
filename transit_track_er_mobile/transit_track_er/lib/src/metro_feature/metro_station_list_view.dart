@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station_short.dart';
+import 'package:transit_track_er/src/metro_feature/api_call.dart';
 
 import '../settings/settings_view.dart';
-import 'sample_item_details_view.dart';
-import 'package:transit_track_er/src/sample_feature/test.dart';
+import 'metro_station_details_view.dart';
 
-/// Displays a list of SampleItems.
-class SampleItemListView extends StatefulWidget {
-  const SampleItemListView({
+/// Displays a list of Metro Station.
+class MetroStationListView extends StatefulWidget {
+  const MetroStationListView({
     super.key,
   });
 
   @override
-  State<SampleItemListView> createState() => _SampleItemListViewState();
+  State<MetroStationListView> createState() => _MetroStationListViewState();
 
-  static const routeName = '/sample_list';
+  static const routeName = '/metro_station_list';
 }
 
-class _SampleItemListViewState extends State<SampleItemListView> {
+class _MetroStationListViewState extends State<MetroStationListView> {
   late Future<List<MetroStation>> _futureStations;
 
   @override
@@ -68,7 +69,8 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SampleItemDetailsView(station: station),
+                      builder: (context) =>
+                          MetroStationDetailsView(station: station),
                     ),
                   );
                 },

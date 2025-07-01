@@ -5,15 +5,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:transit_track_er/src/form/remove_metro_station.dart';
 import 'package:transit_track_er/src/form/save_metro_station.dart';
-import 'package:transit_track_er/src/sample_feature/metro_station.dart';
-import 'package:transit_track_er/src/sample_feature/test.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station_full.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station_short.dart';
+import 'package:transit_track_er/src/metro_feature/api_call.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart'; // Ensure fetchMetro is imported
 
-/// Displays detailed information about a SampleItem.
-class SampleItemDetailsView extends StatelessWidget {
-  const SampleItemDetailsView({super.key, required this.station});
+/// Displays detailed information about a Metro Station.
+class MetroStationDetailsView extends StatelessWidget {
+  const MetroStationDetailsView({super.key, required this.station});
 
-  static const routeName = '/sample_item';
+  static const routeName = '/metro_station_details';
 
   final MetroStation station;
 
@@ -34,7 +35,8 @@ class SampleItemDetailsView extends StatelessWidget {
                 ),
                 onPressed: () {
                   if (isFavorite) {
-                    showRemoveFavoriteStationDialog(context, stationBox, station);
+                    showRemoveFavoriteStationDialog(
+                        context, stationBox, station);
                     box.delete(stationBox.keys.firstWhere(
                         (k) => stationBox.get(k)!.id == station.id));
                   } else {
