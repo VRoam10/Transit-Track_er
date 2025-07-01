@@ -35,7 +35,12 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle login logic here
+                      if (!loginIsValid('username', 'password')) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(localizations.loginError)),
+                        );
+                        return;
+                      }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(localizations.loginSuccess)),
                       );
@@ -61,4 +66,9 @@ class HomePage extends StatelessWidget {
               )),
         ));
   }
+}
+
+bool loginIsValid(String username, String password) {
+  // Implement login validation logic here with server-side verification
+  return false;
 }

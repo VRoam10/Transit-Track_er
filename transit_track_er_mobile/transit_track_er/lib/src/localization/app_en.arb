@@ -20,6 +20,10 @@
   "@loginSuccess": {
     "description": "Message displayed on successful login"
   },
+  "loginError": "Login error",
+  "@loginError": {
+    "description": "Message displayed on login error"
+  },
   "guest": "Guest",
   "@guest": {
     "description": "Label for guest user"

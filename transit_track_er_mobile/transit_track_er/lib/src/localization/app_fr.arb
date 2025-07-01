@@ -20,6 +20,10 @@
   "@loginSuccess": {
     "description": "Message affiché lors d'une connexion réussie"
   },
+  "loginError": "Erreur de connexion",
+  "@loginError": {
+    "description": "Message affiché lors d'une erreur de connexion"
+  },
   "guest": "Invité",
   "@guest": {
     "description": "Label pour l'utilisateur invité"
