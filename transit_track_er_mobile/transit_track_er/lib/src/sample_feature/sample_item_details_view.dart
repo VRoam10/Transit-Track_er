@@ -26,13 +26,6 @@ class SampleItemDetailsView extends StatelessWidget {
             valueListenable: stationBox.listenable(),
             builder: (context, Box box, _) {
               final isFavorite = box.values.any((s) => s.id == id);
-              // ? IconButton(
-              //     onPressed: () => stationBox.delete(stationBox.keys.firstWhere((k) => stationBox.get(k)!.id == id)),
-              //     icon: const Icon(Icons.alarm_off))
-              // : IconButton(
-              //     onPressed: () => stationBox.add(FavoriteStation(
-              //         id: id, name: "name", alarmTime: DateTime.now())),
-              //     icon: const Icon(Icons.alarm_add))
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,
