@@ -3,40 +3,42 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:transit_track_er/src/form/remove_metro_station.dart';
+import 'package:transit_track_er/src/form/save_metro_station.dart';
 import 'package:transit_track_er/src/sample_feature/metro_station.dart';
 import 'package:transit_track_er/src/sample_feature/test.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart'; // Ensure fetchMetro is imported
 
 /// Displays detailed information about a SampleItem.
 class SampleItemDetailsView extends StatelessWidget {
-  const SampleItemDetailsView({super.key, required this.id});
+  const SampleItemDetailsView({super.key, required this.station});
 
   static const routeName = '/sample_item';
 
-  final String id;
+  final MetroStation station;
 
   @override
   Widget build(BuildContext context) {
     final stationBox = Hive.box<FavoriteStation>('stationsBox');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Details for Station #$id'),
+        title: Text('Details for Station #${station.id}'),
         actions: [
           ValueListenableBuilder(
             valueListenable: stationBox.listenable(),
             builder: (context, Box box, _) {
-              final isFavorite = box.values.any((s) => s.id == id);
+              final isFavorite = box.values.any((s) => s.id == station.id);
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,
                 ),
                 onPressed: () {
                   if (isFavorite) {
-                    box.delete(stationBox.keys
-                        .firstWhere((k) => stationBox.get(k)!.id == id));
+                    showRemoveFavoriteStationDialog(context, stationBox, station);
+                    box.delete(stationBox.keys.firstWhere(
+                        (k) => stationBox.get(k)!.id == station.id));
                   } else {
-                    box.add(FavoriteStation(
-                        id: id, name: "name", alarmTime: DateTime.now()));
+                    showAddFavoriteStationDialog(context, stationBox, station);
                   }
                 },
               );
@@ -45,7 +47,7 @@ class SampleItemDetailsView extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<http.Response>(
-        future: fetchTestMetro(id),
+        future: fetchTestMetro(station.id),
         builder: (context, snapshot) {
           // Check if the connection is still loading
           if (snapshot.connectionState == ConnectionState.waiting) {

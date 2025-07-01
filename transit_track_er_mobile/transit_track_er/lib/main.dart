@@ -29,12 +29,4 @@ void main() async {
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   runApp(MyApp(settingsController: settingsController));
-
-  final station = FavoriteStation(
-    id: "1",
-    name: 'Central Station',
-    alarmTime: DateTime.now().add(Duration(seconds: 10)),
-  );
-
-  await scheduleStationNotification(station);
 }

@@ -68,7 +68,7 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SampleItemDetailsView(id: station.id),
+                      builder: (context) => SampleItemDetailsView(station: station),
                     ),
                   );
                 },
