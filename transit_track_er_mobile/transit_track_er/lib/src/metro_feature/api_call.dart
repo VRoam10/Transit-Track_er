@@ -11,8 +11,8 @@ Future<http.Response> fetchTestMetro(String id) async {
 
 Future<List<MetroStation>> fetchAllMetro() async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd&limit=20&refine=idligne%3A%221001%22'));
-  
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd%2Csens&limit=20&refine=idligne%3A%221001%22'));
+
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
     return data.map((e) => MetroStation.fromJson(e)).toList();

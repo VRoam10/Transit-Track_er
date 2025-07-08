@@ -4,7 +4,8 @@ import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station_short.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 
-Future<void> showAddFavoriteStationDialog(BuildContext context, Box<FavoriteStation> box, MetroStation station) async {
+Future<void> showAddFavoriteStationDialog(BuildContext context,
+    Box<FavoriteStation> box, MetroStation station) async {
   // Step 1: Let the user choose a date
   final DateTime? pickedDate = await showDatePicker(
     context: context,
@@ -33,8 +34,9 @@ Future<void> showAddFavoriteStationDialog(BuildContext context, Box<FavoriteStat
   );
 
   FavoriteStation favoriteStation = FavoriteStation(
-    id: station.id,
-    name: station.name,
+    idjdd: station.id,
+    nomCourtLigne: station.name,
+    sens: station.sens,
     alarmTime: chosenDateTime,
   );
 
@@ -44,6 +46,8 @@ Future<void> showAddFavoriteStationDialog(BuildContext context, Box<FavoriteStat
 
   // Optional: show confirmation
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Favorite station ${station.name} added for ${chosenDateTime.toLocal()}')),
+    SnackBar(
+        content: Text(
+            'Favorite station ${station.name} added for ${chosenDateTime.toLocal()}')),
   );
 }

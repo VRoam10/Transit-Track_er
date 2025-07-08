@@ -29,21 +29,23 @@ Future<void> scheduleStationNotification(FavoriteStation station) async {
     android: androidPlatformChannelSpecifics,
   );
 
-  final androidImplementation = flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
+  final androidImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
-  final bool? isExactAllowed = await androidImplementation?.areNotificationsEnabled();
+  final bool? isExactAllowed =
+      await androidImplementation?.areNotificationsEnabled();
 
   await flutterLocalNotificationsPlugin.zonedSchedule(
     9, // Use station.id for unique notification ID
-    'Alarm: ${station.name}', // Title
+    'Alarm: ${station.nomCourtLigne}', // Title
     'Your station alarm is set for ${station.alarmTime}', // Body
     tz.TZDateTime.from(station.alarmTime, tz.local),
     platformChannelSpecifics,
     uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
-    matchDateTimeComponents: DateTimeComponents.time, // For repeating at the same time
+    matchDateTimeComponents:
+        DateTimeComponents.time, // For repeating at the same time
     androidScheduleMode: isExactAllowed == true
         ? AndroidScheduleMode.inexact //exactAllowWhileIdle
         : AndroidScheduleMode.inexact, // fallback if no exact alarms permission

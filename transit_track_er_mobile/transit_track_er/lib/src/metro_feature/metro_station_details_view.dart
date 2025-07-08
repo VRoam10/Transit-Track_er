@@ -38,7 +38,7 @@ class MetroStationDetailsView extends StatelessWidget {
                     showRemoveFavoriteStationDialog(
                         context, stationBox, station);
                     box.delete(stationBox.keys.firstWhere(
-                        (k) => stationBox.get(k)!.id == station.id));
+                        (k) => stationBox.get(k)!.idjdd == station.id));
                   } else {
                     showAddFavoriteStationDialog(context, stationBox, station);
                   }
