@@ -21,14 +21,14 @@ class HomePage extends StatelessWidget {
                   TextField(
                     decoration: InputDecoration(
                       labelText: localizations.username,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     decoration: InputDecoration(
                       labelText: localizations.password,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     obscureText: true,
                   ),
