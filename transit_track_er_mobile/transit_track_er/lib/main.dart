@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
+import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 import 'package:transit_track_er/src/settings/timezone.dart';
 
@@ -20,7 +21,10 @@ void main() async {
   // Initialize Hive and open a box
   await Hive.initFlutter();
   Hive.registerAdapter(FavoriteStationAdapter());
+  Hive.registerAdapter(FavoriteBusStopAdapter());
+  
   await Hive.openBox<FavoriteStation>('stationsBox');
+  await Hive.openBox<FavoriteBusStop>('busBox');
 
   configureLocalTimeZone();
   await initializeNotifications();

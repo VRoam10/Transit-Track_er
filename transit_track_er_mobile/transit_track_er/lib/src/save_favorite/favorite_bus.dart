@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'favorite_bus.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class FavoriteBusStop extends HiveObject {
   @HiveField(0)
   final String idLigne;

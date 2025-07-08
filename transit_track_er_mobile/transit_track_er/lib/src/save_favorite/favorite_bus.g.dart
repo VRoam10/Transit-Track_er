@@ -8,7 +8,7 @@ part of 'favorite_bus.dart';
 
 class FavoriteBusStopAdapter extends TypeAdapter<FavoriteBusStop> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
   FavoriteBusStop read(BinaryReader reader) {
