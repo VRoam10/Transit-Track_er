@@ -11,7 +11,7 @@ Future<http.Response> fetchTestBus(String id) async {
 
 Future<List<BusStop>> fetchAllBusLigne() async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd%2Csens&limit=20&refine=idligne%3A%221001%22'));
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?select=idligne%2Cnomcourtligne%2Cidarret%2Csens%2Cnomarret&limit=20 '));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];

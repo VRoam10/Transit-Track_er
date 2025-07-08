@@ -1,68 +1,49 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station_list_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const routeName = '/';
+  static const routeName = '/home';
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-        appBar: AppBar(title: Text(localizations.appTitle)),
+        appBar: AppBar(title: Text(localizations.homeTitle)),
         body: Center(
           child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: localizations.username,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: localizations.password,
-                      border: const OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
                     onPressed: () {
-                      if (!loginIsValid('username', 'password')) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(localizations.loginError)),
-                        );
-                        return;
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(localizations.loginSuccess)),
-                      );
-                      Navigator.pushNamed(
+                      Navigator.pushNamed(context, BusStopListView.routeName);
+                    },
+                    child: Text(localizations.busStopListTitle),
+                  ),),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
                           context,
                           MetroStationListView
-                              .routeName // navigates to /metro_station_list
-                          );
-                    },
-                    child: Text(localizations.connect),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        MetroStationListView
-                            .routeName, // navigates to /metro_station_list
-                      );
-                    },
-                    child: Text(localizations.guest),
-                  ),
+                              .routeName, // navigates to /metro_station_list
+                        );
+                      },
+                      child: Text(localizations.metroStationListTitle),
+                    ),
+                  )
                 ],
               )),
         ));

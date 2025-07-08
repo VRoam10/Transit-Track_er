@@ -27,5 +27,17 @@
   "guest": "Guest",
   "@guest": {
     "description": "Label for guest user"
+  },
+  "homeTitle": "Home",
+  "@homeTitle": {
+    "description": "Title for the home page"
+  },
+  "metroStationListTitle": "Metro Stations",
+  "@metroStationListTitle": {
+    "description": "Title for the metro station list page"
+  },
+  "busStopListTitle": "Bus Stops",
+  "@busStopListTitle": {  
+    "description": "Title for the bus stop list page"
   }
 }

@@ -27,5 +27,17 @@
   "guest": "Invité",
   "@guest": {
     "description": "Label pour l'utilisateur invité"
+  },
+  "homeTitle": "Accueil",
+  "@homeTitle": {
+    "description": "Titre de la page d'accueil"
+  },
+  "metroStationListTitle": "Stations de métro",
+  "@metroStationListTitle": {
+    "description": "Titre de la page de liste des stations de métro"
+  },
+  "busStopListTitle": "Arrêts de bus",
+  "@busStopListTitle": {
+    "description": "Titre de la page de liste des arrêts de bus"
   }
 }
