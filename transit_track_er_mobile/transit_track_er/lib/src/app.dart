@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:transit_track_er/src/bus_feature/bus_details_view.dart';
+import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
 import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
+import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
 
 import 'metro_feature/metro_station_list_view.dart';
@@ -73,10 +74,12 @@ class MyApp extends StatelessWidget {
                 switch (routeSettings.name) {
                   case SettingsView.routeName:
                     return SettingsView(controller: settingsController);
-                  case MetroStationListView.routeName:
-                    return const MetroStationListView();
+                  case MetroLineListView.routeName:
+                    return const MetroLineListView();
                   case BusStopListView.routeName:
                     return const BusStopListView();
+                  case BusLineListView.routeName:
+                    return const BusLineListView();
                   case HomePage.routeName:
                     return const HomePage();
                   case LoginPage.routeName:
