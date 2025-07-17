@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
 import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
+import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station_list_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -25,11 +27,12 @@ class HomePage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, BusStopListView.routeName);
-                    },
-                    child: Text(localizations.busStopListTitle),
-                  ),),
+                      onPressed: () {
+                        Navigator.pushNamed(context, BusStopListView.routeName);
+                      },
+                      child: Text(localizations.busStopListTitle),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -37,11 +40,25 @@ class HomePage extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
-                          MetroStationListView
-                              .routeName, // navigates to /metro_station_list
+                          MetroLineListView
+                              .routeName, // navigates to /metro_line_list
                         );
                       },
                       child: Text(localizations.metroStationListTitle),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          BusLineListView
+                              .routeName, // navigates to /metro_line_list
+                        );
+                      },
+                      child: Text(localizations.busStopListTitle),
                     ),
                   )
                 ],

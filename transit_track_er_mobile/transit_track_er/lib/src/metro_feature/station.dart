@@ -34,7 +34,6 @@ class Station {
   });
 
   factory Station.fromJson(Map<String, dynamic> json) {
-    print(json);
     return switch (json) {
       {
         "idjdd": String idjdd,

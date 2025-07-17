@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:transit_track_er/src/metro_feature/metro_station.dart';
+import 'package:transit_track_er/src/metro_feature/metro_line.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station_list_view.dart';
 
 import '../settings/settings_view.dart';
-import 'metro_station_details_view.dart';
 
 /// Displays a list of Metro Station.
-class MetroStationListView extends StatefulWidget {
-  const MetroStationListView({
-    super.key, required this.idLigne,
+class MetroLineListView extends StatefulWidget {
+  const MetroLineListView({
+    super.key,
   });
 
-  final String idLigne;
-
   @override
-  State<MetroStationListView> createState() => _MetroStationListViewState(idLigne);
+  State<MetroLineListView> createState() => _MetroLineListViewState();
 
-  static const routeName = '/metro_station_list';
+  static const routeName = '/metro_line_list';
 }
 
-class _MetroStationListViewState extends State<MetroStationListView> {
-  _MetroStationListViewState(this.idLigne);
-
-  final String idLigne;
-  late Future<List<MetroStation>> _futureStations;
+class _MetroLineListViewState extends State<MetroLineListView> {
+  late Future<List<MetroLine>> _futureStations;
 
   @override
   void initState() {
     super.initState();
-    _futureStations = fetchAllMetro(idLigne);
+    _futureStations = fetchAllLineMetro();
   }
 
   @override
@@ -48,7 +43,7 @@ class _MetroStationListViewState extends State<MetroStationListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<MetroStation>>(
+      body: FutureBuilder<List<MetroLine>>(
         future: _futureStations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,18 +59,19 @@ class _MetroStationListViewState extends State<MetroStationListView> {
             restorationId: 'metroStationListView',
             itemCount: stations.length,
             itemBuilder: (context, index) {
-              final station = stations[index];
+              final metroLine = stations[index];
               return ListTile(
-                title: Text(station.name),
-                leading: const CircleAvatar(
-                  foregroundImage: AssetImage('assets/images/flutter_logo.png'),
+                title: Text(metroLine.shortName),
+                leading: Icon(
+                  Icons.circle,
+                  color: metroLine.lineColor, // This shows the color
                 ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          MetroStationDetailsView(station: station),
+                          MetroStationListView(idLigne: metroLine.id),
                     ),
                   );
                 },
