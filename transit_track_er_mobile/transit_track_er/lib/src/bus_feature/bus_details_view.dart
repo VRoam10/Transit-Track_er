@@ -46,7 +46,7 @@ class BusStopDetailsView extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<http.Response>(
-        future: fetchTestBus(bus.idArret),
+        future: fetchTestBus(bus.idArret, bus.idLigne),
         builder: (context, snapshot) {
           // Check if the connection is still loading
           if (snapshot.connectionState == ConnectionState.waiting) {

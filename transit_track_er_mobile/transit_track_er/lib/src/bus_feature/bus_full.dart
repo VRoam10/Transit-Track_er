@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class BusStopFull {
-  final String idjdd;
   final String idLigne;
   final String nomcourtligne;
   final int sens;
@@ -9,34 +8,30 @@ class BusStopFull {
   final String idArret;
   final String nomArret;
   final Coordonnees coordonnees;
-  final DateTime arriveeFirstTrain;
-  final DateTime departFirstTrain;
-  final int? idFirstTrain;
-  final DateTime arriveeSecondTrain;
-  final DateTime departSecondTrain;
+  final DateTime arriveeBus;
+  final DateTime departBus;
+  final String? idCourse;
+  final int? idBus;
   final String heureExtraction;
 
   const BusStopFull(
-      {required this.idjdd,
-      required this.idLigne,
+      {required this.idLigne,
       required this.nomcourtligne,
       required this.sens,
       required this.destination,
       required this.idArret,
       required this.nomArret,
       required this.coordonnees,
-      required this.arriveeFirstTrain,
-      required this.departFirstTrain,
-      this.idFirstTrain,
-      required this.arriveeSecondTrain,
-      required this.departSecondTrain,
+      required this.arriveeBus,
+      required this.departBus,
+      this.idCourse,
+      this.idBus,
       required this.heureExtraction});
 
   factory BusStopFull.fromJson(Map<String, dynamic> json) {
     print(json);
     return switch (json) {
       {
-        "idjdd": String idjdd,
         "idligne": String idLigne,
         "nomcourtligne": String nomcourtligne,
         "sens": int sens,
@@ -44,15 +39,13 @@ class BusStopFull {
         "idarret": String idArret,
         "nomarret": String nomArret,
         "coordonnees": Map<String, dynamic> coordonnees,
-        "arriveefirsttrain": String arriveeFirstTrain,
-        "departfirsttrain": String departFirstTrain,
-        "idfirsttrain": int? idFirstTrain,
-        "arriveesecondtrain": String arriveeSecondTrain,
-        "departsecondtrain": String departSecondTrain,
+        "arriveetheorique": String arriveeBus,
+        "departtheorique": String departBus,
+        "idcourse": String? idCourse,
+        "idbus": int? idBus,
         "heureextraction": String heureExtraction
       } =>
         BusStopFull(
-            idjdd: idjdd,
             idLigne: idLigne,
             nomcourtligne: nomcourtligne,
             sens: sens,
@@ -60,11 +53,10 @@ class BusStopFull {
             idArret: idArret,
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
-            arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
-            departFirstTrain: DateTime.parse(departFirstTrain),
-            idFirstTrain: idFirstTrain,
-            arriveeSecondTrain: DateTime.parse(arriveeSecondTrain),
-            departSecondTrain: DateTime.parse(departSecondTrain),
+            arriveeBus: DateTime.parse(arriveeBus),
+            departBus: DateTime.parse(departBus),
+            idCourse: idCourse,
+            idBus: idBus,
             heureExtraction: heureExtraction),
       _ => throw const FormatException('Invalid JSON format for Station'),
     };
@@ -110,7 +102,7 @@ class BusDetailsView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Arrival Time: ${busStopFull.arriveeFirstTrain}',
+              'Arrival Time: ${busStopFull.arriveeBus}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),

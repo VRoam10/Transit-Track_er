@@ -5,9 +5,9 @@ import 'package:transit_track_er/src/bus_feature/bus_direction.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line.dart';
 import 'package:transit_track_er/src/bus_feature/bus_short.dart';
 
-Future<http.Response> fetchTestBus(String id) async {
+Future<http.Response> fetchTestBus(String id, String idLigne) async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?limit=20&refine=idjdd%3A$id&refine=idligne%3A%221001%22'));
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?limit=20&refine=idarret%3A$id&refine=idligne%3A%22$idLigne%22'));
   return response;
 }
 
@@ -25,7 +25,7 @@ Future<List<BusStop>> fetchAllBusLigne(String idLigne) async {
 
 Future<List<BusRouteDirection>> fetchLineDirection(String idLigne) async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-topologie-parcours-td/records?select=sens%2Cnomarretarrivee&where=idligne%3D%22$idLigne%22&limit=20&refine=type%3A%22Principal%22'));
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-parcours-td/records?select=sens%2Cnomarretarrivee&where=idligne%3D%22$idLigne%22&limit=20&refine=type%3A%22Principal%22'));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
