@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line.dart';
 import 'package:transit_track_er/src/bus_feature/bus_full.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
+import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
 
 import '../settings/settings_view.dart';
 import 'bus_details_view.dart';
@@ -68,13 +69,13 @@ class _BusLineListViewState extends State<BusLineListView> {
                   color: busLine.lineColor, // This shows the color
                 ),
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) =>
-                  //         BusStationDetailsView(station: busLine),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          BusStopListView(idLigne: busLine.id),
+                    ),
+                  );
                 },
               );
             },

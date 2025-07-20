@@ -9,22 +9,27 @@ import 'bus_details_view.dart';
 /// Displays a list of Bus.
 class BusStopListView extends StatefulWidget {
   const BusStopListView({
-    super.key,
+    super.key, required this.idLigne
   });
 
+  final String idLigne;
+
   @override
-  State<BusStopListView> createState() => _BusStopListViewState();
+  State<BusStopListView> createState() => _BusStopListViewState(idLigne);
 
   static const routeName = '/bus_list';
 }
 
 class _BusStopListViewState extends State<BusStopListView> {
+  _BusStopListViewState(this.idLigne);
+  
   late Future<List<BusStop>> _futureStations;
+  final String idLigne;
 
   @override
   void initState() {
     super.initState();
-    _futureStations = fetchAllBusLigne();
+    _futureStations = fetchAllBusLigne(idLigne);
   }
 
   @override

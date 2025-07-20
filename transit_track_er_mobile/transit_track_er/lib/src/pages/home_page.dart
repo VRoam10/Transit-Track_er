@@ -28,16 +28,6 @@ class HomePage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, BusStopListView.routeName);
-                      },
-                      child: Text(localizations.busStopListTitle),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
                         Navigator.pushNamed(
                           context,
                           MetroLineListView

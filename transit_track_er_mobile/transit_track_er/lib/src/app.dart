@@ -76,8 +76,6 @@ class MyApp extends StatelessWidget {
                     return SettingsView(controller: settingsController);
                   case MetroLineListView.routeName:
                     return const MetroLineListView();
-                  case BusStopListView.routeName:
-                    return const BusStopListView();
                   case BusLineListView.routeName:
                     return const BusLineListView();
                   case HomePage.routeName:
