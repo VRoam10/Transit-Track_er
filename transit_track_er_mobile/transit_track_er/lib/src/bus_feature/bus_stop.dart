@@ -39,8 +39,8 @@ class BusStop {
         "idarret": String idArret,
         "nomarret": String nomArret,
         "coordonnees": Map<String, dynamic> coordonnees,
-        "arriveetheorique": String arriveeBus,
-        "departtheorique": String departBus,
+        "arrivee": String arriveeBus,
+        "depart": String departBus,
         "idcourse": String? idCourse,
         "idbus": int? idBus,
         "heureextraction": String heureExtraction
@@ -58,7 +58,7 @@ class BusStop {
             idCourse: idCourse,
             idBus: idBus,
             heureExtraction: heureExtraction),
-      _ => throw const FormatException('Invalid JSON format for Station'),
+      _ => throw const FormatException('Invalid JSON format for Bus Stop'),
     };
   }
 }
