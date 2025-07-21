@@ -41,3 +41,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Android NDK / CMake / CXX native build artifacts
+android/.cxx/
+android/.externalNativeBuild/
+**/cmake-build-debug/
+**/cmake-build-release/
+**/build/intermediates/cmake/
