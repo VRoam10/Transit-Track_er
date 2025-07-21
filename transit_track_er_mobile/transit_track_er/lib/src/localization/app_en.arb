@@ -37,7 +37,35 @@
     "description": "Title for the metro station list page"
   },
   "busStopListTitle": "Bus Stops",
-  "@busStopListTitle": {  
+  "@busStopListTitle": {
     "description": "Title for the bus stop list page"
+  },
+  "setAlarm": "Set Alarm",
+  "@setAlarm": {
+    "description": "Title for the set alarm dialog"
+  },
+  "setAlarmConfirmation": "Do you want to set a custom alarm date and time?",
+  "@setAlarmConfirmation": {
+    "description": "Confirmation message for setting an alarm"
+  },
+  "cancelAction": "Cancel",
+  "@cancelAction": {
+    "description": "Label for the cancel button in dialogs"
+  },
+  "continueAction": "Continue",
+  "@continueAction": {
+    "description": "Label for the continue button in dialogs"
+  },
+  "favoriteMetroStation": "Favorite Metro Station",
+  "@favoriteMetroStation": {
+    "description": "Label for favorite metro station"
+  },
+  "favoriteBusStop": "Favorite Bus Stop",
+  "@favoriteBusStop": {
+    "description": "Label for favorite bus stop"
+  },
+  "addedFor": "added for",
+  "@addedFor": {
+    "description": "Label for added for"
   }
 }

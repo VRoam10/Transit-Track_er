@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
-import 'package:transit_track_er/src/bus_feature/bus_stop.dart';
 import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
+import 'package:transit_track_er/src/bus_feature/bus_stop.dart';
 import 'package:transit_track_er/src/form/remove_bus_stop.dart';
 import 'package:transit_track_er/src/form/save_bus_stop.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
@@ -20,6 +18,8 @@ class BusStopDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     final busBox = Hive.box<FavoriteBusStop>('busBox');
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +28,8 @@ class BusStopDetailsView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: busBox.listenable(),
             builder: (context, Box box, _) {
-              final isFavorite = box.values.any((s) => s.idArret == bus.idArret);
+              final isFavorite =
+                  box.values.any((s) => s.idArret == bus.idArret);
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,
@@ -36,8 +37,8 @@ class BusStopDetailsView extends StatelessWidget {
                 onPressed: () {
                   if (isFavorite) {
                     showRemoveFavoriteBusStopDialog(context, busBox, bus);
-                    box.delete(busBox.keys
-                        .firstWhere((k) => busBox.get(k)!.idArret == bus.idArret));
+                    box.delete(busBox.keys.firstWhere(
+                        (k) => busBox.get(k)!.idArret == bus.idArret));
                   } else {
                     showAddFavoriteBusStopDialog(context, busBox, bus);
                   }
@@ -59,7 +60,7 @@ class BusStopDetailsView extends StatelessWidget {
           }
 
           final busStop = snapshot.data!.first;
-          
+
           return Center(child: BusDetailsView(busStopFull: busStop));
         },
       ),

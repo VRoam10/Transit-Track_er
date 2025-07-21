@@ -39,5 +39,33 @@
   "busStopListTitle": "Arrêts de bus",
   "@busStopListTitle": {
     "description": "Titre de la page de liste des arrêts de bus"
+  },
+  "setAlarm": "Définir une alarme",
+  "@setAlarm": {
+    "description": "Titre pour la boîte de dialogue de définition d'alarme"
+  },
+  "setAlarmConfirmation": "Voulez-vous définir une date et une heure d'alarme personnalisées ?",
+  "@setAlarmConfirmation": {
+    "description": "Message de confirmation pour la définition d'une alarme"
+  },
+  "cancelAction": "Annuler",
+  "@cancelAction": {
+    "description": "Label pour le bouton d'annulation dans les boîtes de dialogue"
+  },
+  "continueAction": "Continuer",
+  "@continueAction": {
+    "description": "Label pour le bouton de continuation dans les boîtes de dialogue"
+  },
+  "favoriteMetroStation": "Station de métro favorite",
+  "@favoriteMetroStation": {
+    "description": "Label pour la station de métro favorite"
+  },
+  "favoriteBusStop": "Arrêt de bus favori",
+  "@favoriteBusStop": {
+    "description": "Label pour l'arrêt de bus favori"
+  },
+  "addedFor": "ajouté pour",
+  "@addedFor": {
+    "description": "Message indiquant que l'arrêt de bus a été ajouté pour une date et une heure spécifiques"
   }
 }

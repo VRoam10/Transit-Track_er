@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
-import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station.dart';
+import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 
 Future<void> showAddFavoriteStationDialog(BuildContext context,
@@ -34,20 +35,21 @@ Future<void> showAddFavoriteStationDialog(BuildContext context,
   );
 
   FavoriteStation favoriteStation = FavoriteStation(
-    idjdd: station.id,
-    nomCourtLigne: station.name,
-    sens: station.sens,
-    alarmTime: chosenDateTime,
-  );
+      idjdd: station.id,
+      nomCourtLigne: station.name,
+      sens: station.sens,
+      alarmTime: chosenDateTime);
 
   box.add(favoriteStation);
 
   await scheduleStationNotification(favoriteStation);
 
+  final localization = AppLocalizations.of(context)!;
+
   // Optional: show confirmation
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
         content: Text(
-            'Favorite station ${station.name} added for ${chosenDateTime.toLocal()}')),
+            '${localization.favoriteMetroStation} ${station.name} ${localization.addedFor} ${chosenDateTime.toLocal()}')),
   );
 }

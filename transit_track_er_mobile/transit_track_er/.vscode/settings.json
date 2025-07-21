@@ -3,6 +3,7 @@
         "allprojects"
     ],
     "conventionalCommits.scopes": [
-        "Notification"
+        "Notification",
+        "Localization"
     ]
 }

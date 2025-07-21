@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
@@ -45,10 +46,11 @@ Future<void> showAddFavoriteBusStopDialog(BuildContext context,
 
   await scheduleBusStopNotification(favoriteBusStop);
 
+  final localization = AppLocalizations.of(context)!;
   // Optional: show confirmation
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
         content: Text(
-            'Favorite Bus Stop ${busStop.name} added for ${chosenDateTime.toLocal()}')),
+            '${localization.favoriteBusStop} ${busStop.name} ${localization.addedFor} ${chosenDateTime.toLocal()}')),
   );
 }
