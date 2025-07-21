@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
@@ -87,6 +89,16 @@ class _BusStopListViewState extends State<BusStopListView> {
               .where((station) => station.sens == selectedSens)
               .toList();
 
+          final uniqueStationsByIdarret = <String, dynamic>{};
+
+          for (var station in filteredStations) {
+            if (!uniqueStationsByIdarret.containsKey(station.idArret)) {
+              uniqueStationsByIdarret[station.idArret] = station;
+            }
+          }
+
+          final oneStationPerIdarret = uniqueStationsByIdarret.values.toList();
+
           // Get name of selected direction
           final directionName = directions
               .firstWhere(
@@ -103,9 +115,9 @@ class _BusStopListViewState extends State<BusStopListView> {
                     top: 60.0), // Offset to show list below the box
                 child: ListView.builder(
                   restorationId: 'BusStopListView',
-                  itemCount: filteredStations.length,
+                  itemCount: oneStationPerIdarret.length,
                   itemBuilder: (context, index) {
-                    final station = filteredStations[index];
+                    final station = oneStationPerIdarret[index];
                     return ListTile(
                       title: Text(station.name),
                       leading: const CircleAvatar(

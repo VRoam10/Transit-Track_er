@@ -13,7 +13,7 @@ Future<http.Response> fetchTestBus(String id, String idLigne) async {
 
 Future<List<BusStop>> fetchAllBusLigne(String idLigne) async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?select=idligne%2Cnomcourtligne%2Cidarret%2Csens%2Cnomarret&limit=20&refine=idligne%3A%22$idLigne%22'));
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?group_by=idligne%2Cnomcourtligne%2Cidarret%2Csens%2Cnomarret&limit=100&refine=idligne%3A%22$idLigne%22'));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
@@ -37,7 +37,7 @@ Future<List<BusRouteDirection>> fetchLineDirection(String idLigne) async {
 
 Future<List<BusLine>> fetchAllLineBus() async {
   final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-lignes-td/records?select=id%2Cnomcourt%2Ccouleurligne&order_by=id&limit=30'));
+      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-lignes-td/records?select=id%2Cnomcourt%2Ccouleurligne&order_by=id&limit=50'));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
