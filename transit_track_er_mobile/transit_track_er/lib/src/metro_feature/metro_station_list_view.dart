@@ -4,7 +4,6 @@ import 'package:transit_track_er/src/metro_feature/api_call.dart';
 import 'package:transit_track_er/src/metro_feature/metro_direction.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station.dart';
 
-import '../settings/settings_view.dart';
 import 'metro_station_details_view.dart';
 
 /// Displays a list of Metro Station.
@@ -62,17 +61,7 @@ class _MetroStationListViewState extends State<MetroStationListView> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.appTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(localizations.appTitle)),
       body: FutureBuilder<List<MetroStation>>(
         future: _futureStations,
         builder: (context, snapshot) {
@@ -95,7 +84,8 @@ class _MetroStationListViewState extends State<MetroStationListView> {
           final directionName = directions
               .firstWhere(
                 (d) => d.sens == selectedSens,
-                orElse: () => MetroDirection(sens: selectedSens, nomarretarrivee: ''),
+                orElse: () =>
+                    MetroDirection(sens: selectedSens, nomarretarrivee: ''),
               )
               .nomarretarrivee;
 

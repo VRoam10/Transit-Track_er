@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
 import 'package:transit_track_er/src/bus_feature/bus_direction.dart';
 import 'package:transit_track_er/src/bus_feature/bus_short.dart';
 
-import '../settings/settings_view.dart';
 import 'bus_details_view.dart';
 
 /// Displays a list of Bus.
@@ -60,17 +57,7 @@ class _BusStopListViewState extends State<BusStopListView> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.appTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(localizations.appTitle)),
       body: FutureBuilder<List<BusStop>>(
         future: _futureStations,
         builder: (context, snapshot) {

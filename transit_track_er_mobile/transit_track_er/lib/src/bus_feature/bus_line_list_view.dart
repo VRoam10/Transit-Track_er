@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:transit_track_er/src/bus_feature/bus_line.dart';
-import 'package:transit_track_er/src/bus_feature/bus_full.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
+import 'package:transit_track_er/src/bus_feature/bus_line.dart';
 import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
-
-import '../settings/settings_view.dart';
-import 'bus_details_view.dart';
 
 /// Displays a list of Bus Station.
 class BusLineListView extends StatefulWidget {
@@ -34,17 +30,7 @@ class _BusLineListViewState extends State<BusLineListView> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.appTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(localizations.appTitle)),
       body: FutureBuilder<List<BusLine>>(
         future: _futureStations,
         builder: (context, snapshot) {

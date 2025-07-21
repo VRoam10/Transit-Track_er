@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:transit_track_er/src/metro_feature/metro_line.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
+import 'package:transit_track_er/src/metro_feature/metro_line.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station_list_view.dart';
-
-import '../settings/settings_view.dart';
 
 /// Displays a list of Metro Station.
 class MetroLineListView extends StatefulWidget {
@@ -32,17 +30,7 @@ class _MetroLineListViewState extends State<MetroLineListView> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.appTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(localizations.appTitle)),
       body: FutureBuilder<List<MetroLine>>(
         future: _futureStations,
         builder: (context, snapshot) {
