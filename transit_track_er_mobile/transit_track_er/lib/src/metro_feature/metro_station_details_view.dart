@@ -28,7 +28,7 @@ class MetroStationDetailsView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: stationBox.listenable(),
             builder: (context, Box box, _) {
-              final isFavorite = box.values.any((s) => s.id == station.id);
+              final isFavorite = box.values.any((s) => s.idjdd == station.id);
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,

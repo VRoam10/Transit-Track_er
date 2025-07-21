@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
 import 'package:transit_track_er/src/bus_feature/bus_stop.dart';
 import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
+import 'package:transit_track_er/src/form/remove_bus_stop.dart';
+import 'package:transit_track_er/src/form/save_bus_stop.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 
 /// Displays detailed information about a Bus Stop.
@@ -26,18 +28,18 @@ class BusStopDetailsView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: busBox.listenable(),
             builder: (context, Box box, _) {
-              final isFavorite = box.values.any((s) => s.id == bus.idLigne);
+              final isFavorite = box.values.any((s) => s.idArret == bus.idArret);
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,
                 ),
                 onPressed: () {
                   if (isFavorite) {
-                    // showRemoveFavoriteStationDialog(context, busBox, bus);
-                    // box.delete(busBox.keys
-                    //     .firstWhere((k) => busBox.get(k)!.idjdd == bus.id));
+                    showRemoveFavoriteBusStopDialog(context, busBox, bus);
+                    box.delete(busBox.keys
+                        .firstWhere((k) => busBox.get(k)!.idArret == bus.idArret));
                   } else {
-                    // showAddFavoriteStationDialog(context, busBox, bus);
+                    showAddFavoriteBusStopDialog(context, busBox, bus);
                   }
                 },
               );
