@@ -1,5 +1,8 @@
 {
     "cSpell.words": [
         "allprojects"
+    ],
+    "conventionalCommits.scopes": [
+        "Notification"
     ]
 }
