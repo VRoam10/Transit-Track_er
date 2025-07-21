@@ -73,23 +73,18 @@ Future<void> scheduleBusStopNotification(FavoriteBusStop busStop) async {
   final bool? isExactAllowed =
       await androidImplementation?.areNotificationsEnabled();
 
-  try {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      10, // Use busStop.id for unique notification ID
-      'Alarm: ${busStop.nomCourtLigne}', // Title
-      'Your bus stop alarm is set for ${busStop.alarmTime}', // Body
-      tz.TZDateTime.from(busStop.alarmTime, tz.local),
-      platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents:
-          DateTimeComponents.time, // For repeating at the same time
-      androidScheduleMode: isExactAllowed == true
-          ? AndroidScheduleMode.inexact //exactAllowWhileIdle
-          : AndroidScheduleMode
-              .inexact, // fallback if no exact alarms permission
-    );
-  } catch (e) {
-    print('[Bus Notification] Error: $e');
-  }
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    10, // Use busStop.id for unique notification ID
+    'Alarm: ${busStop.nomCourtLigne}', // Title
+    'Your bus stop alarm is set for ${busStop.alarmTime}', // Body
+    tz.TZDateTime.from(busStop.alarmTime, tz.local),
+    platformChannelSpecifics,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents:
+        DateTimeComponents.time, // For repeating at the same time
+    androidScheduleMode: isExactAllowed == true
+        ? AndroidScheduleMode.inexact //exactAllowWhileIdle
+        : AndroidScheduleMode.inexact, // fallback if no exact alarms permission
+  );
 }

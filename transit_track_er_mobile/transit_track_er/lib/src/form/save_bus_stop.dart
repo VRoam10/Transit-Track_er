@@ -4,8 +4,8 @@ import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 
-Future<void> showAddFavoriteBusStopDialog(
-    BuildContext context, Box<FavoriteBusStop> box, BusServicePoint busStop) async {
+Future<void> showAddFavoriteBusStopDialog(BuildContext context,
+    Box<FavoriteBusStop> box, BusServicePoint busStop) async {
   // Step 1: Let the user choose a date
   final DateTime? pickedDate = await showDatePicker(
     context: context,
@@ -34,14 +34,12 @@ Future<void> showAddFavoriteBusStopDialog(
   );
 
   FavoriteBusStop favoriteBusStop = FavoriteBusStop(
-    idLigne: busStop.idLigne,
-    nomCourtLigne: busStop.nomCourtLigne,
-    idArret: busStop.idArret,
-    name: busStop.name,
-    sens: busStop.sens,
-    alarmTime:
-        DateTime.now().add(const Duration(minutes: 5)), // or custom logic
-  );
+      idLigne: busStop.idLigne,
+      nomCourtLigne: busStop.nomCourtLigne,
+      idArret: busStop.idArret,
+      name: busStop.name,
+      sens: busStop.sens,
+      alarmTime: chosenDateTime);
 
   box.add(favoriteBusStop);
 
