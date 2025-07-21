@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BusStopFull {
+class BusStop {
   final String idLigne;
   final String nomcourtligne;
   final int sens;
@@ -14,7 +14,7 @@ class BusStopFull {
   final int? idBus;
   final String heureExtraction;
 
-  const BusStopFull(
+  const BusStop(
       {required this.idLigne,
       required this.nomcourtligne,
       required this.sens,
@@ -28,7 +28,7 @@ class BusStopFull {
       this.idBus,
       required this.heureExtraction});
 
-  factory BusStopFull.fromJson(Map<String, dynamic> json) {
+  factory BusStop.fromJson(Map<String, dynamic> json) {
     print(json);
     return switch (json) {
       {
@@ -45,7 +45,7 @@ class BusStopFull {
         "idbus": int? idBus,
         "heureextraction": String heureExtraction
       } =>
-        BusStopFull(
+        BusStop(
             idLigne: idLigne,
             nomcourtligne: nomcourtligne,
             sens: sens,
@@ -79,7 +79,7 @@ class Coordonnees {
 
 // The main widget displaying the metro information
 class BusDetailsView extends StatelessWidget {
-  final BusStopFull busStopFull;
+  final BusStop busStopFull;
 
   const BusDetailsView({super.key, required this.busStopFull});
 

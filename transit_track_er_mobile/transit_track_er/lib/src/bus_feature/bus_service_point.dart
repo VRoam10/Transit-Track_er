@@ -1,11 +1,11 @@
-class BusStop {
+class BusServicePoint {
   final String idLigne;
   final String nomCourtLigne;
   final String idArret;
   final int sens;
   final String name;
 
-  BusStop({
+  BusServicePoint({
     required this.idLigne,
     required this.nomCourtLigne,
     required this.idArret,
@@ -13,8 +13,8 @@ class BusStop {
     required this.name,
   });
 
-  factory BusStop.fromJson(Map<String, dynamic> json) {
-    return BusStop(
+  factory BusServicePoint.fromJson(Map<String, dynamic> json) {
+    return BusServicePoint(
       idLigne: json['idligne'],
       nomCourtLigne: json['nomcourtligne'],
       idArret: json['idarret'],

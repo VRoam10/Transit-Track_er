@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
 import 'package:transit_track_er/src/bus_feature/bus_direction.dart';
-import 'package:transit_track_er/src/bus_feature/bus_short.dart';
+import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
 
 import 'bus_details_view.dart';
 
@@ -22,7 +22,7 @@ class _BusStopListViewState extends State<BusStopListView> {
   _BusStopListViewState(this.idLigne);
 
   final String idLigne;
-  late Future<List<BusStop>> _futureStations;
+  late Future<List<BusServicePoint>> _futureStations;
   late Future<List<BusRouteDirection>> _futureDirections;
 
   int selectedSens = 0; // Default to sens 0
@@ -58,7 +58,7 @@ class _BusStopListViewState extends State<BusStopListView> {
 
     return Scaffold(
       appBar: AppBar(title: Text(localizations.appTitle)),
-      body: FutureBuilder<List<BusStop>>(
+      body: FutureBuilder<List<BusServicePoint>>(
         future: _futureStations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

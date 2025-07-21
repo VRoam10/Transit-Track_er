@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
-import 'package:transit_track_er/src/bus_feature/bus_full.dart';
-import 'package:transit_track_er/src/bus_feature/bus_short.dart';
+import 'package:transit_track_er/src/bus_feature/bus_stop.dart';
+import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 
 /// Displays detailed information about a Bus Stop.
@@ -14,7 +14,7 @@ class BusStopDetailsView extends StatelessWidget {
 
   static const routeName = '/bus_stop_details';
 
-  final BusStop bus;
+  final BusServicePoint bus;
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +63,8 @@ class BusStopDetailsView extends StatelessWidget {
             final response = snapshot.data!;
             if (response.statusCode == 200) {
               // Successfully fetched data, display it
-              final station = BusStopFull.fromJson(
-                  json.decode(response.body)['results'][0]);
+              final station =
+                  BusStop.fromJson(json.decode(response.body)['results'][0]);
               return Center(child: BusDetailsView(busStopFull: station));
             } else {
               return Center(
