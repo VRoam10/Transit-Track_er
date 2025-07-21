@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:transit_track_er/src/app.dart';
+import 'package:transit_track_er/src/metro_feature/api_call.dart';
+import 'package:transit_track_er/src/metro_feature/station.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 
@@ -14,7 +20,37 @@ Future<void> initializeNotifications() async {
     android: initializationSettingsAndroid,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: onNotificationTap,
+  );
+}
+
+void onNotificationTap(NotificationResponse response) async {
+  // This is called when the user taps the notification
+  print('Notification tapped: ${response.payload}');
+
+  // Call your metro API here
+  final apiCall = await fetchTestMetro('1001-0-5008');
+  final data = json.decode(apiCall.body);
+  final metroPassages = Station.fromJson(data['results'][0]);
+  print('Next metro passage: ${metroPassages.arriveeFirstTrain}');
+  // Ensure you have a context — pass it from where you set up the callback
+  showDialog(
+    context: navigatorKey.currentContext!,
+    builder: (_) => AlertDialog(
+      title: Text('Next Metro'),
+      content: Text('Next passage at ${metroPassages.nomArret}: ${metroPassages.arriveeFirstTrain}'),
+      actions: [
+        TextButton(
+          child: Text('OK'),
+          onPressed: () => Navigator.of(navigatorKey.currentContext!).pop(),
+        ),
+      ],
+    ),
+  );
+
+  // Navigate or show a dialog/snackbar with results
 }
 
 Future<void> scheduleStationNotification(FavoriteStation station) async {
