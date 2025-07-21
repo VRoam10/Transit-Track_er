@@ -45,9 +45,8 @@ void onNotificationTap(NotificationResponse response) async {
 
 handleMetroNotification(Map<String, dynamic> payload) async {
   // Call your metro API here
-  final apiCall = await fetchTestMetro(payload['stationId'] ?? '');
-  final data = json.decode(apiCall.body);
-  final metroPassages = Station.fromJson(data['results'][0]);
+  final data = await fetchTestMetro(payload['stationId'] ?? '');
+  final metroPassages = data.first;
   print('Next metro passage: ${metroPassages.arriveeFirstTrain}');
 
   // Ensure you have a context — pass it from where you set up the callback
@@ -68,9 +67,8 @@ handleMetroNotification(Map<String, dynamic> payload) async {
 
 handleBusStopNotification(Map<String, dynamic> payload) async {
   // Call your bus API here
-  final apiCall = await fetchTestBus(payload['idArret'] ?? '', payload['idLigne'] ?? '');
-  final data = json.decode(apiCall.body);
-  final busPassages = BusStop.fromJson(data['results'][0]);
+  final data = await fetchTestBus(payload['idArret'] ?? '', payload['idLigne'] ?? '');
+  final busPassages = data.first;
   print('Next bus passage: ${busPassages.arriveeBus}');
 
   // Ensure you have a context — pass it from where you set up the callback

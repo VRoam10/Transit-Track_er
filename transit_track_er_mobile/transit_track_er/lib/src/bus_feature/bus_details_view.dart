@@ -47,36 +47,20 @@ class BusStopDetailsView extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<http.Response>(
+      body: FutureBuilder<List<BusStop>>(
         future: fetchTestBus(bus.idArret, bus.idLigne),
         builder: (context, snapshot) {
-          // Check if the connection is still loading
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          // If an error occurs
-          if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No stations found'));
           }
 
-          // If data is received successfully, display it
-          if (snapshot.hasData) {
-            final response = snapshot.data!;
-            if (response.statusCode == 200) {
-              // Successfully fetched data, display it
-              final station =
-                  BusStop.fromJson(json.decode(response.body)['results'][0]);
-              return Center(child: BusDetailsView(busStopFull: station));
-            } else {
-              return Center(
-                  child: Text(
-                      'Failed to load station data. Status code: ${response.statusCode}'));
-            }
-          }
-
-          // If no data is received (this shouldn't normally happen)
-          return const Center(child: Text('No data found.'));
+          final busStop = snapshot.data!.first;
+          
+          return Center(child: BusDetailsView(busStopFull: busStop));
         },
       ),
     );
