@@ -5,9 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:transit_track_er/src/app.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
-import 'package:transit_track_er/src/bus_feature/bus_stop.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
-import 'package:transit_track_er/src/metro_feature/station.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 
@@ -54,7 +52,8 @@ handleMetroNotification(Map<String, dynamic> payload) async {
     context: navigatorKey.currentContext!,
     builder: (_) => AlertDialog(
       title: const Text('Next Metro'),
-      content: Text('Next passage at ${metroPassages.nomArret}: ${metroPassages.arriveeFirstTrain}'),
+      content: Text(
+          'Next passage at ${metroPassages.nomArret}: ${metroPassages.arriveeFirstTrain}'),
       actions: [
         TextButton(
           child: const Text('OK'),
@@ -67,7 +66,8 @@ handleMetroNotification(Map<String, dynamic> payload) async {
 
 handleBusStopNotification(Map<String, dynamic> payload) async {
   // Call your bus API here
-  final data = await fetchTestBus(payload['idArret'] ?? '', payload['idLigne'] ?? '');
+  final data =
+      await fetchTestBus(payload['idArret'] ?? '', payload['idLigne'] ?? '');
   final busPassages = data.first;
   print('Next bus passage: ${busPassages.arriveeBus}');
 
@@ -76,7 +76,8 @@ handleBusStopNotification(Map<String, dynamic> payload) async {
     context: navigatorKey.currentContext!,
     builder: (_) => AlertDialog(
       title: const Text('Next Bus'),
-      content: Text('Next passage at ${busPassages.nomArret}: ${busPassages.arriveeBus}'),
+      content: Text(
+          'Next passage at ${busPassages.nomArret}: ${busPassages.arriveeBus}'),
       actions: [
         TextButton(
           child: const Text('OK'),

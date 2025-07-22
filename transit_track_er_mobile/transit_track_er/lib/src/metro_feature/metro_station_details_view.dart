@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:transit_track_er/src/form/remove_metro_station.dart';
 import 'package:transit_track_er/src/form/save_metro_station.dart';
-import 'package:transit_track_er/src/metro_feature/station.dart';
-import 'package:transit_track_er/src/metro_feature/metro_station.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
+import 'package:transit_track_er/src/metro_feature/metro_station.dart';
+import 'package:transit_track_er/src/metro_feature/station.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart'; // Ensure fetchMetro is imported
 
 /// Displays detailed information about a Metro Station.

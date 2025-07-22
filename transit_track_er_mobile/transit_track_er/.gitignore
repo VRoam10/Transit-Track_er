@@ -44,7 +44,7 @@ app.*.map.json
 
 
 # Android NDK / CMake / CXX native build artifacts
-android/.cxx/
+android/app/.cxx/
 android/.externalNativeBuild/
 **/cmake-build-debug/
 **/cmake-build-release/
