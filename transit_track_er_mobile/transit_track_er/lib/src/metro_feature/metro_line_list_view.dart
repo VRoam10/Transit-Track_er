@@ -39,7 +39,7 @@ class _MetroLineListViewState extends State<MetroLineListView> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No stations found'));
+            return Center(child: Text(localizations.noStationsFound));
           }
 
           final stations = snapshot.data!;

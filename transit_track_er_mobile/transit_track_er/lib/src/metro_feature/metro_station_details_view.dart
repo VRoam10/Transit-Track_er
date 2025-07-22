@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:transit_track_er/src/form/remove_metro_station.dart';
 import 'package:transit_track_er/src/form/save_metro_station.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
 import 'package:transit_track_er/src/metro_feature/metro_station.dart';
 import 'package:transit_track_er/src/metro_feature/station.dart';
@@ -18,9 +19,10 @@ class MetroStationDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stationBox = Hive.box<FavoriteStation>('stationsBox');
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Details for Station #${station.id}'),
+        title: Text('${localizations.metroStationDetailsTitle} #${station.id}'),
         actions: [
           ValueListenableBuilder(
             valueListenable: stationBox.listenable(),
@@ -53,7 +55,7 @@ class MetroStationDetailsView extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No stations found'));
+            return Center(child: Text(localizations.noStationsFound));
           }
 
           final station = snapshot.data!.first;

@@ -70,7 +70,7 @@ class _MetroStationListViewState extends State<MetroStationListView> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No stations found'));
+            return Center(child: Text(localizations.noStationsFound));
           }
 
           final stations = snapshot.data!;
@@ -130,7 +130,7 @@ class _MetroStationListViewState extends State<MetroStationListView> {
                     color: selectedSens == 0 ? Colors.blue : Colors.green,
                     alignment: Alignment.center,
                     child: Text(
-                      'Direction: $directionName (Tap to switch)',
+                      '${localizations.direction}: $directionName (${localizations.tapToSwitch})',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

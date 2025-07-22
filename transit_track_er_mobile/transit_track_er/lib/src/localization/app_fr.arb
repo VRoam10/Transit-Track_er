@@ -67,5 +67,69 @@
   "addedFor": "ajouté pour",
   "@addedFor": {
     "description": "Message indiquant que l'arrêt de bus a été ajouté pour une date et une heure spécifiques"
+  },
+  "settingsTitle": "Paramètres",
+  "@settingsTitle": {
+    "description": "Titre de la page des paramètres"
+  },
+  "systemTheme": "Thème système",
+  "@systemTheme": {
+    "description": "Label pour le thème système dans les paramètres"
+  },
+  "lightTheme": "Thème clair",
+  "@lightTheme": {
+    "description": "Label pour le thème clair dans les paramètres"
+  },
+  "darkTheme": "Thème sombre",
+  "@darkTheme": {
+    "description": "Label pour le thème sombre dans les paramètres"
+  },
+  "nextMetroPassage": "Prochain passage du métro",
+  "@nextMetroPassage": {
+    "description": "Label pour la notification du prochain passage du métro"
+  },
+  "nextBusPassage": "Prochain passage de bus",
+  "@nextBusPassage": {
+    "description": "Label pour la notification du prochain passage de bus"
+  },
+  "nextPassageAt": "Prochain passage à",
+  "@nextPassageAt": {
+    "description": "Label pour l'heure du prochain passage"
+  },
+  "noStationsFound": "Aucune station trouvée",
+  "@noStationsFound": {
+    "description": "Message affiché lorsque aucune station n'est trouvée"
+  },
+  "metroStationDetailsTitle": "Détails de la station de métro",
+  "@metroStationDetailsTitle": {
+    "description": "Titre pour la page de détails de la station de métro"
+  },
+  "direction": "Direction",
+  "@direction": {
+    "description": "Label pour la direction de la ligne de métro"
+  },
+  "tapToSwitch": "Appuyez pour changer",
+  "@tapToSwitch": {
+    "description": "Instruction pour appuyer pour changer de direction"
+  },
+  "busStopDetails": "Détails de l'arrêt de bus",
+  "@busStopDetails": {
+    "description": "Titre pour la page de détails de l'arrêt de bus"
+  },
+  "noBusFound": "Aucun bus trouvé",
+  "@noBusFound": {
+    "description": "Message affiché lorsque aucun arrêt de bus n'est trouvé"
+  },
+  "line": "Ligne",
+  "@line": {
+    "description": "Label pour la ligne de bus ou de métro"
+  },
+  "station": "Station",
+  "@station": {
+    "description": "Label pour la station de bus ou de métro"
+  },
+  "arrivalTime": "Heure d'arrivée",
+  "@arrivalTime": {
+    "description": "Label pour l'heure d'arrivée du bus ou du métro"
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Station {
   final String idjdd;
@@ -16,22 +17,21 @@ class Station {
   final DateTime departSecondTrain;
   final String heureExtraction;
 
-  const Station({
-    required this.idjdd,
-    required this.idLigne,
-    required this.nomcourtligne,
-    required this.sens,
-    required this.destination,
-    required this.idArret,
-    required this.nomArret,
-    required this.coordonnees,
-    required this.arriveeFirstTrain,
-    required this.departFirstTrain,
-    this.idFirstTrain,
-    required this.arriveeSecondTrain,
-    required this.departSecondTrain,
-    required this.heureExtraction
-  });
+  const Station(
+      {required this.idjdd,
+      required this.idLigne,
+      required this.nomcourtligne,
+      required this.sens,
+      required this.destination,
+      required this.idArret,
+      required this.nomArret,
+      required this.coordonnees,
+      required this.arriveeFirstTrain,
+      required this.departFirstTrain,
+      this.idFirstTrain,
+      required this.arriveeSecondTrain,
+      required this.departSecondTrain,
+      required this.heureExtraction});
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return switch (json) {
@@ -52,21 +52,20 @@ class Station {
         "heureextraction": String heureExtraction
       } =>
         Station(
-          idjdd: idjdd,
-          idLigne: idLigne,
-          nomcourtligne: nomcourtligne,
-          sens: sens,
-          destination: destination,
-          idArret: idArret,
-          nomArret: nomArret,
-          coordonnees: Coordonnees.fromJson(coordonnees),
-          arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
-          departFirstTrain: DateTime.parse(departFirstTrain),
-          idFirstTrain: idFirstTrain,
-          arriveeSecondTrain: DateTime.parse(arriveeSecondTrain),
-          departSecondTrain: DateTime.parse(departSecondTrain),
-          heureExtraction: heureExtraction
-        ),
+            idjdd: idjdd,
+            idLigne: idLigne,
+            nomcourtligne: nomcourtligne,
+            sens: sens,
+            destination: destination,
+            idArret: idArret,
+            nomArret: nomArret,
+            coordonnees: Coordonnees.fromJson(coordonnees),
+            arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
+            departFirstTrain: DateTime.parse(departFirstTrain),
+            idFirstTrain: idFirstTrain,
+            arriveeSecondTrain: DateTime.parse(arriveeSecondTrain),
+            departSecondTrain: DateTime.parse(departSecondTrain),
+            heureExtraction: heureExtraction),
       _ => throw const FormatException('Invalid JSON format for Station'),
     };
   }
@@ -94,6 +93,7 @@ class MetroDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -101,22 +101,22 @@ class MetroDetailsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Line: ${metro.idLigne}',
+              '${localizations.line}: ${metro.idLigne}',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'Station: ${metro.nomArret}',
+              '${localizations.station}: ${metro.nomArret}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              'Arrival Time: ${metro.arriveeFirstTrain}',
+              '${localizations.arrivalTime}: ${metro.arriveeFirstTrain}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              'Direction: ${metro.sens}',
+              '${localizations.direction}: ${metro.sens}',
               style: const TextStyle(fontSize: 18),
             ),
           ],
@@ -125,5 +125,3 @@ class MetroDetailsView extends StatelessWidget {
     );
   }
 }
-
-

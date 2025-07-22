@@ -67,5 +67,69 @@
   "addedFor": "added for",
   "@addedFor": {
     "description": "Label for added for"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for the settings page"
+  },
+  "systemTheme": "System Theme",
+  "@systemTheme": {
+    "description": "Label for the system theme option in settings"
+  },
+  "lightTheme": "Light Theme",
+  "@lightTheme": {
+    "description": "Label for the light theme option in settings"
+  },
+  "darkTheme": "Dark Theme",
+  "@darkTheme": {
+    "description": "Label for the dark theme option in settings"
+  },
+  "nextMetroPassage": "Next Metro Passage",
+  "@nextMetroPassage": {
+    "description": "Label for the next metro passage notification"
+  },
+  "nextBusPassage": "Next Bus Passage",
+  "@nextBusPassage": {
+    "description": "Label for the next bus passage notification"
+  },
+  "nextPassageAt": "Next passage at",
+  "@nextPassageAt": {
+    "description": "Label for the next passage time"
+  },
+  "noStationsFound": "No stations found",
+  "@noStationsFound": {
+    "description": "Message displayed when no stations are found"
+  },
+  "metroStationDetailsTitle": "Metro Station Details",
+  "@metroStationDetailsTitle": {
+    "description": "Title for the metro station details page"
+  },
+  "direction": "Direction",
+  "@direction": {
+    "description": "Label for the direction of the metro line"
+  },
+  "tapToSwitch": "Tap to switch",
+  "@tapToSwitch": {
+    "description": "Instruction to tap to switch direction"
+  },
+  "busStopDetails": "Bus Stop Details",
+  "@busStopDetails": {
+    "description": "Title for the bus stop details page"
+  },
+  "noBusFound": "No bus stops found",
+  "@noBusFound": {
+    "description": "Message displayed when no bus stops are found"
+  },
+  "line": "Line",
+  "@line": {
+    "description": "Label for the bus or metro line"
+  },
+  "station": "Station",
+  "@station": {
+    "description": "Label for the bus or metro station"
+  },
+  "arrivalTime": "Arrival Time",
+  "@arrivalTime": {
+    "description": "Label for the arrival time of the bus or metro"
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:transit_track_er/src/app.dart';
@@ -27,9 +28,6 @@ Future<void> initializeNotifications() async {
 }
 
 void onNotificationTap(NotificationResponse response) async {
-  // This is called when the user taps the notification
-  print('Notification tapped: ${response.payload}');
-
   final Map<String, dynamic> payload = json.decode(response.payload ?? '{}');
 
   if (payload['metro'] == true) {
@@ -45,22 +43,26 @@ handleMetroNotification(Map<String, dynamic> payload) async {
   // Call your metro API here
   final data = await fetchTestMetro(payload['stationId'] ?? '');
   final metroPassages = data.first;
-  print('Next metro passage: ${metroPassages.arriveeFirstTrain}');
 
   // Ensure you have a context — pass it from where you set up the callback
   showDialog(
     context: navigatorKey.currentContext!,
-    builder: (_) => AlertDialog(
-      title: const Text('Next Metro'),
-      content: Text(
-          'Next passage at ${metroPassages.nomArret}: ${metroPassages.arriveeFirstTrain}'),
-      actions: [
-        TextButton(
-          child: const Text('OK'),
-          onPressed: () => Navigator.of(navigatorKey.currentContext!).pop(),
+    builder: (BuildContext context) {
+      final localizations = AppLocalizations.of(context)!;
+
+      return AlertDialog(
+        title: Text(localizations.nextMetroPassage),
+        content: Text(
+          '${localizations.nextPassageAt} ${metroPassages.nomArret}: ${metroPassages.arriveeFirstTrain}',
         ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      );
+    },
   );
 }
 
@@ -69,22 +71,26 @@ handleBusStopNotification(Map<String, dynamic> payload) async {
   final data =
       await fetchTestBus(payload['idArret'] ?? '', payload['idLigne'] ?? '');
   final busPassages = data.first;
-  print('Next bus passage: ${busPassages.arriveeBus}');
 
   // Ensure you have a context — pass it from where you set up the callback
   showDialog(
     context: navigatorKey.currentContext!,
-    builder: (_) => AlertDialog(
-      title: const Text('Next Bus'),
-      content: Text(
-          'Next passage at ${busPassages.nomArret}: ${busPassages.arriveeBus}'),
-      actions: [
-        TextButton(
-          child: const Text('OK'),
-          onPressed: () => Navigator.of(navigatorKey.currentContext!).pop(),
+    builder: (BuildContext context) {
+      final localizations = AppLocalizations.of(context)!;
+
+      return AlertDialog(
+        title: Text(localizations.nextBusPassage),
+        content: Text(
+          '${localizations.nextPassageAt} ${busPassages.nomArret}: ${busPassages.arriveeBus}',
         ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      );
+    },
   );
 }
 

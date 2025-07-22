@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BusStop {
   final String idLigne;
@@ -85,6 +86,7 @@ class BusDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,22 +94,22 @@ class BusDetailsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Line: ${busStopFull.idLigne}',
+              '${localizations.line}: ${busStopFull.idLigne}',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'Station: ${busStopFull.nomArret}',
+              '${localizations.station}: ${busStopFull.nomArret}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              'Arrival Time: ${busStopFull.arriveeBus}',
+              '${localizations.arrivalTime}: ${busStopFull.arriveeBus}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              'Direction: ${busStopFull.sens}',
+              '${localizations.direction}: ${busStopFull.sens}',
               style: const TextStyle(fontSize: 18),
             ),
           ],

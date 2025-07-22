@@ -23,7 +23,7 @@ class BusStopDetailsView extends StatelessWidget {
     final busBox = Hive.box<FavoriteBusStop>('busBox');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Details for Station #${bus.idLigne}'),
+        title: Text('${localizations.busStopDetails} #${bus.idLigne}'),
         actions: [
           ValueListenableBuilder(
             valueListenable: busBox.listenable(),
@@ -56,7 +56,7 @@ class BusStopDetailsView extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No stations found'));
+            return Center(child: Text(localizations.noBusFound));
           }
 
           final busStop = snapshot.data!.first;
