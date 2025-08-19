@@ -4,33 +4,23 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class Station {
   final String idjdd;
   final String idLigne;
-  final String nomcourtligne;
   final int sens;
   final String destination;
   final String idArret;
   final String nomArret;
   final Coordonnees coordonnees;
   final DateTime arriveeFirstTrain;
-  final DateTime departFirstTrain;
-  final int? idFirstTrain;
-  final DateTime arriveeSecondTrain;
-  final DateTime departSecondTrain;
   final String heureExtraction;
 
   const Station(
       {required this.idjdd,
       required this.idLigne,
-      required this.nomcourtligne,
       required this.sens,
       required this.destination,
       required this.idArret,
       required this.nomArret,
       required this.coordonnees,
       required this.arriveeFirstTrain,
-      required this.departFirstTrain,
-      this.idFirstTrain,
-      required this.arriveeSecondTrain,
-      required this.departSecondTrain,
       required this.heureExtraction});
 
   factory Station.fromJson(Map<String, dynamic> json) {
@@ -38,33 +28,23 @@ class Station {
       {
         "idjdd": String idjdd,
         "idligne": String idLigne,
-        "nomcourtligne": String nomcourtligne,
         "sens": int sens,
         "destination": String destination,
         "idarret": String idArret,
         "nomarret": String nomArret,
         "coordonnees": Map<String, dynamic> coordonnees,
         "arriveefirsttrain": String arriveeFirstTrain,
-        "departfirsttrain": String departFirstTrain,
-        "idfirsttrain": int? idFirstTrain,
-        "arriveesecondtrain": String arriveeSecondTrain,
-        "departsecondtrain": String departSecondTrain,
         "heureextraction": String heureExtraction
       } =>
         Station(
             idjdd: idjdd,
             idLigne: idLigne,
-            nomcourtligne: nomcourtligne,
             sens: sens,
             destination: destination,
             idArret: idArret,
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
             arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
-            departFirstTrain: DateTime.parse(departFirstTrain),
-            idFirstTrain: idFirstTrain,
-            arriveeSecondTrain: DateTime.parse(arriveeSecondTrain),
-            departSecondTrain: DateTime.parse(departSecondTrain),
             heureExtraction: heureExtraction),
       _ => throw const FormatException('Invalid JSON format for Station'),
     };
