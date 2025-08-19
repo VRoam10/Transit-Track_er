@@ -1,0 +1,23 @@
+# Transit-Track_er Backend - Notes
+
+## Favorite Station/Bus Feature (Draft)
+
+- **Goal:** Allow users to save their favorite station or bus in the database.
+- **Data to Save:**
+    - **Station/Bus ID:** Example format: `1001-1-5432`
+    - **Datetime Wanted:** Example: `2024-08-19 16:00`
+    - **API Source:** Example: `star`
+
+### Example Record
+
+| id         | datetime           | api  |
+|------------|--------------------|------|
+| 1001-1-5432| 2024-08-19 16:00   | star |
+
+### Next Steps
+
+- Define database schema for favorites.
+- Implement API endpoints to save and retrieve favorites.
+- Ensure datetime is stored in a consistent format (e.g., ISO 8601).
+
+- Additionnal libelle for repeat  datetime eg. Every week
