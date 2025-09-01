@@ -1,20 +1,85 @@
 import { PrismaClient } from "@prisma/client";
-import { Router } from "express";
+import bcrypt from "bcrypt";
+import { NextFunction, Request, Response, Router } from "express";
+import { check, validationResult } from "express-validator";
+import util from "util";
 
 const router = Router();
 const prisma = new PrismaClient();
+
+const validation = [
+  check("name")
+    .exists()
+    .withMessage("name is required")
+    .isLength({ min: 3 })
+    .withMessage("wrong name length"),
+  check("email")
+    .exists()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("email not valid")
+    .custom(async (value) => {
+      const user = await prisma.user.findUnique({ where: { email: value } });
+      if (user) {
+        throw new Error("email already in use");
+      }
+    })
+    .withMessage("email already in use"),
+  check("password").exists().withMessage("password is required"),
+];
+
+function handleValidationErrors(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(util.inspect(errors.array()));
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  next();
+}
 
 router.get("/", async (_req, res) => {
   const users = await prisma.user.findMany();
   res.json({ users });
 });
 
-router.post("/", async (req, res) => {
-  const { name, email } = req.body;
-  const user = await prisma.user.create({
-    data: { name, email },
-  });
-  res.status(201).json({ user });
+router.post(
+  "/",
+  validation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    const { name, email, password } = req.body;
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const user = await prisma.user.create({
+      data: { name, email, password: hashedPassword },
+    });
+    res.status(201).json({ user: user.id });
+  }
+);
+
+router.post("/login", async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+
+  try {
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      res.status(200).json({ message: 'Login successful.' });
+    } else {
+      res.status(401).json({ error: 'Invalid username or password.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 export default router;
