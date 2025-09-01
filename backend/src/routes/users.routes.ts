@@ -2,7 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { NextFunction, Request, Response, Router } from "express";
 import { check, validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 import util from "util";
+import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -42,7 +44,7 @@ function handleValidationErrors(
   next();
 }
 
-router.get("/", async (_req, res) => {
+router.get("/", authenticateToken, async (_req, res) => {
   const users = await prisma.user.findMany();
   res.json({ users });
 });
@@ -67,18 +69,25 @@ router.post("/login", async (req: Request, res: Response) => {
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return res.status(401).json({ error: 'Invalid email or password.' });
+    return res.status(401).json({ error: "Invalid email or password." });
   }
 
   try {
     const match = await bcrypt.compare(password, user.password);
     if (match) {
-      res.status(200).json({ message: 'Login successful.' });
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        process.env.JWT_SECRET as string,
+        {
+          expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
+        }
+      );
+      res.status(200).json({ message: "Login successful.", token: token });
     } else {
-      res.status(401).json({ error: 'Invalid username or password.' });
+      res.status(401).json({ error: "Invalid username or password." });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
