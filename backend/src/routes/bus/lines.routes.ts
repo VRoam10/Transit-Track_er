@@ -6,7 +6,7 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     // Fetch lines logic here
-    axios.get("https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-topologie-lignes-td/records?select=id%2Cnomcourt%2Ccouleurligne&order_by=id&limit=20").then((response) => {
+    axios.get("https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-lignes-td/records?select=id%2Cnomcourt%2Ccouleurligne&order_by=id&limit=50").then((response) => {
       let lines = response.data.results.map((line: any) => ({
         id: line.id,
         name: line.nomcourt,
