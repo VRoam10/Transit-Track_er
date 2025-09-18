@@ -49,3 +49,6 @@ android/.externalNativeBuild/
 **/cmake-build-debug/
 **/cmake-build-release/
 **/build/intermediates/cmake/
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
