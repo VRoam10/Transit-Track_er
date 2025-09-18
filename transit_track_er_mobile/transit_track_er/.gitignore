@@ -52,3 +52,7 @@ android/.externalNativeBuild/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+
+# FVM
+.fvm/flutter_sdk
+.fvm/versions

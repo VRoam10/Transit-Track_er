@@ -1,9 +1,10 @@
 {
-    "cSpell.words": [
-        "allprojects"
-    ],
-    "conventionalCommits.scopes": [
-        "Notification",
-        "Localization"
-    ]
+  "cSpell.words": [
+    "allprojects"
+  ],
+  "conventionalCommits.scopes": [
+    "Notification",
+    "Localization"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.19.6"
 }
