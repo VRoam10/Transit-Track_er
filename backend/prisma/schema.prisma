@@ -18,6 +18,7 @@ model User {
   name           String
   email          String           @unique
   password       String           @db.VarChar(255)
+  token          String?          @db.VarChar(255)
   createdAt      DateTime         @default(now())
   SavedTimetable SavedTimetable[]
 }

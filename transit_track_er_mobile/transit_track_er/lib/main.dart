@@ -33,7 +33,7 @@ void main() async {
   print("FCM Token: $token");
 
   try {
-    final url = Uri.parse('${Environment.baseUrl}/register-token');
+    final url = Uri.parse('${Environment.baseUrl}/api/users/register-token');
     await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

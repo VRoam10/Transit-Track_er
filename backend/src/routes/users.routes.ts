@@ -79,13 +79,30 @@ router.post("/login", async (req: Request, res: Response) => {
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET as string,
         {
-          expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
+          expiresIn: (process.env.JWT_EXPIRES_IN ||
+            "1h") as jwt.SignOptions["expiresIn"],
         }
       );
       res.status(200).json({ message: "Login successful.", token: token });
     } else {
       res.status(401).json({ error: "Invalid username or password." });
     }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.post("/register-token", authenticateToken, (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const token = req.body.token;
+    prisma.user.update({
+      where: { id: req.user.id },
+      data: { token: token },
+    });
+    res.status(200).send("Token registered");
   } catch (error) {
     res.status(500).json({ error: "Internal server error." });
   }
