@@ -1,9 +1,45 @@
 import { PrismaClient } from "@prisma/client";
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
+import { body, validationResult } from "express-validator";
+import util from "util";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 const prisma = new PrismaClient();
+
+const validateSchedule = [
+  body('timetable')
+    .isObject()
+    .withMessage('timetable must be an object'),
+
+  body('timetable.cron')
+    .isString()
+    .notEmpty()
+    .withMessage('Each timetable item must have a valid cron string'),
+
+  body('timetable.api')
+    .isString()
+    .notEmpty()
+    .withMessage('Each timetable item must have a valid API identifier'),
+
+  body('timetable.id')
+    .notEmpty()
+    .withMessage('Each timetable item must have an ID'),
+];
+
+function handleValidationErrors(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(util.inspect(errors.array()));
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  next();
+}
 
 router.get("/", authenticateToken, async (req, res) => {
   try {
@@ -46,21 +82,13 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", validateSchedule, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const { timetable } = req.body;
-
-    const isValid = Array.isArray(timetable) && timetable.every(item =>
-      item.cron && item.api && item.id
-    );
-
-    if (!isValid) {
-      return res.status(400).json({ error: "Invalid timetable format" });
-    }
 
     const newTimetable = await prisma.savedTimetable.create({
       data: {
@@ -76,7 +104,7 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/:id", authenticateToken, async (req, res) => {
+router.put("/:id", validateSchedule, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
