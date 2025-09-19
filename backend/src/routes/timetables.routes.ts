@@ -85,6 +85,14 @@ router.put("/:id", authenticateToken, async (req, res) => {
 
     const { timetable } = req.body;
 
+    const isValid = Array.isArray(timetable) && timetable.every(item =>
+      item.cron && item.api && item.id
+    );
+
+    if (!isValid) {
+      return res.status(400).json({ error: "Invalid timetable format" });
+    }
+
     const updatedTimetable = await prisma.savedTimetable.update({
       where: {
         id: req.params.id,
