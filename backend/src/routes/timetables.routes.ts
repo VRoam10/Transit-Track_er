@@ -25,6 +25,11 @@ const validateSchedule = [
   body('timetable.id')
     .notEmpty()
     .withMessage('Each timetable item must have an ID'),
+
+  body('timetable.mode')
+    .isString()
+    .notEmpty()
+    .withMessage('Each timetable item must have a valid transport mode'),
 ];
 
 function handleValidationErrors(
