@@ -5,6 +5,7 @@ import { check, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import util from "util";
 import { authenticateToken } from "../middleware/auth";
+import { sendNotification } from "../services/firebase.services";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -92,17 +93,29 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/register-token", authenticateToken, (req, res) => {
+router.post("/register-token", authenticateToken, async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const token = req.body.token;
-    prisma.user.update({
+    await prisma.user.update({
       where: { id: req.user.id },
       data: { token: token },
     });
-    res.status(200).send("Token registered");
+    res.status(200).send({ message: "Token registered successfully." });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    sendNotification(req.user.token, "Test", "This is a test notification");
+    res.json({ id: req.user.id, name: req.user.name, email: req.user.email });
   } catch (error) {
     res.status(500).json({ error: "Internal server error." });
   }
