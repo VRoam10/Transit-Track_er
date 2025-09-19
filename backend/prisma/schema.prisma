@@ -21,6 +21,7 @@ model SavedTimetable {
   id        String   @id
   userId    Int
   timetable Json
+  enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 }
