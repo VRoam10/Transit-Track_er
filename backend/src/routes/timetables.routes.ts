@@ -54,6 +54,14 @@ router.post("/", authenticateToken, async (req, res) => {
 
     const { id, timetable } = req.body;
 
+    const isValid = Array.isArray(timetable) && timetable.every(item =>
+      item.cron && item.api && item.id
+    );
+
+    if (!isValid) {
+      return res.status(400).json({ error: "Invalid timetable format" });
+    }
+
     const newTimetable = await prisma.savedTimetable.create({
       data: {
         id,
