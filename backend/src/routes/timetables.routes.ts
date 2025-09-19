@@ -52,7 +52,7 @@ router.post("/", authenticateToken, async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { id, timetable } = req.body;
+    const { timetable } = req.body;
 
     const isValid = Array.isArray(timetable) && timetable.every(item =>
       item.cron && item.api && item.id
@@ -64,7 +64,6 @@ router.post("/", authenticateToken, async (req, res) => {
 
     const newTimetable = await prisma.savedTimetable.create({
       data: {
-        id,
         timetable,
         userId: req.user.id,
       },
