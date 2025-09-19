@@ -1,9 +1,12 @@
+import axios from 'axios';
 import { CronExpressionParser } from 'cron-parser';
 import { sendNotification } from "../services/firebase.services";
 
 const { PrismaClient } = require("@prisma/client");
 const moment = require("moment");
 const prisma = new PrismaClient();
+
+const PORT = process.env.PORT || 3000;
 
 async function runScheduledTasks() {
     const now = new Date();
@@ -23,20 +26,28 @@ async function runScheduledTasks() {
             const prevMinute = moment(prev.toDate()).format("YYYY-MM-DD HH:mm");
 
             console.log(`${task.cron} => prev: ${prevMinute}, now: ${nowMinute}`);
-            if (prevMinute === nowMinute) {
+            if (prevMinute === nowMinute && schedule.user.token) {
                 console.log(`Triggering ${task.api.toUpperCase()} - ${task.id}`);
 
-                if (schedule.user.token) {
-                    await sendNotification(
-                        schedule.user.token,
-                        task.message || "Scheduled task",
-                        `It's time for your scheduled task: ${task.api} - ${task.id}`
-                    );
+                if (task.api === "data.explore.star.fr") {
+                    try {
+                        const response = await axios.get(`http://localhost:${PORT}/api/${task.mode}/nextpassages/${task.id}`);
+                        const passages = response.data;
+
+                        await sendNotification(
+                            schedule.user.token,
+                            task.message || "Scheduled task",
+                            `Next Train at ${passages[0].name}: ${passages[0].nextTrain}`
+                        );
+                        break;
+                    } catch (err) {
+                        throw new Error(`Error fetching next passages from external API: ${err}`);
+                    }
                 }
             }
         } catch (err: Error | any) {
             console.error(
-                `❌ Invalid cron "${task.cron}" in schedule ID ${schedule.id}:`,
+                `Invalid cron "${task.cron}" in schedule ID ${schedule.id}:`,
                 err.message
             );
         }
