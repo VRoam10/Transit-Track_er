@@ -1,12 +1,14 @@
 import axios from "axios";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
-router.get("/:idLigne", async (req, res) => {
+router.get("/:idLigne", async (req: Request<{ idLigne: string }, any, any, { pages?: string }>, res: Response) => {
   try {
-    // Fetch stops logic here
-    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd%2Csens&limit=50&refine=idligne%3A%22${req.params.idLigne}%22`).then((response) => {
+    const page = parseInt(req.query.pages ?? "0", 10);
+    const offset = Number.isNaN(page) ? 0 : page * 50;
+
+    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd%2Csens&limit=50&refine=idligne%3A%22${req.params.idLigne}%22&offset=${offset}`).then((response) => {
       let stops = response.data.results.map((stop: any) => ({
         id: stop.idjdd,
         name: stop.nomarret,
