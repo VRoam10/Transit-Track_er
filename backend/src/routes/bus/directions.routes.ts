@@ -6,10 +6,11 @@ const router = Router();
 router.get("/:idLigne", async (req, res) => {
   try {
     // Fetch directions logic here
-    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-parcours-td/records?select=sens%2Cnomarretarrivee&where=idligne%3D%22${req.params.idLigne}%22&limit=20&refine=type%3A%22Principal%22`).then((response) => {
+    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-topologie-parcours-td/records?select=sens%2Cnomarretarrivee%2Cid&where=idligne%3D%22${req.params.idLigne}%22&limit=20&refine=type%3A%22Principal%22`).then((response) => {
       let directions = response.data.results.map((direction: any) => ({
         id: direction.sens,
         name: direction.nomarretarrivee,
+        parcoursId: direction.id,
       }));
       res.json({
         total_count: response.data.total_count,
