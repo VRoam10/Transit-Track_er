@@ -6,7 +6,7 @@ const router = Router();
 router.get("/:id", async (req, res) => {
   try {
     const [idLigne, idStop] = req.params.id.split("-");
-    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?limit=20&refine=idarret%3A${idStop}&refine=idligne%3A%22${idLigne}%22`).then((response) => {
+    axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-bus-circulation-passages-tr/records?order_by=arrivee&limit=20&refine=idarret%3A${idStop}&refine=idligne%3A%22${idLigne}%22`).then((response) => {
       let passages = response.data.results.map((passage: any) => ({
         id: req.params.id,
         lineId: passage.idligne,
@@ -16,7 +16,10 @@ router.get("/:id", async (req, res) => {
         coordonnees: passage.coordonnees,
         extraction: passage.heureextraction,
       }));
-      res.json(passages);
+      res.json({
+        total_count: 1,
+        data: passages[0]
+      });
     }).catch((error) => {
       console.error("Error fetching next passages from external API:", error);
       throw error;
