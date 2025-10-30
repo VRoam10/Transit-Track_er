@@ -14,7 +14,10 @@ router.get("/", async (req: Request<{}, any, any, { pages?: string }>, res: Resp
         name: line.nomcourt,
         color: line.couleurligne,
       }));
-      res.json(lines);
+      res.json({
+        total_count: response.data.total_count,
+        data: lines
+      });
     }).catch((error) => {
       console.error("Error fetching lines from external API:", error);
       throw error;

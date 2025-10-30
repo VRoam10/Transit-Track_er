@@ -14,7 +14,10 @@ router.get("/:idLigne", async (req: Request<{ idLigne: string }, any, any, { pag
         name: stop.nomarret,
         direction: stop.sens,
       }));
-      res.json(stops);
+      res.json({
+        total_count: response.data.total_count,
+        data: stops
+      });
     }).catch((error) => {
       console.error("Error fetching stops from external API:", error);
       throw error;

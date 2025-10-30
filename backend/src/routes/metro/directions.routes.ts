@@ -10,7 +10,10 @@ router.get("/:idLigne", async (req, res) => {
         id: direction.sens,
         name: direction.nomarretarrivee,
       }));
-      res.json(directions);
+      res.json({
+        total_count: response.data.total_count,
+        data: directions
+      });
     }).catch((error) => {
       console.error("Error fetching directions from external API:", error);
       throw error;
