@@ -14,8 +14,13 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/timetables", timetablesRoutes);
 
+app.use("/api/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // Metro Route
 app.use("/api/metro", metroRouter);
+// Bus Route
 app.use("/api/bus", busRouter);
 
 app.listen(PORT, () => {
