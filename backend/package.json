@@ -6,7 +6,7 @@
   "scripts": {
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name",
-    "prisma:studio": "prisma studio",
+    "prisma:studio": "prisma studio --port 5556",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset --force",
     "dev": "ts-node-dev --respawn src/index.ts",
