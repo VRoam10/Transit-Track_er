@@ -3,16 +3,42 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    secrets:
+      - service_account.json
     ports:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgres://transit:transit@postgres:5432/transit
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/service_account.json
+      - JWT_EXPIRES_IN=7d
+      - JWT_SECRET=d7facc60a041d13f4dbe25128a673a78
 
   postgres:
     image: postgres:14
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data_hub:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=transit
       - POSTGRES_PASSWORD=transit
       - POSTGRES_DB=transit
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    secrets:
+      - service_account.json
+    command: node dist/worker/scheduler.js
+    depends_on:
+      - backend
+    environment:
+      - DATABASE_URL=postgres://transit:transit@postgres:5432/transit
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/service_account.json
+
+volumes:
+  postgres_data_hub:
+secrets:
+  service_account.json:
+    file: ./backend/serviceAccountKey.json

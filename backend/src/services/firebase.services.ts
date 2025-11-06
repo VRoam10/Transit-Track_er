@@ -1,5 +1,11 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../../serviceAccountKey.json");
+
+let serviceAccount;
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+} else {
+    throw new Error("GOOGLE_APPLICATION_CREDENTIALS environment variable not set");
+}
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

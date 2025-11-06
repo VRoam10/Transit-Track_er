@@ -10,6 +10,8 @@ COPY . .
 
 RUN npm run build
 
+RUN npx prisma generate
+
 RUN npm prune --omit=dev
 
 FROM node:20.19.4-bullseye-slim AS runner
