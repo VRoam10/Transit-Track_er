@@ -32,12 +32,12 @@ async function runScheduledTasks() {
                 if (task.api === "data.explore.star.fr") {
                     try {
                         const response = await axios.get(`http://localhost:${PORT}/api/${task.mode}/nextpassages/${task.id}`);
-                        const passages = response.data;
+                        const passages = response.data.data;
 
                         await sendNotification(
                             schedule.user.token,
                             task.message || "Scheduled task",
-                            `Next Train at ${passages[0].name}: ${passages[0].nextTrain}`
+                            `Next Train at ${passages.name}: ${passages.nextTrain}`
                         );
                         break;
                     } catch (err) {
