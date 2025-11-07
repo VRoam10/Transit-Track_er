@@ -20,6 +20,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Create google-services.json
+        working-directory: ./transit_track_er_mobile/transit_track_er
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_JSON }}' > android/app/google-services.json
+
       - name: Set Up Java
         uses: actions/setup-java@v3.12.0
         with:
