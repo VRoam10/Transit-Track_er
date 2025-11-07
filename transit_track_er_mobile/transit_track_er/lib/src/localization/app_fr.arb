@@ -131,5 +131,17 @@
   "arrivalTime": "Heure d'arrivée",
   "@arrivalTime": {
     "description": "Label pour l'heure d'arrivée du bus ou du métro"
+  },
+  "register": "S'inscrire",
+  "@register": {
+    "description": "Bouton pour s'inscrire"
+  },
+  "createAccount": "Créer un compte",
+  "@createAccount": {
+    "description": "Label pour le bouton de création de compte"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Label pour le champ de saisie de l'email"
   }
 }

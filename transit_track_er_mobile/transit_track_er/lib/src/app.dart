@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
+import 'package:transit_track_er/src/pages/register_page.dart';
 
 import 'pages/login_page.dart';
 import 'settings/settings_controller.dart';
@@ -81,6 +82,8 @@ class MyApp extends StatelessWidget {
                     return const BusLineListView();
                   case HomePage.routeName:
                     return const HomePage();
+                  case RegisterPage.routeName:
+                    return const RegisterPage();
                   case LoginPage.routeName:
                   default:
                     return const LoginPage();
