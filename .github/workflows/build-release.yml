@@ -32,6 +32,9 @@ jobs:
           flutter-version: "3.19.6"
           channel: "stable"
 
+      - name: Change Directory
+        run: cd ./transit_track_er_mobile/transit_track_er
+
       - name: Install Dependencies
         run: flutter pub get
 
