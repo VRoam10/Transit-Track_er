@@ -1,15 +1,13 @@
-import 'dart:convert';
-
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:transit_track_er/src/environment.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
+import 'package:transit_track_er/src/service/auth_service.dart';
+import 'package:transit_track_er/src/service/notification_service.dart';
 import 'package:transit_track_er/src/settings/timezone.dart';
 
 import 'src/app.dart';
@@ -23,25 +21,6 @@ void main() async {
       Permission.notification.request();
     }
   });
-
-  // Initialize Firebase
-  await Firebase.initializeApp();
-
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  String? token = await messaging.getToken();
-  print("FCM Token: $token");
-
-  try {
-    final url = Uri.parse('${Environment.baseUrl}/api/users/register-token');
-    await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(<String, String>{'token': token ?? ''}),
-    );
-  } catch (e) {
-    print("Error registering FCM token: $e");
-  }
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
@@ -61,6 +40,19 @@ void main() async {
 
   configureLocalTimeZone();
   await initializeNotifications();
+
+  await Firebase.initializeApp();
+
+  // Initialize notifications
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
+  // Remove old auth token if expired
+  final authToken = await AuthService().getToken();
+
+  if (authToken != null && JwtDecoder.isExpired(authToken)) {
+    await AuthService().logout();
+  }
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
