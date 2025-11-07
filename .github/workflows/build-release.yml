@@ -32,16 +32,16 @@ jobs:
           flutter-version: "3.19.6"
           channel: "stable"
 
-      - name: Change Directory
-        run: cd ./transit_track_er_mobile/transit_track_er
-
       - name: Install Dependencies
+        working-directory: ./transit_track_er_mobile/transit_track_er
         run: flutter pub get
 
       - name: Build APK
+        working-directory: ./transit_track_er_mobile/transit_track_er
         run: flutter build apk --release
 
       - name: Build appBundle
+        working-directory: ./transit_track_er_mobile/transit_track_er
         run: flutter build appbundle
 
       - name: Upload Artifacts
@@ -49,10 +49,11 @@ jobs:
         with:
           name: Releases
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+            ./transit_track_er_mobile/transit_track_er/build/app/outputs/flutter-apk/app-release.apk
+            ./transit_track_er_mobile/transit_track_er/build/app/outputs/bundle/release/app-release.aab
 
       - name: Extract version from pubspec.yaml
+        working-directory: ./transit_track_er_mobile/transit_track_er
         id: extract_version
         run: |
           version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
@@ -77,6 +78,6 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab"
+          artifacts: "./transit_track_er_mobile/transit_track_er/build/app/outputs/flutter-apk/app-release.apk,./transit_track_er_mobile/transit_track_er/build/app/outputs/bundle/release/app-release.aab"
           tag: v${{ github.run_number }}
           token: ${{ secrets.TOKEN }}
