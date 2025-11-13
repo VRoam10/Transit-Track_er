@@ -17,7 +17,7 @@ router.get("/:idLigne/:sens", async (req: Request<{ idLigne: string, sens: strin
 
       axios.get(`https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-topologie-dessertes-td/records?order_by=ordre&select=nomarret%2Cidarret%2Cordre&limit=50&refine=idparcours%3A%22${direction.parcoursId}%22&offset=${offset}`).then((response) => {
         let stops = response.data.results.map((stop: any) => ({
-          id: stop.idarret,
+          id: req.params.idLigne + '-' + direction.id + '-' + stop.idarret,
           name: stop.nomarret,
           direction: direction.id,
           order: stop.ordre

@@ -16,7 +16,7 @@ router.get("/:idStop", async (req, res) => {
         extraction: passage.heureextraction,
       }));
       res.json({
-        total_count: 1,
+        total_count: response.data.total_count ? 1 : 0,
         data: passages[0]
       });
     }).catch((error) => {
