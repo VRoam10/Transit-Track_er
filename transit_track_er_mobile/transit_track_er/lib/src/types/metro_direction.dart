@@ -13,8 +13,8 @@ class MetroDirection {
 
   factory MetroDirection.fromBackendJson(Map<String, dynamic> json) {
     return MetroDirection(
-      nomarretarrivee: json['nomarretarrivee'],
-      sens: json['sens'],
+      nomarretarrivee: json['name'],
+      sens: json['id'],
     );
   }
 }

@@ -10,4 +10,11 @@ class BusRouteDirection {
       sens: json['sens'],
     );
   }
+
+  factory BusRouteDirection.fromBackendJson(Map<String, dynamic> json) {
+    return BusRouteDirection(
+      nomarretarrivee: json['name'],
+      sens: json['id'],
+    );
+  }
 }

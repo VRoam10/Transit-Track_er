@@ -15,9 +15,9 @@ class MetroStation {
 
   factory MetroStation.fromBackendJson(Map<String, dynamic> json) {
     return MetroStation(
-      id: json['idjdd'],
-      name: json['nomarret'],
-      sens: json['sens'],
+      id: json['id'],
+      name: json['name'],
+      sens: json['direction'],
     );
   }
 }

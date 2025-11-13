@@ -47,19 +47,18 @@ class MetroStationDetailsView extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<List<Station>>(
+      body: FutureBuilder<Station>(
         future: fetchNextPassageMetro(station.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text(localizations.noStationsFound));
           }
 
-          final station = snapshot.data!.first;
-
+          final station = snapshot.data!;
           // If no data is received (this shouldn't normally happen)
           return Center(child: MetroDetailsView(metro: station));
         },

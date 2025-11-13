@@ -34,7 +34,7 @@ class _MetroStationListViewState extends State<MetroStationListView> {
   @override
   void initState() {
     super.initState();
-    _futureStations = fetchAllMetro(idLigne);
+    _futureStations = fetchAllMetroStation(idLigne, selectedSens);
     _futureDirections = fetchLineDirection(widget.idLigne);
     _futureDirections.then((dirList) {
       if (dirList.isNotEmpty) {

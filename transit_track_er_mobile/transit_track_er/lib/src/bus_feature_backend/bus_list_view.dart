@@ -78,8 +78,8 @@ class _BusStopListViewState extends State<BusStopListView> {
           final uniqueStationsByIdarret = <String, dynamic>{};
 
           for (var station in filteredStations) {
-            if (!uniqueStationsByIdarret.containsKey(station.idArret)) {
-              uniqueStationsByIdarret[station.idArret] = station;
+            if (!uniqueStationsByIdarret.containsKey(station.id)) {
+              uniqueStationsByIdarret[station.id] = station;
             }
           }
 

@@ -14,6 +14,14 @@ class BusLine {
       lineColor: hexToColor(json['couleurligne']),
     );
   }
+
+  factory BusLine.fromBackendJson(Map<String, dynamic> json) {
+    return BusLine(
+      id: json['id'],
+      shortName: json['name'],
+      lineColor: hexToColor(json['color']),
+    );
+  }
 }
 
 Color hexToColor(String hex) {

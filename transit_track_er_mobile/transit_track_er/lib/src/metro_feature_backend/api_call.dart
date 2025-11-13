@@ -7,20 +7,21 @@ import 'package:transit_track_er/src/types/metro_line.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/types/station.dart';
 
-Future<List<Station>> fetchNextPassageMetro(String id) async {
-  final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?limit=20&refine=idjdd%3A$id'));
+Future<Station> fetchNextPassageMetro(String id) async {
+  final response = await http
+      .get(Uri.parse('${Environment.baseUrl}/api/metro/nextpassages/$id'));
   if (response.statusCode == 200) {
-    final List data = json.decode(response.body)['data'];
-    return data.map((e) => Station.fromBackendJson(e)).toList();
+    final Map<String, dynamic> data = json.decode(response.body)['data'];
+    return Station.fromBackendJson(data);
   } else {
     throw Exception('Failed to load metro data');
   }
 }
 
-Future<List<MetroStation>> fetchAllMetro(String idLigne) async {
-  final response = await http.get(Uri.parse(
-      'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?select=nomarret%2Cidjdd%2Csens&limit=50&refine=idligne%3A%22$idLigne%22'));
+Future<List<MetroStation>> fetchAllMetroStation(
+    String idLigne, int direction) async {
+  final response = await http.get(
+      Uri.parse('${Environment.baseUrl}/api/metro/stops/$idLigne/$direction'));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['data'];
@@ -31,8 +32,8 @@ Future<List<MetroStation>> fetchAllMetro(String idLigne) async {
 }
 
 Future<List<MetroDirection>> fetchLineDirection(String idLigne) async {
-  final response = await http.get(
-      Uri.parse('${Environment.baseUrl}/api/metro/lines/directions/$idLigne'));
+  final response = await http
+      .get(Uri.parse('${Environment.baseUrl}/api/metro/directions/$idLigne'));
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['data'];

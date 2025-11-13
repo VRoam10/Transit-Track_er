@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
+import 'package:transit_track_er/src/bus_feature/bus_details_view.dart';
 import 'package:transit_track_er/src/types/bus_direction.dart';
 import 'package:transit_track_er/src/types/bus_service_point.dart';
-
-import 'package:transit_track_er/src/bus_feature/bus_details_view.dart';
 
 /// Displays a list of Bus.
 class BusStopListView extends StatefulWidget {
@@ -79,8 +78,8 @@ class _BusStopListViewState extends State<BusStopListView> {
           final uniqueStationsByIdarret = <String, dynamic>{};
 
           for (var station in filteredStations) {
-            if (!uniqueStationsByIdarret.containsKey(station.idArret)) {
-              uniqueStationsByIdarret[station.idArret] = station;
+            if (!uniqueStationsByIdarret.containsKey(station.id)) {
+              uniqueStationsByIdarret[station.id] = station;
             }
           }
 

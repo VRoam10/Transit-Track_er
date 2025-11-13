@@ -5,8 +5,8 @@ class Station {
   final String idjdd;
   final String idLigne;
   final int sens;
-  final String destination;
-  final String idArret;
+  final String? destination;
+  final String? idArret;
   final String nomArret;
   final Coordonnees coordonnees;
   final DateTime arriveeFirstTrain;
@@ -16,8 +16,8 @@ class Station {
       {required this.idjdd,
       required this.idLigne,
       required this.sens,
-      required this.destination,
-      required this.idArret,
+      this.destination,
+      this.idArret,
       required this.nomArret,
       required this.coordonnees,
       required this.arriveeFirstTrain,
@@ -53,22 +53,18 @@ class Station {
   factory Station.fromBackendJson(Map<String, dynamic> json) {
     return switch (json) {
       {
-        "idjdd": String idjdd,
-        "idligne": String idLigne,
-        "sens": int sens,
-        "destination": String destination,
-        "idarret": String idArret,
-        "nomarret": String nomArret,
+        "id": String idjdd,
+        "lineId": String idLigne,
+        "direction": int sens,
+        "name": String nomArret,
         "coordonnees": Map<String, dynamic> coordonnees,
-        "arriveefirsttrain": String arriveeFirstTrain,
-        "heureextraction": String heureExtraction
+        "nextTrain": String arriveeFirstTrain,
+        "extraction": String heureExtraction
       } =>
         Station(
             idjdd: idjdd,
             idLigne: idLigne,
             sens: sens,
-            destination: destination,
-            idArret: idArret,
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
             arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),

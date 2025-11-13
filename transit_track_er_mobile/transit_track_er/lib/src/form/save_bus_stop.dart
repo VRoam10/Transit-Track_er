@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
-import 'package:transit_track_er/src/types/bus_service_point.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
+import 'package:transit_track_er/src/types/bus_service_point.dart';
 
 Future<void> showAddFavoriteBusStopDialog(BuildContext context,
     Box<FavoriteBusStop> box, BusServicePoint busStop) async {
@@ -37,7 +37,7 @@ Future<void> showAddFavoriteBusStopDialog(BuildContext context,
   FavoriteBusStop favoriteBusStop = FavoriteBusStop(
       idLigne: busStop.idLigne,
       nomCourtLigne: busStop.nomCourtLigne,
-      idArret: busStop.idArret,
+      idArret: busStop.id,
       name: busStop.name,
       sens: busStop.sens,
       alarmTime: chosenDateTime);

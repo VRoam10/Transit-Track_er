@@ -28,8 +28,7 @@ class BusStopDetailsView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: busBox.listenable(),
             builder: (context, Box box, _) {
-              final isFavorite =
-                  box.values.any((s) => s.idArret == bus.idArret);
+              final isFavorite = box.values.any((s) => s.idArret == bus.id);
               return IconButton(
                 icon: Icon(
                   isFavorite ? Icons.alarm_off : Icons.alarm_on,
@@ -37,8 +36,8 @@ class BusStopDetailsView extends StatelessWidget {
                 onPressed: () {
                   if (isFavorite) {
                     showRemoveFavoriteBusStopDialog(context, busBox, bus);
-                    box.delete(busBox.keys.firstWhere(
-                        (k) => busBox.get(k)!.idArret == bus.idArret));
+                    box.delete(busBox.keys
+                        .firstWhere((k) => busBox.get(k)!.idArret == bus.id));
                   } else {
                     showAddFavoriteBusStopDialog(context, busBox, bus);
                   }
@@ -49,7 +48,7 @@ class BusStopDetailsView extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<List<BusStop>>(
-        future: fetchNextPassageBus(bus.idArret, bus.idLigne),
+        future: fetchNextPassageBus(bus.id, bus.idLigne),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

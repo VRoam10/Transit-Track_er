@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BusStop {
+  final String? id;
   final String idLigne;
   final int sens;
-  final String destination;
-  final String idArret;
+  final String? destination;
+  final String? idArret;
   final String nomArret;
   final Coordonnees coordonnees;
   final DateTime arriveeBus;
   final String heureExtraction;
 
   const BusStop(
-      {required this.idLigne,
+      {this.id,
+      required this.idLigne,
       required this.sens,
-      required this.destination,
-      required this.idArret,
+      this.destination,
+      this.idArret,
       required this.nomArret,
       required this.coordonnees,
       required this.arriveeBus,
@@ -38,6 +40,29 @@ class BusStop {
             sens: sens,
             destination: destination,
             idArret: idArret,
+            nomArret: nomArret,
+            coordonnees: Coordonnees.fromJson(coordonnees),
+            arriveeBus: DateTime.parse(arriveeBus),
+            heureExtraction: heureExtraction),
+      _ => throw const FormatException('Invalid JSON format for Bus Stop'),
+    };
+  }
+
+  factory BusStop.fromBackendJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        "id": String idjdd,
+        "lineId": String idLigne,
+        "direction": int sens,
+        "name": String nomArret,
+        "coordonnees": Map<String, dynamic> coordonnees,
+        "nextTrain": String arriveeBus,
+        "extraction": String heureExtraction
+      } =>
+        BusStop(
+            id: idjdd,
+            idLigne: idLigne,
+            sens: sens,
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
             arriveeBus: DateTime.parse(arriveeBus),
