@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-class BusLine {
+class MetroLine {
   final String id;
   final String shortName;
   final Color lineColor;
 
-  BusLine({required this.id, required this.shortName, required this.lineColor});
+  MetroLine({required this.id, required this.shortName, required this.lineColor});
 
-  factory BusLine.fromJson(Map<String, dynamic> json) {
-    print(json);
-    return BusLine(
+  factory MetroLine.fromStarJson(Map<String, dynamic> json) {
+    return MetroLine(
       id: json['id'],
       shortName: json['nomcourt'],
       lineColor: hexToColor(json['couleurligne']),

@@ -13,7 +13,7 @@ class BusServicePoint {
     required this.name,
   });
 
-  factory BusServicePoint.fromJson(Map<String, dynamic> json) {
+  factory BusServicePoint.fromStarJson(Map<String, dynamic> json) {
     return BusServicePoint(
       idLigne: json['idligne'],
       nomCourtLigne: json['nomcourtligne'],

@@ -21,8 +21,7 @@ class BusStop {
       required this.arriveeBus,
       required this.heureExtraction});
 
-  factory BusStop.fromJson(Map<String, dynamic> json) {
-    print(json);
+  factory BusStop.fromStarJson(Map<String, dynamic> json) {
     return switch (json) {
       {
         "idligne": String idLigne,

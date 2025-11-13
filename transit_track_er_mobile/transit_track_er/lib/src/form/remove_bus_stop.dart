@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
+import 'package:transit_track_er/src/types/bus_service_point.dart';
 import 'package:transit_track_er/src/form/save_bus_stop.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

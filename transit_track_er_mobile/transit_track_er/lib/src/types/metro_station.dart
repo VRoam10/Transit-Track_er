@@ -5,7 +5,7 @@ class MetroStation {
 
   MetroStation({required this.id, required this.name, required this.sens});
 
-  factory MetroStation.fromJson(Map<String, dynamic> json) {
+  factory MetroStation.fromStarJson(Map<String, dynamic> json) {
     return MetroStation(
       id: json['idjdd'],
       name: json['nomarret'],

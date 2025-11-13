@@ -23,7 +23,7 @@ class Station {
       required this.arriveeFirstTrain,
       required this.heureExtraction});
 
-  factory Station.fromJson(Map<String, dynamic> json) {
+  factory Station.fromStarJson(Map<String, dynamic> json) {
     return switch (json) {
       {
         "idjdd": String idjdd,
