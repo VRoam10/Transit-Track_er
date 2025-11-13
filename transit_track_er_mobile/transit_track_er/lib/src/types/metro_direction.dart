@@ -10,4 +10,11 @@ class MetroDirection {
       sens: json['sens'],
     );
   }
+
+  factory MetroDirection.fromBackendJson(Map<String, dynamic> json) {
+    return MetroDirection(
+      nomarretarrivee: json['nomarretarrivee'],
+      sens: json['sens'],
+    );
+  }
 }

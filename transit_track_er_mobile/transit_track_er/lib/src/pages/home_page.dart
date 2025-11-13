@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
+import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart'
+    as bus_backend;
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
+import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart'
+    as metro_backend;
 import 'package:transit_track_er/src/service/api_service.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/settings/settings_view.dart';
@@ -74,11 +78,41 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
+                          metro_backend.MetroLineListView
+                              .routeName, // navigates to /metro_line_list
+                        );
+                      },
+                      child: Text(
+                          '${localizations.metroStationListTitle} (Backend)'),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
                           BusLineListView
                               .routeName, // navigates to /bus_line_list
                         );
                       },
                       child: Text(localizations.busStopListTitle),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          bus_backend.BusLineListView
+                              .routeName, // navigates to /bus_line_list
+                        );
+                      },
+                      child:
+                          Text('${localizations.busStopListTitle} (Backend)'),
                     ),
                   )
                 ],

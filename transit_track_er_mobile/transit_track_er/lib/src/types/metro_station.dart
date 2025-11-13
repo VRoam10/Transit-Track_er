@@ -12,4 +12,12 @@ class MetroStation {
       sens: json['sens'],
     );
   }
+
+  factory MetroStation.fromBackendJson(Map<String, dynamic> json) {
+    return MetroStation(
+      id: json['idjdd'],
+      name: json['nomarret'],
+      sens: json['sens'],
+    );
+  }
 }

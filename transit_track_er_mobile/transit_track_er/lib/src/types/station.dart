@@ -49,6 +49,33 @@ class Station {
       _ => throw const FormatException('Invalid JSON format for Station'),
     };
   }
+
+  factory Station.fromBackendJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        "idjdd": String idjdd,
+        "idligne": String idLigne,
+        "sens": int sens,
+        "destination": String destination,
+        "idarret": String idArret,
+        "nomarret": String nomArret,
+        "coordonnees": Map<String, dynamic> coordonnees,
+        "arriveefirsttrain": String arriveeFirstTrain,
+        "heureextraction": String heureExtraction
+      } =>
+        Station(
+            idjdd: idjdd,
+            idLigne: idLigne,
+            sens: sens,
+            destination: destination,
+            idArret: idArret,
+            nomArret: nomArret,
+            coordonnees: Coordonnees.fromJson(coordonnees),
+            arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
+            heureExtraction: heureExtraction),
+      _ => throw const FormatException('Invalid JSON format for Station'),
+    };
+  }
 }
 
 class Coordonnees {

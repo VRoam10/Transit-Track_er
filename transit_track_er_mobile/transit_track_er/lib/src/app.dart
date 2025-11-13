@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
+import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart' as bus_backend;
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
+import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart' as metro_backend;
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/pages/register_page.dart';
 
@@ -80,6 +82,10 @@ class MyApp extends StatelessWidget {
                     return const MetroLineListView();
                   case BusLineListView.routeName:
                     return const BusLineListView();
+                  case bus_backend.BusLineListView.routeName:
+                    return const bus_backend.BusLineListView();
+                  case metro_backend.MetroLineListView.routeName:
+                    return const metro_backend.MetroLineListView();
                   case HomePage.routeName:
                     return const HomePage();
                   case RegisterPage.routeName:
