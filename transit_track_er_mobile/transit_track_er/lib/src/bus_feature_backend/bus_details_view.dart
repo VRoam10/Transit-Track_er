@@ -47,18 +47,18 @@ class BusStopDetailsView extends StatelessWidget {
           ),
         ],
       ),
-      body: FutureBuilder<List<BusStop>>(
+      body: FutureBuilder<BusStop>(
         future: fetchNextPassageBus(bus.id, bus.idLigne),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text(localizations.noBusFound));
           }
 
-          final busStop = snapshot.data!.first;
+          final busStop = snapshot.data!;
 
           return Center(child: BusDetailsView(busStopFull: busStop));
         },

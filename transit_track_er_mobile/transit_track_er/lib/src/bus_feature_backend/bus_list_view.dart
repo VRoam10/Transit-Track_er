@@ -30,16 +30,19 @@ class _BusStopListViewState extends State<BusStopListView> {
   @override
   void initState() {
     super.initState();
-    _futureStations = fetchAllBusLigne(idLigne);
     _futureDirections = fetchLineDirection(idLigne);
     _futureDirections.then((dirList) {
       if (dirList.isNotEmpty) {
         setState(() {
           directions = dirList;
           selectedSens = dirList.first.sens;
+          // Fetch stations after we know the first direction
+          _futureStations = fetchAllBusLigne(idLigne, selectedSens);
         });
       }
     });
+    // Initialize with default sens
+    _futureStations = fetchAllBusLigne(idLigne, selectedSens);
   }
 
   void toggleSens() {
@@ -48,6 +51,8 @@ class _BusStopListViewState extends State<BusStopListView> {
       selectedSens = selectedSens == directions[0].sens
           ? directions[1].sens
           : directions[0].sens;
+      // Recall the API with the new direction
+      _futureStations = fetchAllBusLigne(idLigne, selectedSens);
     });
   }
 
@@ -70,14 +75,10 @@ class _BusStopListViewState extends State<BusStopListView> {
 
           final stations = snapshot.data!;
 
-          // Filter stations by sens
-          final filteredStations = stations
-              .where((station) => station.sens == selectedSens)
-              .toList();
-
+          // Remove filtering by sens since the API call already filters
           final uniqueStationsByIdarret = <String, dynamic>{};
 
-          for (var station in filteredStations) {
+          for (var station in stations) {
             if (!uniqueStationsByIdarret.containsKey(station.id)) {
               uniqueStationsByIdarret[station.id] = station;
             }
@@ -135,7 +136,7 @@ class _BusStopListViewState extends State<BusStopListView> {
                     color: selectedSens == 0 ? Colors.blue : Colors.green,
                     alignment: Alignment.center,
                     child: Text(
-                      '${localizations.direction}: $directionName ${localizations.tapToSwitch}',
+                      '${localizations.direction}: $directionName (${localizations.tapToSwitch})',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

@@ -135,7 +135,7 @@ class _BusStopListViewState extends State<BusStopListView> {
                     color: selectedSens == 0 ? Colors.blue : Colors.green,
                     alignment: Alignment.center,
                     child: Text(
-                      '${localizations.direction}: $directionName ${localizations.tapToSwitch}',
+                      '${localizations.direction}: $directionName (${localizations.tapToSwitch})',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
