@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive/hive.dart';
-import 'package:transit_track_er/src/notification/local_notification.dart';
-import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
+import 'package:transit_track_er/src/service/auth_service.dart';
+import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/bus_service_point.dart';
+import 'package:transit_track_er/src/types/timetable.dart';
 
-Future<void> showAddFavoriteBusStopDialog(BuildContext context,
-    Box<FavoriteBusStop> box, BusServicePoint busStop) async {
+Future<void> showAddFavoriteBusStopDialog(
+    BuildContext context, BusServicePoint busStop) async {
   // Step 1: Let the user choose a date
   final DateTime? pickedDate = await showDatePicker(
     context: context,
@@ -34,17 +34,22 @@ Future<void> showAddFavoriteBusStopDialog(BuildContext context,
     pickedTime.minute,
   );
 
-  FavoriteBusStop favoriteBusStop = FavoriteBusStop(
-      idLigne: busStop.idLigne,
-      nomCourtLigne: busStop.nomCourtLigne,
-      idArret: busStop.id,
-      name: busStop.name,
-      sens: busStop.sens,
-      alarmTime: chosenDateTime);
+  Timetable timetable = Timetable(
+      id: '',
+      enabled: true,
+      idLine: busStop.id,
+      cron: '${pickedTime.minute} ${pickedTime.hour} * * ${pickedDate.weekday}',
+      mode: 'bus',
+      api: 'data.explore.star.fr');
 
-  box.add(favoriteBusStop);
-
-  await scheduleBusStopNotification(favoriteBusStop);
+  String token = await AuthService().getToken() ?? '';
+  if (token.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.notAuthenticated)),
+    );
+    return;
+  }
+  await TimetableService().createTimetable(token, timetable);
 
   final localization = AppLocalizations.of(context)!;
   // Optional: show confirmation

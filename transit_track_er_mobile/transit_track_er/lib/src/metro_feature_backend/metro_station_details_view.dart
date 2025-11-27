@@ -1,46 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:transit_track_er/src/form/remove_metro_station.dart';
-import 'package:transit_track_er/src/form/save_metro_station.dart';
+import 'package:transit_track_er/src/form_backend/remove_metro_station.dart';
+import 'package:transit_track_er/src/form_backend/save_metro_station.dart';
 import 'package:transit_track_er/src/metro_feature_backend/api_call.dart';
-import 'package:transit_track_er/src/save_favorite/favorite_station.dart'; // Ensure fetchMetro is imported
+import 'package:transit_track_er/src/service/auth_service.dart';
+import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/types/station.dart';
+import 'package:transit_track_er/src/types/timetable.dart';
 
 /// Displays detailed information about a Metro Station.
-class MetroStationDetailsView extends StatelessWidget {
+class MetroStationDetailsView extends StatefulWidget {
   const MetroStationDetailsView({super.key, required this.station});
 
   static const routeName = '/metro_station_details_backend';
-
   final MetroStation station;
 
   @override
+  State<MetroStationDetailsView> createState() =>
+      _MetroStationDetailsViewState();
+}
+
+class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
+  late Future<List<Timetable>> _timetableFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimetables();
+  }
+
+  void _refreshTimetables() {
+    setState(() {
+      _timetableFuture = AuthService().getToken().then((token) {
+        if (token != null && token.isNotEmpty) {
+          return TimetableService().fetchTimetable(token);
+        }
+        return Future.value([]);
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final stationBox = Hive.box<FavoriteStation>('stationsBox');
     final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${localizations.metroStationDetailsTitle} #${station.id}'),
+        title: Text(
+            '${localizations.metroStationDetailsTitle} #${widget.station.id}'),
         actions: [
-          ValueListenableBuilder(
-            valueListenable: stationBox.listenable(),
-            builder: (context, Box box, _) {
-              final isFavorite = box.values.any((s) => s.idjdd == station.id);
-              return IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.alarm_off : Icons.alarm_on,
-                ),
-                onPressed: () {
-                  if (isFavorite) {
-                    showRemoveFavoriteStationDialog(
-                        context, stationBox, station);
-                    box.delete(stationBox.keys.firstWhere(
-                        (k) => stationBox.get(k)!.idjdd == station.id));
-                  } else {
-                    showAddFavoriteStationDialog(context, stationBox, station);
+          FutureBuilder<String?>(
+            future: AuthService().getToken(),
+            builder: (context, tokenSnapshot) {
+              if (tokenSnapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(width: 48);
+              }
+
+              final isConnected = tokenSnapshot.hasData &&
+                  tokenSnapshot.data != null &&
+                  tokenSnapshot.data!.isNotEmpty;
+
+              if (!isConnected) {
+                return const SizedBox.shrink();
+              }
+
+              return FutureBuilder<List<Timetable>>(
+                future: _timetableFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(width: 48);
+                  } else if (snapshot.hasError) {
+                    return const SizedBox.shrink();
                   }
+                  final List<Timetable> timetables = snapshot.data ?? [];
+
+                  if (timetables
+                      .any((element) => element.idLine == widget.station.id)) {
+                    return IconButton(
+                      icon: const Icon(Icons.alarm_off),
+                      onPressed: () {
+                        Timetable timetable = timetables.firstWhere(
+                            (element) => element.idLine == widget.station.id);
+                        showRemoveFavoriteStationDialog(
+                                context, widget.station, timetable)
+                            .then((_) {
+                          _refreshTimetables();
+                        });
+                      },
+                    );
+                  }
+
+                  return IconButton(
+                    icon: const Icon(Icons.alarm_on),
+                    onPressed: () {
+                      showAddFavoriteStationDialog(context, widget.station)
+                          .then((_) {
+                        _refreshTimetables();
+                      });
+                    },
+                  );
                 },
               );
             },
@@ -48,7 +106,7 @@ class MetroStationDetailsView extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<Station>(
-        future: fetchNextPassageMetro(station.id),
+        future: fetchNextPassageMetro(widget.station.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -59,7 +117,6 @@ class MetroStationDetailsView extends StatelessWidget {
           }
 
           final station = snapshot.data!;
-          // If no data is received (this shouldn't normally happen)
           return Center(child: MetroDetailsView(metro: station));
         },
       ),
