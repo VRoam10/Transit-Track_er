@@ -1,13 +1,11 @@
 name: Build & Release
 on:
-  pull_request:
-    branches:
-      - main
-      - dev
   push:
     branches:
       - main
       - dev
+    paths:
+      - "transit_track_er_mobile/**"
 
 permissions:
   contents: write
