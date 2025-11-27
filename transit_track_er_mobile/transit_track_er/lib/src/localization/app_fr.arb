@@ -143,5 +143,9 @@
   "email": "Email",
   "@email": {
     "description": "Label pour le champ de saisie de l'email"
+  },
+  "notAuthenticated": "Utilisateur non authentifié. Veuillez vous connecter.",
+  "@notAuthenticated": {
+    "description": "Message affiché lorsque l'utilisateur n'est pas authentifié"
   }
 }
