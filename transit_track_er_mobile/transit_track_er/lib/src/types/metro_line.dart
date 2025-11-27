@@ -5,14 +5,22 @@ class MetroLine {
   final String shortName;
   final Color lineColor;
 
-  MetroLine({required this.id, required this.shortName, required this.lineColor});
+  MetroLine(
+      {required this.id, required this.shortName, required this.lineColor});
 
-  factory MetroLine.fromJson(Map<String, dynamic> json) {
-    print(json);
+  factory MetroLine.fromStarJson(Map<String, dynamic> json) {
     return MetroLine(
       id: json['id'],
       shortName: json['nomcourt'],
       lineColor: hexToColor(json['couleurligne']),
+    );
+  }
+
+  factory MetroLine.fromBackendJson(Map<String, dynamic> json) {
+    return MetroLine(
+      id: json['id'],
+      shortName: json['name'],
+      lineColor: hexToColor(json['color']),
     );
   }
 }

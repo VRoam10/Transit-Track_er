@@ -4,8 +4,8 @@ import 'package:transit_track_er/src/form/remove_metro_station.dart';
 import 'package:transit_track_er/src/form/save_metro_station.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/metro_feature/api_call.dart';
-import 'package:transit_track_er/src/metro_feature/metro_station.dart';
-import 'package:transit_track_er/src/metro_feature/station.dart';
+import 'package:transit_track_er/src/types/metro_station.dart';
+import 'package:transit_track_er/src/types/station.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart'; // Ensure fetchMetro is imported
 
 /// Displays detailed information about a Metro Station.

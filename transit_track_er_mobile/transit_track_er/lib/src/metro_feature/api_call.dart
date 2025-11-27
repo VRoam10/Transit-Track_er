@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:transit_track_er/src/metro_feature/metro_direction.dart';
-import 'package:transit_track_er/src/metro_feature/metro_line.dart';
-import 'package:transit_track_er/src/metro_feature/metro_station.dart';
-import 'package:transit_track_er/src/metro_feature/station.dart';
+import 'package:transit_track_er/src/types/metro_direction.dart';
+import 'package:transit_track_er/src/types/metro_line.dart';
+import 'package:transit_track_er/src/types/metro_station.dart';
+import 'package:transit_track_er/src/types/station.dart';
 
 Future<List<Station>> fetchTestMetro(String id) async {
   final response = await http.get(Uri.parse(
       'https://data.explore.star.fr/api/explore/v2.1/catalog/datasets/tco-metro-circulation-deux-prochains-passages-tr/records?limit=20&refine=idjdd%3A$id'));
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
-    return data.map((e) => Station.fromJson(e)).toList();
+    return data.map((e) => Station.fromStarJson(e)).toList();
   } else {
     throw Exception('Failed to load metro data');
   }
@@ -23,7 +23,7 @@ Future<List<MetroStation>> fetchAllMetro(String idLigne) async {
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
-    return data.map((e) => MetroStation.fromJson(e)).toList();
+    return data.map((e) => MetroStation.fromStarJson(e)).toList();
   } else {
     throw Exception('Failed to load stations');
   }
@@ -35,7 +35,7 @@ Future<List<MetroDirection>> fetchLineDirection(String idLigne) async {
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
-    return data.map((e) => MetroDirection.fromJson(e)).toList();
+    return data.map((e) => MetroDirection.fromStarJson(e)).toList();
   } else {
     throw Exception('Failed to load stations');
   }
@@ -47,7 +47,7 @@ Future<List<MetroLine>> fetchAllLineMetro() async {
 
   if (response.statusCode == 200) {
     final List data = json.decode(response.body)['results'];
-    return data.map((e) => MetroLine.fromJson(e)).toList();
+    return data.map((e) => MetroLine.fromStarJson(e)).toList();
   } else {
     throw Exception('Failed to load lines');
   }

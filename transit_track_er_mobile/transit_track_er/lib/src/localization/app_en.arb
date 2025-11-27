@@ -143,5 +143,9 @@
   "email": "Email",
   "@email": {
     "description": "Label for the email input field"
+  },
+  "notAuthenticated": "User not authenticated. Please log in.",
+  "@notAuthenticated": {
+    "description": "Message displayed when the user is not authenticated"
   }
 }

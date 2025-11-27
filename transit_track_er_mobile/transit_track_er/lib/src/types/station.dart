@@ -1,49 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class BusStop {
+class Station {
+  final String idjdd;
   final String idLigne;
   final int sens;
-  final String destination;
-  final String idArret;
+  final String? destination;
+  final String? idArret;
   final String nomArret;
   final Coordonnees coordonnees;
-  final DateTime arriveeBus;
+  final DateTime arriveeFirstTrain;
   final String heureExtraction;
 
-  const BusStop(
-      {required this.idLigne,
+  const Station(
+      {required this.idjdd,
+      required this.idLigne,
       required this.sens,
-      required this.destination,
-      required this.idArret,
+      this.destination,
+      this.idArret,
       required this.nomArret,
       required this.coordonnees,
-      required this.arriveeBus,
+      required this.arriveeFirstTrain,
       required this.heureExtraction});
 
-  factory BusStop.fromJson(Map<String, dynamic> json) {
-    print(json);
+  factory Station.fromStarJson(Map<String, dynamic> json) {
     return switch (json) {
       {
+        "idjdd": String idjdd,
         "idligne": String idLigne,
         "sens": int sens,
         "destination": String destination,
         "idarret": String idArret,
         "nomarret": String nomArret,
         "coordonnees": Map<String, dynamic> coordonnees,
-        "arrivee": String arriveeBus,
+        "arriveefirsttrain": String arriveeFirstTrain,
         "heureextraction": String heureExtraction
       } =>
-        BusStop(
+        Station(
+            idjdd: idjdd,
             idLigne: idLigne,
             sens: sens,
             destination: destination,
             idArret: idArret,
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
-            arriveeBus: DateTime.parse(arriveeBus),
+            arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
             heureExtraction: heureExtraction),
-      _ => throw const FormatException('Invalid JSON format for Bus Stop'),
+      _ => throw const FormatException('Invalid JSON format for Station'),
+    };
+  }
+
+  factory Station.fromBackendJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        "id": String idjdd,
+        "lineId": String idLigne,
+        "direction": int sens,
+        "name": String nomArret,
+        "coordonnees": Map<String, dynamic> coordonnees,
+        "nextTrain": String arriveeFirstTrain,
+        "extraction": String heureExtraction
+      } =>
+        Station(
+            idjdd: idjdd,
+            idLigne: idLigne,
+            sens: sens,
+            nomArret: nomArret,
+            coordonnees: Coordonnees.fromJson(coordonnees),
+            arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
+            heureExtraction: heureExtraction),
+      _ => throw const FormatException('Invalid JSON format for Station'),
     };
   }
 }
@@ -63,10 +89,10 @@ class Coordonnees {
 }
 
 // The main widget displaying the metro information
-class BusDetailsView extends StatelessWidget {
-  final BusStop busStopFull;
+class MetroDetailsView extends StatelessWidget {
+  final Station metro;
 
-  const BusDetailsView({super.key, required this.busStopFull});
+  const MetroDetailsView({super.key, required this.metro});
 
   @override
   Widget build(BuildContext context) {
@@ -78,22 +104,22 @@ class BusDetailsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${localizations.line}: ${busStopFull.idLigne}',
+              '${localizations.line}: ${metro.idLigne}',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              '${localizations.station}: ${busStopFull.nomArret}',
+              '${localizations.station}: ${metro.nomArret}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              '${localizations.arrivalTime}: ${busStopFull.arriveeBus}',
+              '${localizations.arrivalTime}: ${metro.arriveeFirstTrain}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
-              '${localizations.direction}: ${busStopFull.sens}',
+              '${localizations.direction}: ${metro.sens}',
               style: const TextStyle(fontSize: 18),
             ),
           ],

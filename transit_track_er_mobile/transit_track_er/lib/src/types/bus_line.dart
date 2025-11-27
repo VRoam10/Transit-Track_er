@@ -7,12 +7,19 @@ class BusLine {
 
   BusLine({required this.id, required this.shortName, required this.lineColor});
 
-  factory BusLine.fromJson(Map<String, dynamic> json) {
-    print(json);
+  factory BusLine.fromStarJson(Map<String, dynamic> json) {
     return BusLine(
       id: json['id'],
       shortName: json['nomcourt'],
       lineColor: hexToColor(json['couleurligne']),
+    );
+  }
+
+  factory BusLine.fromBackendJson(Map<String, dynamic> json) {
+    return BusLine(
+      id: json['id'],
+      shortName: json['name'],
+      lineColor: hexToColor(json['color']),
     );
   }
 }

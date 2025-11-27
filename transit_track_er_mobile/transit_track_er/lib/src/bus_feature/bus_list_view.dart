@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
-import 'package:transit_track_er/src/bus_feature/bus_direction.dart';
-import 'package:transit_track_er/src/bus_feature/bus_service_point.dart';
-
-import 'bus_details_view.dart';
+import 'package:transit_track_er/src/bus_feature/bus_details_view.dart';
+import 'package:transit_track_er/src/types/bus_direction.dart';
+import 'package:transit_track_er/src/types/bus_service_point.dart';
 
 /// Displays a list of Bus.
 class BusStopListView extends StatefulWidget {
@@ -79,8 +78,8 @@ class _BusStopListViewState extends State<BusStopListView> {
           final uniqueStationsByIdarret = <String, dynamic>{};
 
           for (var station in filteredStations) {
-            if (!uniqueStationsByIdarret.containsKey(station.idArret)) {
-              uniqueStationsByIdarret[station.idArret] = station;
+            if (!uniqueStationsByIdarret.containsKey(station.id)) {
+              uniqueStationsByIdarret[station.id] = station;
             }
           }
 
@@ -136,7 +135,7 @@ class _BusStopListViewState extends State<BusStopListView> {
                     color: selectedSens == 0 ? Colors.blue : Colors.green,
                     alignment: Alignment.center,
                     child: Text(
-                      '${localizations.direction}: $directionName ${localizations.tapToSwitch}',
+                      '${localizations.direction}: $directionName (${localizations.tapToSwitch})',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

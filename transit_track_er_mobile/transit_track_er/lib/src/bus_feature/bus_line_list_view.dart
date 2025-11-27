@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/api_call.dart';
-import 'package:transit_track_er/src/bus_feature/bus_line.dart';
+import 'package:transit_track_er/src/types/bus_line.dart';
 import 'package:transit_track_er/src/bus_feature/bus_list_view.dart';
 
 /// Displays a list of Bus Station.
