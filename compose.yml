@@ -35,7 +35,8 @@ services:
       - backend
     environment:
       - DATABASE_URL=postgres://transit:transit@postgres:5432/transit
-      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/service_account.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/service_account.json # this need to be removed later
+      - URL_SERVER=http://backend:3000
 
 volumes:
   postgres_data_hub:

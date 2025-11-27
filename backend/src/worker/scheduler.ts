@@ -6,7 +6,7 @@ const { PrismaClient } = require("@prisma/client");
 const moment = require("moment");
 const prisma = new PrismaClient();
 
-const PORT = process.env.PORT || 3000;
+const URL_SERVER = process.env.URL_SERVER || `http://localhost:3000`;
 
 async function runScheduledTasks() {
     const now = new Date();
@@ -31,7 +31,7 @@ async function runScheduledTasks() {
 
                 if (task.api === "data.explore.star.fr") {
                     try {
-                        const response = await axios.get(`http://localhost:${PORT}/api/${task.mode}/nextpassages/${task.id}`);
+                        const response = await axios.get(`${URL_SERVER}/api/${task.mode}/nextpassages/${task.id}`);
                         const passages = response.data.data;
 
                         await sendNotification(
