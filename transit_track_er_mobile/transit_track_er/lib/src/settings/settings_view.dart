@@ -3,6 +3,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
+import 'package:transit_track_er/src/service/auth_service.dart';
+import 'package:transit_track_er/src/service/timetable_service.dart';
+import 'package:transit_track_er/src/types/timetable.dart';
 
 import 'settings_controller.dart';
 
@@ -23,6 +26,8 @@ class _SettingsViewState extends State<SettingsView> {
   _SettingsViewState(this.controller);
   late Box<FavoriteBusStop> busBox;
   late Box<FavoriteStation> stationBox;
+  late List<Timetable> timetables = [];
+  late String token = '';
 
   final SettingsController controller;
 
@@ -31,6 +36,18 @@ class _SettingsViewState extends State<SettingsView> {
     super.initState();
     busBox = Hive.box<FavoriteBusStop>('busBox');
     stationBox = Hive.box<FavoriteStation>('stationsBox');
+    _loadTimetables();
+  }
+
+  Future<void> _loadTimetables() async {
+    final token = await AuthService().getToken() ?? '';
+    if (token.isNotEmpty) {
+      final loaded = await TimetableService().fetchTimetable(token);
+      setState(() {
+        timetables = loaded;
+        this.token = token;
+      });
+    }
   }
 
   void _deleteBus(int index) {
@@ -43,6 +60,12 @@ class _SettingsViewState extends State<SettingsView> {
     setState(() {});
   }
 
+  void _deleteTimetable(int index) {
+    Timetable timetable = timetables.removeAt(index);
+    TimetableService().deleteTimetable(token, timetable);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -51,12 +74,7 @@ class _SettingsViewState extends State<SettingsView> {
       appBar: AppBar(
         title: Text(localizations.settingsTitle),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        // Glue the SettingsController to the theme selection DropdownButton.
-        //
-        // When a user selects a theme from the dropdown list, the
-        // SettingsController is updated, which rebuilds the MaterialApp.
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -83,41 +101,59 @@ class _SettingsViewState extends State<SettingsView> {
                 ],
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: busBox.length,
-                  itemBuilder: (context, index) {
-                    final bus = busBox.getAt(index);
-                    return ListTile(
-                      title: Text(bus?.name ?? ''),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          _deleteBus(index);
-                        },
-                      ),
-                    );
-                  },
-                ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: busBox.length,
+                itemBuilder: (context, index) {
+                  final bus = busBox.getAt(index);
+                  return ListTile(
+                    title: Text(bus?.name ?? ''),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteBus(index);
+                      },
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: stationBox.length,
-                  itemBuilder: (context, index) {
-                    final station = stationBox.getAt(index);
-                    return ListTile(
-                      title: Text(station?.nomCourtLigne ?? ''),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          _deleteMetro(index);
-                        },
-                      ),
-                    );
-                  },
-                ),
-              )
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: stationBox.length,
+                itemBuilder: (context, index) {
+                  final station = stationBox.getAt(index);
+                  return ListTile(
+                    title: Text(station?.nomCourtLigne ?? ''),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteMetro(index);
+                      },
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: timetables.length,
+                itemBuilder: (context, index) {
+                  final timetable = timetables[index];
+                  return ListTile(
+                    title: Text(timetable.idLine),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteTimetable(index);
+                      },
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
