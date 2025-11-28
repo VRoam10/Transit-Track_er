@@ -1,69 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Transit Tracker - Mobile App</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-50">
-    <header>
-        <nav class="bg-white shadow">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <div class="text-2xl font-bold text-blue-600"><a href="/">Transit Tracker</a></div>
-                <ul class="flex space-x-8">
-                    <li><a href="#features" class="text-gray-700 hover:text-blue-600">Features</a></li>
-                    <li><a href="#pricing" class="text-gray-700 hover:text-blue-600">Pricing</a></li>
-                    <li><a href="/contact.html" class="text-gray-700 hover:text-blue-600">Contact</a></li>
-                </ul>
+    <header class="sticky top-0 z-50 bg-white shadow">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-600">
+                <a href="/">Transit Tracker</a>
             </div>
+            <ul class="flex space-x-8">
+                <li>
+                    <a href="#features" class="text-gray-700 hover:text-blue-600">Features</a>
+                </li>
+                <li>
+                    <a href="#pricing" class="text-gray-700 hover:text-blue-600">Pricing</a>
+                </li>
+                <li>
+                    <a href="/contact.html" class="text-gray-700 hover:text-blue-600">Contact</a>
+                </li>
+            </ul>
         </nav>
     </header>
 
-    <section class="hero bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-5xl font-bold mb-4">Track Your Transit in Real-Time</h1>
-            <p class="text-xl mb-8 text-blue-100">Never miss a bus, train, or ride again</p>
-            <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">Download Now</button>
-        </div>
-    </section>
+    <main>
+        <section class="hero bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl font-bold mb-4">
+                    Track Your Transit in Real-Time
+                </h1>
+                <p class="text-xl mb-8 text-blue-100">
+                    Never miss a bus, train, or ride again
+                </p>
+                <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
+                    Download Now
+                </button>
+            </div>
+        </section>
 
-    <section id="features" class="features py-20 px-4">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-4xl font-bold text-center mb-12">Key Features</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-                    <h3 class="text-2xl font-bold mb-4 text-blue-600">Real-Time Tracking</h3>
-                    <p class="text-gray-600">Track public transportation in real-time</p>
-                </div>
-                <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-                    <h3 class="text-2xl font-bold mb-4 text-blue-600">Route Planning</h3>
-                    <p class="text-gray-600">Plan your journey with optimized routes</p>
-                </div>
-                <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
-                    <h3 class="text-2xl font-bold mb-4 text-blue-600">Notifications</h3>
-                    <p class="text-gray-600">Get alerts for departures and arrivals</p>
+        <section id="features" class="features py-20 px-4">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12">Key Features</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">
+                            Real-Time Tracking
+                        </h3>
+                        <p class="text-gray-600">
+                            Track public transportation in real-time
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">
+                            Notifications
+                        </h3>
+                        <p class="text-gray-600">
+                            Get alerts for departures and arrivals
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">
+                            Integrate APIs
+                        </h3>
+                        <p class="text-gray-600">
+                            Connect with various transit APIs for comprehensive data
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="pricing" class="pricing bg-gray-100 py-20 px-4">
-        <div class="max-w-7xl mx-auto text-center">
-            <h2 class="text-4xl font-bold mb-4">Pricing</h2>
-            <p class="text-xl text-gray-600">Free to download and use</p>
-        </div>
-    </section>
+        <section id="tutorials" class="tutorials bg-purple-700 text-white py-20 px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-4">Tutorials</h2>
+                <div class="relative inline-block w-full max-w-2xl mt-8">
+                    <img src="app.png" alt="App Tutorial" class="rounded-lg shadow-lg mx-auto" />
+                    
+                    <!-- Hotspot 1 -->
+                    <div class="absolute group cursor-pointer" style="top: 8%; left: 76%;">
+                        <div class="w-4 h-4 bg-blue-400 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"></div>
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white px-3 py-2 rounded whitespace-nowrap text-sm">
+                            Options
+                        </div>
+                    </div>
+
+                    <!-- Hotspot 2 -->
+                    <div class="absolute group cursor-pointer" style="top: 37%; left: 75%;">
+                        <div class="w-4 h-4 bg-blue-400 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"></div>
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white px-3 py-2 rounded whitespace-nowrap text-sm">
+                            The Original Api
+                        </div>
+                    </div>
+
+                    <!-- Hotspot 3 -->
+                    <div class="absolute group cursor-pointer" style="top: 58.5%; left: 75%;">
+                        <div class="w-4 h-4 bg-blue-400 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"></div>
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white px-3 py-2 rounded whitespace-nowrap text-sm">
+                            Our Api
+                        </div>
+                    </div>
+
+                    <!-- Hotspot 4 -->
+                    <div class="absolute group cursor-pointer" style="top: 91%; left: 68%;">
+                        <div class="w-4 h-4 bg-blue-400 rounded-full opacity-70 hover:opacity-100 hover:scale-125 transition-all"></div>
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white px-3 py-2 rounded whitespace-nowrap text-sm">
+                            Log out
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="pricing" class="pricing bg-gray-100 py-20 px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-4">Pricing</h2>
+                <p class="text-xl mb-8 text-gray-600">Free to download and use</p>
+                <button class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    Download Now
+                </button>
+            </div>
+        </section>
+    </main>
 
     <footer class="bg-gray-800 text-white text-center py-8">
-        <p class="mb-4">&copy; 2024 Transit Tracker. All rights reserved.</p>
+        <p class="mb-4">&copy; 2025 Transit Tracker. All rights reserved.</p>
         <ul class="flex justify-center space-x-6">
             <li><a href="/" class="hover:text-blue-400">Home</a></li>
             <li><a href="/contact.html" class="hover:text-blue-400">Contact</a></li>
-            <li><a href="/rgpd.html" class="hover:text-blue-400">Privacy Policy</a></li>
+            <li>
+                <a href="/rgpd.html" class="hover:text-blue-400">Privacy Policy</a>
+            </li>
         </ul>
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>
