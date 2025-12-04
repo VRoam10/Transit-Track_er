@@ -95,33 +95,31 @@ class BusDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${localizations.line}: ${busStopFull.idLigne}',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${localizations.station}: ${busStopFull.nomArret}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${localizations.arrivalTime}: ${busStopFull.arriveeBus}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${localizations.direction}: ${busStopFull.sens}',
-              style: const TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${localizations.line}: ${busStopFull.idLigne}',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${localizations.station}: ${busStopFull.nomArret}',
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${localizations.arrivalTime}: ${busStopFull.arriveeBus}',
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${localizations.direction}: ${busStopFull.sens}',
+            style: const TextStyle(fontSize: 18),
+          ),
+        ],
       ),
     );
   }

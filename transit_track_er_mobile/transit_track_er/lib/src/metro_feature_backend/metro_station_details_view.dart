@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:transit_track_er/src/form_backend/remove_metro_station.dart';
 import 'package:transit_track_er/src/form_backend/save_metro_station.dart';
 import 'package:transit_track_er/src/metro_feature_backend/api_call.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
@@ -22,23 +21,31 @@ class MetroStationDetailsView extends StatefulWidget {
 }
 
 class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
-  late Future<List<Timetable>> _timetableFuture;
+  late List<Timetable> timetables = [];
+  late String token = '';
 
   @override
   void initState() {
     super.initState();
-    _refreshTimetables();
+    _loadTimetables();
   }
 
-  void _refreshTimetables() {
-    setState(() {
-      _timetableFuture = AuthService().getToken().then((token) {
-        if (token != null && token.isNotEmpty) {
-          return TimetableService().fetchTimetable(token);
-        }
-        return Future.value([]);
+  Future<void> _loadTimetables() async {
+    final token = await AuthService().getToken() ?? '';
+    if (token.isNotEmpty) {
+      final loaded = await TimetableService().fetchTimetable(token);
+      setState(() {
+        timetables =
+            loaded.where((t) => t.idLine == widget.station.id).toList();
+        this.token = token;
       });
-    });
+    }
+  }
+
+  void _deleteTimetable(int index) {
+    Timetable timetable = timetables.removeAt(index);
+    TimetableService().deleteTimetable(token, timetable);
+    setState(() {});
   }
 
   @override
@@ -65,29 +72,12 @@ class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
               }
 
               return FutureBuilder<List<Timetable>>(
-                future: _timetableFuture,
+                future: TimetableService().fetchTimetable(tokenSnapshot.data!),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const SizedBox(width: 48);
                   } else if (snapshot.hasError) {
                     return const SizedBox.shrink();
-                  }
-                  final List<Timetable> timetables = snapshot.data ?? [];
-
-                  if (timetables
-                      .any((element) => element.idLine == widget.station.id)) {
-                    return IconButton(
-                      icon: const Icon(Icons.alarm_off),
-                      onPressed: () {
-                        Timetable timetable = timetables.firstWhere(
-                            (element) => element.idLine == widget.station.id);
-                        showRemoveFavoriteStationDialog(
-                                context, widget.station, timetable)
-                            .then((_) {
-                          _refreshTimetables();
-                        });
-                      },
-                    );
                   }
 
                   return IconButton(
@@ -95,7 +85,7 @@ class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
                     onPressed: () {
                       showAddFavoriteStationDialog(context, widget.station)
                           .then((_) {
-                        _refreshTimetables();
+                        _loadTimetables();
                       });
                     },
                   );
@@ -117,7 +107,30 @@ class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
           }
 
           final station = snapshot.data!;
-          return Center(child: MetroDetailsView(metro: station));
+          return ListView(
+            padding: const EdgeInsets.all(8),
+            children: [
+              MetroDetailsView(metro: station),
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: timetables.length,
+                itemBuilder: (context, index) {
+                  final timetable = timetables[index];
+                  return ListTile(
+                    title: Text(timetable.idLine),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteTimetable(index);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
         },
       ),
     );
