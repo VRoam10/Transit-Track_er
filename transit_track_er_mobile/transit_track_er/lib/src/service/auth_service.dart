@@ -56,7 +56,7 @@ class AuthService {
     await storage.delete(key: 'auth_token');
   }
 
-  Future<void> register(String email, String name, String password) async {
+  Future<void> register(String name, String email, String password) async {
     try {
       final response = await http
           .post(
