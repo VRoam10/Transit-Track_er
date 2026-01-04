@@ -41,22 +41,22 @@ export default function Header() {
                             </Link>
                         </li>
                     )}
-                    {/* {token ? ( */}
-                        <li>
-                            <button
-                                onClick={handleLogout}
-                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-                            >
-                                Log out
-                            </button>
-                        </li>
-                    {/* ) : ( */}
-                        <li>
-                            <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                Log in
-                            </Link>
-                        </li>
-                    {/* )} */}
+                    {token ? (
+                    <li>
+                        <Link href="/"
+                            onClick={handleLogout}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                        >
+                            Log out
+                        </Link>
+                    </li>
+                    ) : (
+                    <li>
+                        <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            Log in
+                        </Link>
+                    </li>
+                    )}
                 </ul>
             </nav >
         </header >
