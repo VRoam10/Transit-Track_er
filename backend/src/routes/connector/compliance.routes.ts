@@ -7,7 +7,7 @@ router.get("/direction", async (req, res) => {
         total_count: "Int",
         data: [
             {
-                id: "String",
+                id: "Int",
                 name: "String",
                 parcoursId: "String",
             }
