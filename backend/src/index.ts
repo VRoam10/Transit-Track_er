@@ -4,6 +4,7 @@ import cors from "cors";
 import busRouter from "./routes/bus/mainRouter";
 import metroRouter from "./routes/metro/mainRouter";
 import timetablesRoutes from "./routes/timetables.routes";
+import connectorRoutes from "./routes/connector/mainRouter";
 import userRoutes from "./routes/users.routes";
 
 dotenv.config();
@@ -29,6 +30,8 @@ app.use("/api/health", (req, res) => {
 app.use("/api/metro", metroRouter);
 // Bus Route
 app.use("/api/bus", busRouter);
+// Connector Route
+app.use("/api/connector", connectorRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
