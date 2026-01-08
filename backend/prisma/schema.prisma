@@ -16,6 +16,7 @@ model User {
   createdAt      DateTime         @default(now())
   token          String?          @db.VarChar(255)
   SavedTimetable SavedTimetable[]
+  connectors     Connector[]
 }
 
 model SavedTimetable {
@@ -31,6 +32,8 @@ model Connector {
   id        String   @id @default(uuid())
   name      String   @unique
   apiUrl    String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
