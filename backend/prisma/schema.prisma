@@ -29,11 +29,59 @@ model SavedTimetable {
 }
 
 model Connector {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  apiUrl    String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(uuid())
+  name        String       @unique
+  apiUrl      String
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  line        Line?
+  stop        Stop?
+  direction   Direction?
+  nextPassage NextPassage?
+}
+
+model Line {
+  id             String    @id @default(uuid())
+  name           String
+  apiUrl         String
+  transformation Json
+  connectorId    String    @unique
+  connector      Connector @relation(fields: [connectorId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Stop {
+  id             String    @id @default(uuid())
+  name           String
+  apiUrl         String
+  transformation Json
+  connectorId    String    @unique
+  connector      Connector @relation(fields: [connectorId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Direction {
+  id             String    @id @default(uuid())
+  name           String
+  apiUrl         String
+  transformation Json
+  connectorId    String    @unique
+  connector      Connector @relation(fields: [connectorId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NextPassage {
+  id             String    @id @default(uuid())
+  name           String
+  apiUrl         String
+  transformation Json
+  connectorId    String    @unique
+  connector      Connector @relation(fields: [connectorId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
