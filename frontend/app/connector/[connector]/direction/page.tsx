@@ -13,7 +13,7 @@ export default async function Page({
         <>
             <Header />
             <Link href={`/connector/${connector}`} className="bg-blue-600 text-white px-4 py-2 rounded-br-lg hover:bg-blue-700">Back to Connector</Link>
-            <Transformer subroute="direction" />
+            <Transformer subroute="direction" connectorId={connector} />
         </>
     )
 }

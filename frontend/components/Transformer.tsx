@@ -19,7 +19,12 @@ interface ComplianceSchema {
     [key: string]: any;
 }
 
-export default function Transformer({ subroute }: { subroute: string }) {
+type Props = {
+    subroute: string;
+    connectorId: string;
+};
+
+export default function Transformer({ subroute, connectorId }: Props) {
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [url, setUrl] = useState('');
@@ -30,9 +35,16 @@ export default function Transformer({ subroute }: { subroute: string }) {
     const [transformedData, setTransformedData] = useState<any>(null);
     const router = useRouter();
     const [complianceResult, setComplianceResult] = useState<any>(null);
+    const [saving, setSaving] = useState(false);
+    const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [shouldFetchRecord, setShouldFetchRecord] = useState(true);
     const { data: data_compliance, loading: loading_compliance, error: error_compliance } = useFetch<ComplianceSchema>(
         `/api/connector/compliance/${subroute}`,
         { token }
+    );
+    const { data: recordData, loading: recordLoading, error: recordError } = useFetch<any>(
+        shouldFetchRecord ? `/api/connector/${connectorId}/${subroute}` : '',
+        { token: shouldFetchRecord ? token : null }
     );
 
     useEffect(() => {
@@ -45,6 +57,24 @@ export default function Transformer({ subroute }: { subroute: string }) {
             setLoading(false);
         }
     }, [router]);
+
+    useEffect(() => {
+        if (recordData && !fieldMappings.length) {
+            // Load transformation from record if it exists
+            if (recordData.transformation && Array.isArray(recordData.transformation)) {
+                setFieldMappings(recordData.transformation);
+            }
+            if (recordData.apiUrl) {
+                setUrl(recordData.apiUrl);
+            }
+        }
+    }, [recordData]);
+
+    useEffect(() => {
+        if (data && fieldMappings.length > 0) {
+            handleTransform();
+        }
+    }, [data, fieldMappings]);
 
     const getNestedFields = (obj: any, prefix = ''): FieldMapping[] => {
         const mappings: FieldMapping[] = [];
@@ -103,12 +133,17 @@ export default function Transformer({ subroute }: { subroute: string }) {
             setData(result);
 
             // Get all field mappings from the entire structure
-            setFieldMappings(getNestedFields(result));
+            const mappings = getNestedFields(result);
+            setFieldMappings(mappings);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch');
         } finally {
             setFetching(false);
         }
+    };
+
+    const handleLoadRecord = () => {
+        setShouldFetchRecord(true);
     };
 
     const updateFieldMapping = (index: number, newTransformed: string) => {
@@ -184,11 +219,54 @@ export default function Transformer({ subroute }: { subroute: string }) {
     };
 
     const handleValidate = () => {
-        if (!transformedData || !data_compliance || data_compliance.length === 0) return;
+        if (!transformedData || !data_compliance) return;
 
         console.log('Compliance Schema:', data_compliance);
         const result = validateAgainstCompliance(transformedData, data_compliance);
         setComplianceResult(result);
+    };
+
+    const handleSaveTransformation = async () => {
+        if (!transformedData || !url) {
+            setSaveMessage({ type: 'error', text: 'Please fetch data and perform transformation first' });
+            return;
+        }
+
+        setSaving(true);
+        setSaveMessage(null);
+
+        try {
+            const payload = {
+                name: subroute,
+                apiUrl: url,
+                transformation: fieldMappings,
+            };
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+            const response = await fetch(`${apiUrl}/api/connector/${connectorId}/${subroute}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to save transformation (${response.status})`);
+            }
+
+            const result = await response.json();
+            setSaveMessage({ type: 'success', text: 'Transformation saved successfully!' });
+        } catch (err) {
+            setSaveMessage({
+                type: 'error',
+                text: err instanceof Error ? err.message : 'Failed to save transformation',
+            });
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleTransform = () => {
@@ -274,7 +352,7 @@ export default function Transformer({ subroute }: { subroute: string }) {
         return <div className="text-center text-red-500">Error: {error_compliance}</div>;
     }
 
-    if (!data_compliance || data_compliance.length === 0) {
+    if (!data_compliance) {
         return <div className="text-center text-gray-500">No compliance data found</div>;
     }
 
@@ -305,9 +383,26 @@ export default function Transformer({ subroute }: { subroute: string }) {
                                 >
                                     {fetching ? 'Fetching...' : 'Fetch Data'}
                                 </button>
+                                <button
+                                    onClick={handleLoadRecord}
+                                    disabled={recordLoading}
+                                    className="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                                >
+                                    {recordLoading ? 'Loading...' : 'Load Saved Transformation'}
+                                </button>
+                                {recordError && (
+                                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                        {recordError}
+                                    </div>
+                                )}
                                 {error && (
                                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                                         {error}
+                                    </div>
+                                )}
+                                {saveMessage && (
+                                    <div className={`${saveMessage.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'} border px-4 py-3 rounded-lg`}>
+                                        {saveMessage.text}
                                     </div>
                                 )}
                             </div>
@@ -366,48 +461,60 @@ export default function Transformer({ subroute }: { subroute: string }) {
                             </div>
                         )}
 
-                        {/* Original Data Display */}
-                        {data && (
-                            <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold">Original Data</h2>
-                                    <button
-                                        onClick={() => downloadJSON(data, 'original-data.json')}
-                                        className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-                                    >
-                                        Download
-                                    </button>
-                                </div>
-                                <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-80">
-                                    {JSON.stringify(data, null, 2)}
-                                </pre>
-                            </div>
-                        )}
+                        <section className='flex gap-6 flex-col lg:flex-row'>
 
-                        {/* Transformed Data Display */}
-                        {transformedData && (
-                            <div className="bg-white p-8 rounded-lg shadow-lg">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold">Transformed Data</h2>
-                                    <button
-                                        onClick={() => downloadJSON(transformedData, 'transformed-data.json')}
-                                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                    >
-                                        Download
-                                    </button>
+                            {/* Original Data Display */}
+                            {data && (
+                                <div className="flex-1 bg-white p-8 rounded-lg shadow-lg mb-8">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold">Original Data</h2>
+                                        <button
+                                            onClick={() => downloadJSON(data, 'original-data.json')}
+                                            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                                        >
+                                            Download
+                                        </button>
+                                    </div>
+                                    <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-150">
+                                        {JSON.stringify(data, null, 2)}
+                                    </pre>
                                 </div>
-                                <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-80">
-                                    {JSON.stringify(transformedData, null, 2)}
-                                </pre>
-                                <button
-                                    onClick={handleValidate}
-                                    className="w-full mt-4 bg-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-purple-700 transition"
-                                >
-                                    Validate Against Compliance
-                                </button>
-                            </div>
-                        )}
+                            )}
 
+                            {/* Transformed Data Display */}
+                            {transformedData && (
+                                <div className="flex-1 bg-white p-8 rounded-lg shadow-lg">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold">Transformed Data</h2>
+                                        <button
+                                            onClick={() => downloadJSON(transformedData, 'transformed-data.json')}
+                                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                                        >
+                                            Download
+                                        </button>
+                                    </div>
+                                    <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-150">
+                                        {JSON.stringify(transformedData, null, 2)}
+                                    </pre>
+                                    <div className="space-y-2 mt-4">
+                                        <button
+                                            onClick={handleValidate}
+                                            className="w-full bg-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-purple-700 transition"
+                                        >
+                                            Validate Against Compliance
+                                        </button>
+                                        <button
+                                            onClick={handleSaveTransformation}
+                                            disabled={saving}
+                                            className="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                                        >
+                                            {saving ? 'Saving...' : 'Save Transformation'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                        </section>
                         {/* Compliance Validation Result */}
                         {complianceResult && (
                             <div className="bg-white p-8 rounded-lg shadow-lg mt-8">
