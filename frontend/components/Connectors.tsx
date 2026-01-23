@@ -10,7 +10,7 @@ interface Connector {
     [key: string]: any;
 }
 
-export default function Connector() {
+export default function Connectors() {
     const [token, setToken] = useState<string | null>(null);
     const { data, loading, error } = useFetch<Connector[]>(
         '/api/connector',

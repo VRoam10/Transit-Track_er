@@ -43,8 +43,15 @@ export default function Connector() {
                 </div>
                 <section className="timetables py-20 px-4 bg-gray-50">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl font-bold text-center mb-8">Your Connector</h2>
-                        <Connectors />
+                        <div className="space-y-4">
+                            <h2 className="text-3xl font-bold text-center mb-8">Your Connector</h2>
+                            <Connectors />
+                            <div className="bg-blue-600 p-6 rounded-lg shadow hover:shadow-lg transition">
+                                <Link href={`/connector/new`} className="block text-center text-white font-bold">
+                                    Add New Connector
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
