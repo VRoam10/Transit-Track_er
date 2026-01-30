@@ -1,7 +1,7 @@
 'use client';
 
+import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import Link from 'next/link';
 
 
 export default function RGPD() {
@@ -80,14 +80,7 @@ export default function RGPD() {
                 </section>
             </main>
 
-            <footer className="bg-gray-800 text-white text-center py-8 mt-20">
-                <p className="mb-4">&copy; 2025 Transit Tracker. All rights reserved.</p>
-                <ul className="flex justify-center space-x-6">
-                    <li><Link href="/" className="hover:text-blue-400">Home</Link></li>
-                    <li><Link href="/contact" className="hover:text-blue-400">Contact</Link></li>
-                    <li><Link href="/rgpd" className="hover:text-blue-400">Privacy Policy</Link></li>
-                </ul>
-            </footer>
+            <Footer />
         </>
     );
 }

@@ -27,7 +27,7 @@ export default function Connector() {
             <>
                 <Header />
                 <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-gray-600">Loading...</p>
+                    <p className="text-gray-600 dark:text-gray-300">Loading...</p>
                 </div>
             </>
         );
@@ -38,10 +38,10 @@ export default function Connector() {
             <Header />
 
             <main>
-                <div className=' bg-gray-50'>
+                <div className='bg-gray-50 dark:bg-black'>
                     <Link href={`/dashboard`} className="bg-blue-600 text-white px-4 py-2 rounded-br-lg hover:bg-blue-700">Back to Dashboard</Link>
                 </div>
-                <section className="timetables py-20 px-4 bg-gray-50">
+                <section className="timetables py-20 px-4 bg-gray-50 dark:bg-black">
                     <div className="max-w-5xl mx-auto">
                         <div className="space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">Your Connector</h2>

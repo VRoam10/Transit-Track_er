@@ -338,14 +338,14 @@ export default function Transformer({ subroute, connectorId }: Props) {
         return (
             <>
                 <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-gray-600">Loading...</p>
+                    <p className="text-gray-600 dark:text-gray-300">Loading...</p>
                 </div>
             </>
         );
     }
 
     if (loading_compliance) {
-        return <div className="text-center text-gray-500">Loading compliance...</div>;
+        return <div className="text-center text-gray-600 dark:text-gray-300">Loading compliance...</div>;
     }
 
     if (error_compliance) {
@@ -353,7 +353,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
     }
 
     if (!data_compliance) {
-        return <div className="text-center text-gray-500">No compliance data found</div>;
+        return <div className="text-center text-gray-600 dark:text-gray-300">No compliance data found</div>;
     }
 
     return (
@@ -364,16 +364,16 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         <h1 className="text-4xl font-bold text-center mb-8">API Connector & Transformer</h1>
 
                         {/* URL Input Section */}
-                        <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+                        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">API URL</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">API URL</label>
                                     <input
                                         type="text"
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
                                         placeholder="https://api.example.com/data"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 <button
@@ -410,35 +410,35 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                         {/* Field Mapping Section */}
                         {data && fieldMappings.length > 0 && (
-                            <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+                            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
                                 <div className="mb-6">
                                     <h2 className="text-2xl font-bold">Transform Fields</h2>
-                                    <p className="text-gray-600 text-sm mt-2">These mappings will be applied to all items in the list</p>
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">These mappings will be applied to all items in the list</p>
                                 </div>
-                                <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 rounded p-4">
+                                <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded p-4">
                                     {fieldMappings.map((mapping, index) => {
                                         const depth = (mapping.original.match(/\./g) || []).length;
                                         const displayName = mapping.original.split('.').pop() || mapping.original;
                                         const isNested = depth > 0;
 
                                         return (
-                                            <div key={index} className="flex gap-4 items-end bg-gray-50 p-3 rounded">
+                                            <div key={index} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-700 p-3 rounded">
                                                 <div className="flex-1">
-                                                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                        {isNested && <span className="text-gray-500 block mb-1">📁 {mapping.original}</span>}
-                                                        {!isNested && <span className="text-gray-500">Field name</span>}
+                                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+                                                        {isNested && <span className="text-gray-500 dark:text-gray-400 block mb-1">📁 {mapping.original}</span>}
+                                                        {!isNested && <span className="text-gray-500 dark:text-gray-400">Field name</span>}
                                                     </label>
-                                                    <div className="text-sm font-semibold text-gray-700">{mapping.original}</div>
+                                                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">{mapping.original}</div>
                                                 </div>
                                                 <div className="text-gray-400">→</div>
                                                 <div className="flex-1">
-                                                    <label className="block text-xs font-medium text-gray-600 mb-1">Rename to</label>
+                                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Rename to</label>
                                                     <input
                                                         type="text"
                                                         value={mapping.transformed}
                                                         onChange={(e) => updateFieldMapping(index, e.target.value)}
                                                         placeholder={mapping.original}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                                 <button
@@ -465,7 +465,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                             {/* Original Data Display */}
                             {data && (
-                                <div className="flex-1 bg-white p-8 rounded-lg shadow-lg mb-8">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-2xl font-bold">Original Data</h2>
                                         <button
@@ -475,7 +475,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                             Download
                                         </button>
                                     </div>
-                                    <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-150">
+                                    <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-150">
                                         {JSON.stringify(data, null, 2)}
                                     </pre>
                                 </div>
@@ -483,7 +483,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                             {/* Transformed Data Display */}
                             {transformedData && (
-                                <div className="flex-1 bg-white p-8 rounded-lg shadow-lg">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-2xl font-bold">Transformed Data</h2>
                                         <button
@@ -493,7 +493,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                             Download
                                         </button>
                                     </div>
-                                    <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-150">
+                                    <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-150">
                                         {JSON.stringify(transformedData, null, 2)}
                                     </pre>
                                     <div className="space-y-2 mt-4">
@@ -517,15 +517,15 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         </section>
                         {/* Compliance Validation Result */}
                         {complianceResult && (
-                            <div className="bg-white p-8 rounded-lg shadow-lg mt-8">
+                            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mt-8">
                                 <h2 className="text-2xl font-bold mb-6">Compliance Validation Result</h2>
 
                                 {complianceResult.issues.length === 0 ? (
-                                    <div className="bg-green-50 border-l-4 border-green-600 p-4 mb-6">
+                                    <div className="bg-green-50 dark:bg-green-200 border-l-4 border-green-600 p-4 mb-6">
                                         <p className="text-green-800 font-semibold">✓ Data matches compliance schema!</p>
                                     </div>
                                 ) : (
-                                    <div className="bg-red-50 border-l-4 border-red-600 p-4 mb-6">
+                                    <div className="bg-red-50 dark:bg-red-200 border-l-4 border-red-600 p-4 mb-6">
                                         <p className="text-red-800 font-semibold mb-3">✕ Compliance issues found:</p>
                                         <ul className="space-y-2">
                                             {complianceResult.issues.map((issue: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
@@ -536,7 +536,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                 )}
 
                                 {complianceResult.matches.length > 0 && (
-                                    <div className="bg-blue-50 border-l-4 border-blue-600 p-4">
+                                    <div className="bg-blue-50 dark:bg-blue-200 border-l-4 border-blue-600 p-4">
                                         <p className="text-blue-800 font-semibold mb-3">Matching fields:</p>
                                         <ul className="space-y-1">
                                             {complianceResult.matches.map((match: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
@@ -549,16 +549,16 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         )}
                     </div>
                 </section>
-                <section className="compliance bg-gradient-to-br from-purple-50 to-blue-50 py-16 px-4">
+                <section className="compliance bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 py-16 px-4">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="text-4xl font-bold text-center mb-2 text-gray-800">Expected Data Format</h2>
-                        <p className="text-center text-gray-600 mb-12">Schema that your transformed data should match</p>
+                        <h2 className="text-4xl font-bold text-center mb-2 text-gray-800 dark:text-gray-200">Expected Data Format</h2>
+                        <p className="text-center text-gray-600 dark:text-gray-400 mb-12">Schema that your transformed data should match</p>
 
-                        <div className="bg-white rounded-lg shadow-xl p-8">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
                             {data_compliance && data_compliance.data && data_compliance.data.length > 0 && (
                                 <div className="space-y-6">
                                     {/* Render compliance schema */}
-                                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg p-6 mb-6">
+                                    <div className="bg-gradient-to-r from-custom-blue to-custom-red dark:from-custom-darkblue dark:to-custom-darkred text-white rounded-lg p-6 mb-6">
                                         <h3 className="text-2xl font-bold">Root Schema</h3>
                                     </div>
 
@@ -567,7 +567,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                         <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <h4 className="font-bold text-lg text-gray-800">total_count</h4>
+                                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">total_count</h4>
                                                 </div>
                                                 <div className="px-4 py-2 rounded border-2 font-bold text-center bg-green-100 text-green-800 border-green-300">
                                                     {data_compliance.total_count}
@@ -581,8 +581,8 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                         <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center gap-3">
-                                                    <h4 className="font-bold text-lg text-gray-800">data</h4>
-                                                    <p className="text-sm text-gray-600">Array of objects</p>
+                                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">data</h4>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Array of objects</p>
                                                 </div>
                                                 <div className="px-4 py-2 rounded border-2 font-bold text-center bg-purple-100 text-purple-800 border-purple-300">
                                                     Array
@@ -604,9 +604,9 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                                     };
 
                                                     return (
-                                                        <div key={fieldIdx} className="flex items-center gap-3 p-3 bg-gray-50 rounded hover:shadow-md transition">
+                                                        <div key={fieldIdx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded hover:shadow-md transition">
                                                             <div className="flex-1">
-                                                                <h5 className="font-semibold text-gray-800">{key}</h5>
+                                                                <h5 className="font-semibold text-gray-800 dark:text-gray-200">{key}</h5>
                                                             </div>
                                                             <span className={`text-xs px-2 py-1 rounded border font-bold ${getTypeColor(type)}`}>
                                                                 {typeof type === 'string' ? type : typeof type}

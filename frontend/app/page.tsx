@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
+import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
       <Header />
 
       <main>
-        <section className="hero bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
+        <section className="hero bg-gradient-to-r from-custom-blue to-custom-darkblue text-white py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl font-bold mb-4">
               Track Your Transit in Real-Time
@@ -18,7 +18,7 @@ export default function Home() {
             <p className="text-xl mb-8 text-blue-100">
               Never miss a bus, train, or ride again
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
+            <button className="bg-white dark:bg-gray-800 text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 hover:dark:bg-gray-700 transition">
               Download Now
             </button>
           </div>
@@ -28,27 +28,27 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-center mb-12">Key Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+              <div className="bg-white dark:bg-zinc-800 p-8 rounded-lg shadow hover:shadow-lg transition">
                 <h3 className="text-2xl font-bold mb-4 text-blue-600">
                   Real-Time Tracking
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   Track public transportation in real-time
                 </p>
               </div>
-              <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+              <div className="bg-white dark:bg-zinc-800 p-8 rounded-lg shadow hover:shadow-lg transition">
                 <h3 className="text-2xl font-bold mb-4 text-blue-600">
                   Notifications
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   Get alerts for departures and arrivals
                 </p>
               </div>
-              <div className="bg-white p-8 rounded-lg shadow hover:shadow-lg transition">
+              <div className="bg-white dark:bg-zinc-800 p-8 rounded-lg shadow hover:shadow-lg transition">
                 <h3 className="text-2xl font-bold mb-4 text-blue-600">
                   Integrate APIs
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   Connect with various transit APIs for comprehensive data
                 </p>
               </div>
@@ -56,7 +56,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="tutorials" className="tutorials bg-purple-700 text-white py-20 px-4">
+        <section id="tutorials" className="tutorials bg-gradient-to-r from-custom-red to-custom-darkred text-white py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-4">Tutorials</h2>
             <p className="text-xl mb-4">Learn how to use Transit Tracker effectively</p>
@@ -100,10 +100,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="pricing" className="pricing bg-gray-100 py-20 px-4">
+        <section id="pricing" className="pricing bg-gray-100 dark:bg-gray-900 py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-4">Pricing</h2>
-            <p className="text-xl mb-8 text-gray-600">Free to download and use</p>
+            <p className="text-xl mb-8 text-gray-600 dark:text-gray-300">Free to download and use</p>
             <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
               Download Now
             </button>
@@ -111,14 +111,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-gray-800 text-white text-center py-8">
-        <p className="mb-4">&copy; 2025 Transit Tracker. All rights reserved.</p>
-        <ul className="flex justify-center space-x-6">
-          <li><Link href="/" className="hover:text-blue-400">Home</Link></li>
-          <li><Link href="/contact" className="hover:text-blue-400">Contact</Link></li>
-          <li><Link href="/rgpd" className="hover:text-blue-400">Privacy Policy</Link></li>
-        </ul>
-      </footer>
+      <Footer />
     </>
   );
 }

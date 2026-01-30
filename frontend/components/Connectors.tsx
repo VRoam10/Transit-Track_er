@@ -36,10 +36,10 @@ export default function Connectors() {
     return (
         <div className="space-y-4">
             {data.map((connector) => (
-                <div key={connector.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div key={connector.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg hover:dark:bg-gray-700 transition">
                     <Link href={`/connector/${connector.id}`} className="block">
                         <h3 className="text-xl font-bold text-blue-600 mb-2">{connector.name}</h3>
-                        <p className="text-gray-600">ID: {connector.id}</p>
+                        <p className="text-gray-600 dark:text-gray-300">ID: {connector.id}</p>
                     </Link>
                 </div>
             ))}

@@ -76,17 +76,17 @@ export default function Connector() {
             <Header />
 
             <main>
-                <div className='bg-gray-50'>
+                <div className='bg-gray-50 dark:bg-black'>
                     <Link href={`/connector`} className="bg-blue-600 text-white px-4 py-2 rounded-br-lg hover:bg-blue-700">Back to Connector</Link>
                 </div>
-                <section className="timetables py-20 px-4 bg-gray-50">
+                <section className="timetables py-20 px-4 bg-gray-50 dark:bg-black">
                     <div className="max-w-5xl mx-auto">
                         <div className="space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">Create Your Connector</h2>
 
-                            <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                                 <div className="mb-4">
-                                    <label className="block text-gray-700 font-bold mb-2">Connector Name</label>
+                                    <label className="block text-gray-700 dark:text-gray-300 mb-2">Connector Name</label>
                                     <input
                                         type="text"
                                         value={name}
@@ -95,7 +95,7 @@ export default function Connector() {
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-gray-700 font-bold mb-2">API URL</label>
+                                    <label className="block text-gray-700 dark:text-gray-300 mb-2">API URL</label>
                                     <input
                                         type="text"
                                         value={url}
