@@ -13,7 +13,7 @@ export default function Footer() {
     }, []);
 
     return (
-    <footer className="bg-gray-800 text-white text-center py-8">
+    <footer className="snap-center h-screen bg-gray-800 text-white text-center py-30 py-8">
         <p className="mb-4">&copy; 2025 Transit Tracker. All rights reserved.</p>
         <ul className="flex justify-center space-x-6">
             <li><Link href="/" className="hover:text-blue-400">Home</Link></li>
