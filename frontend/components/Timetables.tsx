@@ -194,15 +194,15 @@ export default function Timetables() {
                     onClick={() => setDeleteConfirm(null)}
                 >
                     <div
-                        className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-lg"
+                        className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h3 className="font-bold text-lg text-gray-900 mb-2">Delete Timetable?</h3>
-                        <p className="text-gray-600 text-sm mb-6">This action cannot be undone.</p>
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Delete Timetable?</h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">This action cannot be undone.</p>
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setDeleteConfirm(null)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                             >
                                 Cancel
                             </button>
@@ -227,10 +227,10 @@ export default function Timetables() {
                         className="fixed inset-0 h-full z-30"
                         onClick={() => setSelectedTimetable(null)}
                     />
-                    <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-lg z-40 overflow-y-auto border-l border-gray-200">
+                    <div className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-800 shadow-lg z-40 overflow-y-auto border-l border-gray-200 dark:border-gray-700">
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">Timetable Details</h3>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Timetable Details</h3>
                                 <button
                                     onClick={() => setSelectedTimetable(null)}
                                     className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
@@ -259,7 +259,7 @@ export default function Timetables() {
 
                                 <div>
                                     <p className="text-sm text-gray-500 font-semibold mb-2">Created</p>
-                                    <p className="text-sm text-gray-700">{formatDate(selectedTimetable.createdAt)}</p>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300">{formatDate(selectedTimetable.createdAt)}</p>
                                 </div>
 
                                 <div>
