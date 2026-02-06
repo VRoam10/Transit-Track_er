@@ -1,6 +1,7 @@
 'use client';
 
 import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
 import Timetables from '@/components/Timetables';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -24,7 +25,6 @@ export default function Timetable() {
     if (loading) {
         return (
             <>
-                <Header />
                 <div className="flex items-center justify-center min-h-screen">
                     <p className="text-gray-600">Loading...</p>
                 </div>
@@ -34,10 +34,9 @@ export default function Timetable() {
 
     return (
         <>
-            <Header />
-
-            <main>
-                <section className="timetables py-20 px-4 bg-gray-50">
+            <main className='flex'>
+                <Sidebar />
+                <section className="timetables ml-64 flex-1 py-20 px-4 bg-gray-50">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-3xl font-bold text-center mb-8">Your Timetables</h2>
                         <Timetables />

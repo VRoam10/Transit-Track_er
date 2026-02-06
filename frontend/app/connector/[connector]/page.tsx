@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import Connector from "../../../components/Connector";
 
@@ -11,10 +11,9 @@ export default async function Page({
 
     return (
         <>
-            <Header />
-            <main>
-                <Link href={`/connector`} className="bg-blue-600 text-white px-4 py-2 rounded-br-lg hover:bg-blue-700">Back to All Connector</Link>
-                <section className="dashboard py-20 px-4">
+            <main className="flex">
+                <Sidebar />
+                <section className="connector ml-64 flex-1 py-20 px-4">
                     <div className="max-w-3xl mx-auto">
                         <h2 className='text-2xl text-center mb-3'>Connector</h2>
                         <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">

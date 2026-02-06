@@ -336,11 +336,11 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     if (loading) {
         return (
-            <>
+            <div className='ml-64 flex-1'>
                 <div className="flex items-center justify-center min-h-screen">
                     <p className="text-gray-600 dark:text-gray-300">Loading...</p>
                 </div>
-            </>
+            </div>
         );
     }
 
@@ -358,8 +358,8 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     return (
         <>
-            <main>
-                <section className="connector py-20 px-4">
+            <main className='ml-64 flex-1'>
+                <section className="transformer py-20 px-4">
                     <div className="max-w-6xl mx-auto">
                         <h1 className="text-4xl font-bold text-center mb-8">API Connector & Transformer</h1>
 

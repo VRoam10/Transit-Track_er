@@ -1,7 +1,6 @@
 'use client';
 
-import Connectors from '@/components/Connectors';
-import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
 import Link from 'next/dist/client/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -26,7 +25,7 @@ export default function Connector() {
         }
     }, [router]);
 
-    const handleCreateConnector = async() => {
+    const handleCreateConnector = async () => {
         try {
             const payload = {
                 name,
@@ -63,7 +62,7 @@ export default function Connector() {
     if (loading) {
         return (
             <>
-                <Header />
+                <Sidebar />
                 <div className="flex items-center justify-center min-h-screen">
                     <p className="text-gray-600">Loading...</p>
                 </div>
@@ -73,13 +72,9 @@ export default function Connector() {
 
     return (
         <>
-            <Header />
-
-            <main>
-                <div className='bg-gray-50 dark:bg-black'>
-                    <Link href={`/connector`} className="bg-blue-600 text-white px-4 py-2 rounded-br-lg hover:bg-blue-700">Back to Connector</Link>
-                </div>
-                <section className="timetables py-20 px-4 bg-gray-50 dark:bg-black">
+            <main className='flex'>
+                <Sidebar />
+                <section className="connector ml-64 flex-1 py-20 px-4 bg-gray-50 dark:bg-black">
                     <div className="max-w-5xl mx-auto">
                         <div className="space-y-4">
                             <h2 className="text-3xl font-bold text-center mb-8">Create Your Connector</h2>
