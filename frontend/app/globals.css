@@ -14,6 +14,8 @@
   --color-custom-darkred: #C41520;
   --color-custom-blue: #017aeb;
   --color-custom-darkblue: #4E0BD4;
+  --color-black: #0a0a0a;
+  --color-white: #ededed;
 }
 
 @media (prefers-color-scheme: dark) {
