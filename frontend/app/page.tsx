@@ -2,14 +2,16 @@
 
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import MetroMap from '@/components/MetroMap';
 import { useEffect, useRef, useState } from 'react';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const container = document.querySelector("main")
+    const container = mainRef.current
     if (!container) return
 
     const onScroll = () => {
@@ -66,9 +68,10 @@ export default function Home() {
     <>
       <Header scrolled={scrolled} />
 
-      <main className='snap-y snap-mandatory overflow-y-scroll h-screen scroll-smooth'>
+      <main ref={mainRef} className='snap-y snap-mandatory overflow-y-scroll h-screen scroll-smooth relative'>
+        <MetroMap scrollRef={mainRef} />
         {/* Hero */}
-        <section id="home" className="snap-center h-screen flex flex-col justify-center items-center px-6 bg-gray-200 text-black relative overflow-hidden">
+        <section id="home" className="snap-center h-screen flex flex-col justify-center items-center px-6 text-black relative overflow-hidden">
           <div className="max-w-6xl mx-auto text-center">
             <p className="uppercase tracking-[0.3em] text-sm text-blue-400 mb-8">Real-Time Transit Intelligence</p>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8">
@@ -115,24 +118,24 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="group bg-gray-50 dark:bg-zinc-800 p-10 rounded-3xl hover:bg-custom-blue hover:text-white transition-all duration-300">
-                <span className="text-5xl font-black text-custom-blue group-hover:text-white transition-colors duration-300">01</span>
+              <div className="group bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm p-10 rounded-3xl border border-gray-200 dark:border-zinc-700 hover:shadow-xl transition-all duration-300">
+                <span className="text-5xl font-black text-custom-blue">01</span>
                 <h3 className="text-2xl font-bold mt-6 mb-4">Real-Time Tracking</h3>
-                <p className="text-gray-500 group-hover:text-blue-100 transition-colors duration-300 leading-relaxed">
+                <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                   See exactly when your bus or metro arrives with live GPS tracking and second-by-second updates.
                 </p>
               </div>
-              <div className="group bg-gray-50 dark:bg-zinc-800 p-10 rounded-3xl hover:bg-custom-blue hover:text-white transition-all duration-300">
-                <span className="text-5xl font-black text-custom-blue group-hover:text-white transition-colors duration-300">02</span>
+              <div className="group bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm p-10 rounded-3xl border border-gray-200 dark:border-zinc-700 hover:shadow-xl transition-all duration-300">
+                <span className="text-5xl font-black text-custom-red">02</span>
                 <h3 className="text-2xl font-bold mt-6 mb-4">Smart Notifications</h3>
-                <p className="text-gray-500 group-hover:text-blue-100 transition-colors duration-300 leading-relaxed">
+                <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                   Set alerts for your daily commute and get notified before your departure — never run for the bus again.
                 </p>
               </div>
-              <div className="group bg-gray-50 dark:bg-zinc-800 p-10 rounded-3xl hover:bg-custom-blue hover:text-white transition-all duration-300">
-                <span className="text-5xl font-black text-custom-blue group-hover:text-white transition-colors duration-300">03</span>
+              <div className="group bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm p-10 rounded-3xl border border-gray-200 dark:border-zinc-700 hover:shadow-xl transition-all duration-300">
+                <span className="text-5xl font-black text-green-500">03</span>
                 <h3 className="text-2xl font-bold mt-6 mb-4">API Connectors</h3>
-                <p className="text-gray-500 group-hover:text-blue-100 transition-colors duration-300 leading-relaxed">
+                <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                   Integrate any transit provider in Europe through our connector system with custom data transformations.
                 </p>
               </div>
