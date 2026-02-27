@@ -2,7 +2,7 @@
 
 import { useFetch } from '@/hooks/useFetch';
 import { useRouter } from 'next/navigation';
-import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from 'react';
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useRef, useState } from 'react';
 
 interface FieldMapping {
     original: string;
@@ -37,14 +37,14 @@ export default function Transformer({ subroute, connectorId }: Props) {
     const [complianceResult, setComplianceResult] = useState<any>(null);
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-    const [shouldFetchRecord, setShouldFetchRecord] = useState(true);
+    const hasAutoFetched = useRef(false);
     const { data: data_compliance, loading: loading_compliance, error: error_compliance } = useFetch<ComplianceSchema>(
         `/api/connector/compliance/${subroute}`,
         { token }
     );
     const { data: recordData, loading: recordLoading, error: recordError } = useFetch<any>(
-        shouldFetchRecord ? `/api/connector/${connectorId}/${subroute}` : '',
-        { token: shouldFetchRecord ? token : null }
+        `/api/connector/${connectorId}/${subroute}`,
+        { token }
     );
 
     useEffect(() => {
@@ -59,14 +59,10 @@ export default function Transformer({ subroute, connectorId }: Props) {
     }, [router]);
 
     useEffect(() => {
-        if (recordData && !fieldMappings.length) {
-            // Load transformation from record if it exists
-            if (recordData.transformation && Array.isArray(recordData.transformation)) {
-                setFieldMappings(recordData.transformation);
-            }
-            if (recordData.apiUrl) {
-                setUrl(recordData.apiUrl);
-            }
+        if (recordData && !hasAutoFetched.current && recordData.apiUrl) {
+            hasAutoFetched.current = true;
+            setUrl(recordData.apiUrl);
+            fetchFromUrl(recordData.apiUrl, recordData.transformation);
         }
     }, [recordData]);
 
@@ -75,6 +71,13 @@ export default function Transformer({ subroute, connectorId }: Props) {
             handleTransform();
         }
     }, [data, fieldMappings]);
+
+    useEffect(() => {
+        if (transformedData && data_compliance) {
+            const result = validateAgainstCompliance(transformedData, data_compliance);
+            setComplianceResult(result);
+        }
+    }, [transformedData]);
 
     const getNestedFields = (obj: any, prefix = ''): FieldMapping[] => {
         const mappings: FieldMapping[] = [];
@@ -112,8 +115,8 @@ export default function Transformer({ subroute, connectorId }: Props) {
         return mappings;
     };
 
-    const handleFetch = async () => {
-        if (!url) {
+    const fetchFromUrl = async (targetUrl: string, savedMappings?: FieldMapping[]) => {
+        if (!targetUrl) {
             setError('Please enter a URL');
             return;
         }
@@ -121,20 +124,22 @@ export default function Transformer({ subroute, connectorId }: Props) {
         setFetching(true);
         setError(null);
         setData(null);
-        setFieldMappings([]);
         setTransformedData(null);
+        setComplianceResult(null);
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(targetUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const result = await response.json();
             setData(result);
 
-            // Get all field mappings from the entire structure
-            const mappings = getNestedFields(result);
-            setFieldMappings(mappings);
+            if (savedMappings && savedMappings.length > 0) {
+                setFieldMappings(savedMappings);
+            } else {
+                setFieldMappings(getNestedFields(result));
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch');
         } finally {
@@ -142,8 +147,13 @@ export default function Transformer({ subroute, connectorId }: Props) {
         }
     };
 
+    const handleFetch = () => fetchFromUrl(url);
+
     const handleLoadRecord = () => {
-        setShouldFetchRecord(true);
+        if (recordData?.apiUrl) {
+            setUrl(recordData.apiUrl);
+            fetchFromUrl(recordData.apiUrl, recordData.transformation);
+        }
     };
 
     const updateFieldMapping = (index: number, newTransformed: string) => {
@@ -220,8 +230,6 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     const handleValidate = () => {
         if (!transformedData || !data_compliance) return;
-
-        console.log('Compliance Schema:', data_compliance);
         const result = validateAgainstCompliance(transformedData, data_compliance);
         setComplianceResult(result);
     };
@@ -244,7 +252,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
             const response = await fetch(`${apiUrl}/api/connector/${connectorId}/${subroute}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -358,13 +366,13 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     return (
         <>
-            <main className='ml-64 flex-1'>
-                <section className="transformer py-20 px-4">
+            <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
+                <section className="transformer py-6 px-6">
                     <div className="max-w-6xl mx-auto">
-                        <h1 className="text-4xl font-bold text-center mb-8">API Connector & Transformer</h1>
+                        <h1 className="text-3xl font-bold mb-8">API Transformer</h1>
 
                         {/* URL Input Section */}
-                        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">API URL</label>
@@ -410,7 +418,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                         {/* Field Mapping Section */}
                         {data && fieldMappings.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
                                 <div className="mb-6">
                                     <h2 className="text-2xl font-bold">Transform Fields</h2>
                                     <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">These mappings will be applied to all items in the list</p>
@@ -465,7 +473,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                             {/* Original Data Display */}
                             {data && (
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-2xl font-bold">Original Data</h2>
                                         <button
@@ -483,7 +491,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                             {/* Transformed Data Display */}
                             {transformedData && (
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+                                <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-2xl font-bold">Transformed Data</h2>
                                         <button
@@ -517,7 +525,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         </section>
                         {/* Compliance Validation Result */}
                         {complianceResult && (
-                            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mt-8">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mt-8">
                                 <h2 className="text-2xl font-bold mb-6">Compliance Validation Result</h2>
 
                                 {complianceResult.issues.length === 0 ? (
@@ -549,12 +557,12 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         )}
                     </div>
                 </section>
-                <section className="compliance bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 py-16 px-4">
+                <section className="compliance py-6 px-6">
                     <div className="max-w-6xl mx-auto">
-                        <h2 className="text-4xl font-bold text-center mb-2 text-gray-800 dark:text-gray-200">Expected Data Format</h2>
-                        <p className="text-center text-gray-600 dark:text-gray-400 mb-12">Schema that your transformed data should match</p>
+                        <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-200">Expected Data Format</h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">Schema that your transformed data should match</p>
 
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                             {data_compliance && data_compliance.data && data_compliance.data.length > 0 && (
                                 <div className="space-y-6">
                                     {/* Render compliance schema */}
@@ -564,7 +572,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                                     {/* Render total_count field */}
                                     {data_compliance.total_count && (
-                                        <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">total_count</h4>
@@ -578,7 +586,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
                                     {/* Render data array field */}
                                     {data_compliance.data && data_compliance.data.length > 0 && (
-                                        <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                             <div className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center gap-3">
                                                     <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">data</h4>

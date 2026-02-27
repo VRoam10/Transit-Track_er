@@ -105,9 +105,9 @@ export default function Timetables() {
                     <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Create your first timetable to get started</p>
                 </div>
             ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                     {/* Table Header */}
-                    <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 font-semibold text-sm text-gray-700 dark:text-gray-300">
+                    <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-semibold text-sm text-gray-700 dark:text-gray-300">
                         <div className="col-span-3">ID</div>
                         <div className="col-span-2">Status</div>
                         <div className="col-span-3">Created</div>

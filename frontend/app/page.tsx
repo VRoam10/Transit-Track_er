@@ -71,7 +71,7 @@ export default function Home() {
       <main ref={mainRef} className='snap-y snap-mandatory overflow-y-scroll h-screen scroll-smooth relative'>
         <MetroMap scrollRef={mainRef} />
         {/* Hero */}
-        <section id="home" className="snap-center h-screen flex flex-col justify-center items-center px-6 text-black relative overflow-hidden">
+        <section id="home" className="snap-center h-screen flex flex-col justify-center items-center px-6 relative overflow-hidden">
           <div className="max-w-6xl mx-auto text-center">
             <p className="uppercase tracking-[0.3em] text-sm text-blue-400 mb-8">Real-Time Transit Intelligence</p>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8">

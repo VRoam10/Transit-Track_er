@@ -28,6 +28,10 @@ export function useFetch<T>(
                 });
 
                 if (!response.ok) {
+                    const result = await response.json();
+                    if (result && result.error) {
+                        throw new Error(`Error: ${result.error}`);
+                    }
                     throw new Error(`Error: ${response.statusText}`);
                 }
 

@@ -11,25 +11,25 @@ const stationData = [
   },
   {
     id: 'alerts',
-    x: 720, y: 1500,
+    x: 720, y: 1430,
     title: 'Smart Alerts',
     desc: 'Schedule departure notifications so you always leave on time — no more guessing.',
     colors: ['#FF1F22', '#22c55e'],
   },
   {
     id: 'routes',
-    x: 350, y: 1800,
+    x: 350, y: 1430,
     title: 'Saved Routes',
     desc: 'Bookmark your daily commute and access next departures instantly with one tap.',
     colors: ['#017aeb'],
   },
-  {
-    id: 'connectors',
-    x: 900, y: 2800,
-    title: 'API Connectors',
-    desc: 'Plug in any European transit provider through our connector system with custom data mapping.',
-    colors: ['#FF1F22', '#22c55e'],
-  },
+  // {
+  //   id: 'connectors',
+  //   x: 900, y: 2800,
+  //   title: 'API Connectors',
+  //   desc: 'Plug in any European transit provider through our connector system with custom data mapping.',
+  //   colors: ['#FF1F22', '#22c55e'],
+  // },
   {
     id: 'cities',
     x: 720, y: 3600,
@@ -134,7 +134,7 @@ export default function MetroMap({ scrollRef }: { scrollRef: RefObject<HTMLEleme
       const viewBottom = progress * 4000 + 1000;
 
       // Draw lines up to the current viewport bottom (slight per-line stagger)
-      const drawBlue = Math.min(1, (viewBottom + 100) / 5100);
+      const drawBlue = Math.min(1, (viewBottom + 50) / 5200);
       const drawRed = Math.min(1, (viewBottom - 50) / 5200);
       const drawGreen = Math.min(1, viewBottom / 5200);
 
