@@ -47,6 +47,7 @@ model Line {
   name           String
   apiUrl         String
   transformation Json
+  params         String[]
   connectorId    String    @unique
   connector      Connector @relation(fields: [connectorId], references: [id])
   createdAt      DateTime  @default(now())
@@ -58,6 +59,7 @@ model Stop {
   name           String
   apiUrl         String
   transformation Json
+  params         String[]
   connectorId    String    @unique
   connector      Connector @relation(fields: [connectorId], references: [id])
   createdAt      DateTime  @default(now())
@@ -69,6 +71,7 @@ model Direction {
   name           String
   apiUrl         String
   transformation Json
+  params         String[]
   connectorId    String    @unique
   connector      Connector @relation(fields: [connectorId], references: [id])
   createdAt      DateTime  @default(now())
@@ -80,6 +83,7 @@ model NextPassage {
   name           String
   apiUrl         String
   transformation Json
+  params         String[]
   connectorId    String    @unique
   connector      Connector @relation(fields: [connectorId], references: [id])
   createdAt      DateTime  @default(now())
