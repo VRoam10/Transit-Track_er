@@ -96,3 +96,10 @@ Structure under `lib/src/`:
 - Backend uses `PrismaClient` instantiated per-file (no shared singleton)
 - Frontend uses `"use client"` directive for interactive components
 - Commit messages follow conventional style: `feat:`, `fix:`, `build:`, `style:`
+
+## Dark Theme
+
+Always support both light and dark themes in **all frontend and mobile UI work**:
+
+- **Frontend (Tailwind CSS)**: Use `dark:` variants alongside every light-mode class. Background: `bg-white dark:bg-gray-800` or `bg-gray-50 dark:bg-black`. Text: `text-gray-900 dark:text-white`, `text-gray-600 dark:text-gray-300`, etc. Borders: `border-gray-200 dark:border-gray-700`. Never add light-only styles without a `dark:` counterpart.
+- **Mobile (Flutter)**: Use `Theme.of(context).colorScheme` and `Theme.of(context).textTheme` instead of hardcoded colors. Rely on the existing theme system in `lib/src/settings/` for light/dark switching. Never hardcode `Colors.*` values that don't adapt to the active theme.
