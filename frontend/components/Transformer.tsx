@@ -2,6 +2,7 @@
 
 import { useFetch } from '@/hooks/useFetch';
 import { useRouter } from 'next/navigation';
+import { Download, RefreshCw, Save, Tag } from 'lucide-react';
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useRef, useState } from 'react';
 
 interface FieldMapping {
@@ -10,7 +11,7 @@ interface FieldMapping {
 }
 
 interface ComplianceField {
-    [key: string]: string; // "Int", "String", "Boolean", etc.
+    [key: string]: string;
 }
 
 interface ComplianceSchema {
@@ -28,6 +29,9 @@ export default function Transformer({ subroute, connectorId }: Props) {
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [url, setUrl] = useState('');
+    const [params, setParams] = useState<string[]>([]);
+    const [newParam, setNewParam] = useState('');
+    const [testParams, setTestParams] = useState<Record<string, string>>({});
     const [fetching, setFetching] = useState(false);
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -38,6 +42,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const hasAutoFetched = useRef(false);
+
     const { data: data_compliance, loading: loading_compliance, error: error_compliance } = useFetch<ComplianceSchema>(
         `/api/connector/compliance/${subroute}`,
         { token }
@@ -49,7 +54,6 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
-
         if (!storedToken) {
             router.push('/');
         } else {
@@ -62,6 +66,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
         if (recordData && !hasAutoFetched.current && recordData.apiUrl) {
             hasAutoFetched.current = true;
             setUrl(recordData.apiUrl);
+            if (recordData.params && Array.isArray(recordData.params)) setParams(recordData.params);
             fetchFromUrl(recordData.apiUrl, recordData.transformation);
         }
     }, [recordData]);
@@ -83,31 +88,20 @@ export default function Transformer({ subroute, connectorId }: Props) {
         const mappings: FieldMapping[] = [];
 
         if (Array.isArray(obj)) {
-            // If obj is an array, process first item
-            if (obj.length > 0) {
-                return getNestedFields(obj[0], prefix);
-            }
+            if (obj.length > 0) return getNestedFields(obj[0], prefix);
             return mappings;
         }
 
         for (const [key, value] of Object.entries(obj)) {
             const path = prefix ? `${prefix}.${key}` : key;
+            mappings.push({ original: path, transformed: path });
 
-            // Add the field itself (including array names)
-            mappings.push({
-                original: path,
-                transformed: path,
-            });
-
-            // If it's an array, process the first item's fields
             if (Array.isArray(value) && value.length > 0) {
                 const firstItem = value[0];
                 if (typeof firstItem === 'object' && firstItem !== null) {
                     mappings.push(...getNestedFields(firstItem, path));
                 }
-            }
-            // If it's a nested object, recursively get its fields
-            else if (typeof value === 'object' && value !== null) {
+            } else if (typeof value === 'object' && value !== null) {
                 mappings.push(...getNestedFields(value, path));
             }
         }
@@ -129,9 +123,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
         try {
             const response = await fetch(targetUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
             setData(result);
 
@@ -147,11 +139,32 @@ export default function Transformer({ subroute, connectorId }: Props) {
         }
     };
 
-    const handleFetch = () => fetchFromUrl(url);
+    const buildEffectiveUrl = (baseUrl: string, values: Record<string, string>) => {
+        let result = baseUrl;
+        for (const [key, value] of Object.entries(values)) {
+            if (value) result = result.replaceAll(`{${key}}`, encodeURIComponent(value));
+        }
+        return result;
+    };
+
+    const addParam = () => {
+        const key = newParam.trim().replace(/\s+/g, '_');
+        if (!key || params.includes(key)) return;
+        setParams([...params, key]);
+        setNewParam('');
+    };
+
+    const removeParam = (key: string) => {
+        setParams(params.filter(p => p !== key));
+        setTestParams(prev => { const next = { ...prev }; delete next[key]; return next; });
+    };
+
+    const handleFetch = () => fetchFromUrl(buildEffectiveUrl(url, testParams));
 
     const handleLoadRecord = () => {
         if (recordData?.apiUrl) {
             setUrl(recordData.apiUrl);
+            if (recordData.params && Array.isArray(recordData.params)) setParams(recordData.params);
             fetchFromUrl(recordData.apiUrl, recordData.transformation);
         }
     };
@@ -163,8 +176,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
     };
 
     const deleteFieldMapping = (index: number) => {
-        const updated = fieldMappings.filter((_, i) => i !== index);
-        setFieldMappings(updated);
+        setFieldMappings(fieldMappings.filter((_, i) => i !== index));
     };
 
     const validateAgainstCompliance = (transformed: any, compliance: any) => {
@@ -174,31 +186,24 @@ export default function Transformer({ subroute, connectorId }: Props) {
         const checkObject = (obj: any, schema: any, path = ''): void => {
             if (!obj || !schema) return;
 
-            // Handle arrays
             if (Array.isArray(schema)) {
                 if (!Array.isArray(obj)) {
                     issues.push(`${path} should be an array but got ${typeof obj}`);
                     return;
                 }
-                if (obj.length === 0) return; // Skip validation for empty arrays
-
-                // Check first item against schema
+                if (obj.length === 0) return;
                 checkObject(obj[0], schema[0], path);
                 return;
             }
 
-            // Handle objects
             if (typeof schema === 'object' && schema !== null) {
                 for (const [key, schemaType] of Object.entries(schema)) {
                     const fullPath = path ? `${path}.${key}` : key;
-
                     if (!(key in obj)) {
                         issues.push(`Missing field: ${fullPath}`);
                     } else {
                         const value = obj[key];
                         const valueType = typeof value;
-
-                        // Check type
                         if (schemaType === 'String' && valueType !== 'string') {
                             issues.push(`${fullPath} should be String but got ${valueType}`);
                         } else if (schemaType === 'Int' && valueType !== 'number') {
@@ -214,8 +219,6 @@ export default function Transformer({ subroute, connectorId }: Props) {
                         }
                     }
                 }
-
-                // Check for extra fields
                 for (const key of Object.keys(obj)) {
                     if (!(key in schema)) {
                         issues.push(`Extra field: ${path ? `${path}.${key}` : key}`);
@@ -235,8 +238,8 @@ export default function Transformer({ subroute, connectorId }: Props) {
     };
 
     const handleSaveTransformation = async () => {
-        if (!transformedData || !url) {
-            setSaveMessage({ type: 'error', text: 'Please fetch data and perform transformation first' });
+        if (!url) {
+            setSaveMessage({ type: 'error', text: 'Please enter a URL first' });
             return;
         }
 
@@ -244,13 +247,14 @@ export default function Transformer({ subroute, connectorId }: Props) {
         setSaveMessage(null);
 
         try {
-            const payload = {
+            const payload: Record<string, any> = {
                 name: subroute,
                 apiUrl: url,
                 transformation: fieldMappings,
             };
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            payload.params = params;
 
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
             const response = await fetch(`${apiUrl}/api/connector/${connectorId}/${subroute}`, {
                 method: 'PATCH',
                 headers: {
@@ -262,15 +266,14 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Failed to save transformation (${response.status})`);
+                throw new Error(errorData.message || `Failed to save (${response.status})`);
             }
 
-            const result = await response.json();
-            setSaveMessage({ type: 'success', text: 'Transformation saved successfully!' });
+            setSaveMessage({ type: 'success', text: 'Saved successfully!' });
         } catch (err) {
             setSaveMessage({
                 type: 'error',
-                text: err instanceof Error ? err.message : 'Failed to save transformation',
+                text: err instanceof Error ? err.message : 'Failed to save',
             });
         } finally {
             setSaving(false);
@@ -285,7 +288,6 @@ export default function Transformer({ subroute, connectorId }: Props) {
                 return obj
                     .map(item => transformObject(item, prefix))
                     .filter(item => {
-                        // Remove empty objects from arrays
                         if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
                             return Object.keys(item).length > 0;
                         }
@@ -293,43 +295,28 @@ export default function Transformer({ subroute, connectorId }: Props) {
                     });
             }
 
-            if (typeof obj !== 'object' || obj === null) {
-                return obj;
-            }
+            if (typeof obj !== 'object' || obj === null) return obj;
 
             const transformed: any = {};
-
             for (const [key, value] of Object.entries(obj)) {
                 const path = prefix ? `${prefix}.${key}` : key;
                 const mapping = fieldMappings.find(m => m.original === path);
-
-                // Skip if field is deleted
-                if (!mapping) {
-                    continue;
-                }
+                if (!mapping) continue;
 
                 const newKey = mapping.transformed.split('.').pop() || mapping.transformed;
-
                 if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-                    // Recursively handle nested objects
                     const nestedTransformed = transformObject(value, path);
-                    if (Object.keys(nestedTransformed).length > 0) {
-                        transformed[newKey] = nestedTransformed;
-                    }
+                    if (Object.keys(nestedTransformed).length > 0) transformed[newKey] = nestedTransformed;
                 } else if (Array.isArray(value)) {
-                    // Handle arrays
                     transformed[newKey] = transformObject(value, path);
                 } else {
-                    // Set simple values
                     transformed[newKey] = value;
                 }
             }
-
             return transformed;
         };
 
-        const result = transformObject(data);
-        setTransformedData(result);
+        setTransformedData(transformObject(data));
     };
 
     const downloadJSON = (jsonData: any, filename: string) => {
@@ -344,293 +331,369 @@ export default function Transformer({ subroute, connectorId }: Props) {
 
     if (loading) {
         return (
-            <div className='ml-64 flex-1'>
-                <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+            <div className='ml-64 flex-1 flex items-center justify-center min-h-screen'>
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+                    <p className="text-gray-500 dark:text-gray-400">Loading...</p>
                 </div>
             </div>
         );
     }
 
     if (loading_compliance) {
-        return <div className="text-center text-gray-600 dark:text-gray-300">Loading compliance...</div>;
+        return (
+            <div className='ml-64 flex-1 flex items-center justify-center min-h-screen'>
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+                    <p className="text-gray-500 dark:text-gray-400">Loading compliance schema...</p>
+                </div>
+            </div>
+        );
     }
 
     if (error_compliance) {
-        return <div className="text-center text-red-500">Error: {error_compliance}</div>;
+        return (
+            <div className='ml-64 flex-1 flex items-center justify-center min-h-screen'>
+                <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+                    <p className="text-red-700 dark:text-red-300 font-semibold">Error loading compliance schema</p>
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error_compliance}</p>
+                </div>
+            </div>
+        );
     }
 
     if (!data_compliance) {
-        return <div className="text-center text-gray-600 dark:text-gray-300">No compliance data found</div>;
+        return (
+            <div className='ml-64 flex-1 flex items-center justify-center min-h-screen'>
+                <p className="text-gray-500 dark:text-gray-400">No compliance schema found for <span className="font-semibold">{subroute}</span></p>
+            </div>
+        );
     }
 
     return (
-        <>
-            <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
-                <section className="transformer py-6 px-6">
-                    <div className="max-w-6xl mx-auto">
-                        <h1 className="text-3xl font-bold mb-8">API Transformer</h1>
+        <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
+            <div className="py-6 px-6 max-w-6xl mx-auto space-y-6">
 
-                        {/* URL Input Section */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">API URL</label>
-                                    <input
-                                        type="text"
-                                        value={url}
-                                        onChange={(e) => setUrl(e.target.value)}
-                                        placeholder="https://api.example.com/data"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
-                                    />
+                {/* Configuration Card */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                        <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">API Configuration</h3>
+                        <button
+                            onClick={handleLoadRecord}
+                            disabled={recordLoading || !recordData?.apiUrl}
+                            className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950 px-3 py-1.5 rounded transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <RefreshCw size={14} />
+                            {recordLoading ? 'Loading...' : 'Load Saved'}
+                        </button>
+                    </div>
+                    <div className="px-6 py-5 space-y-4">
+                        <div>
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wide mb-1">API URL</label>
+                            <input
+                                type="text"
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                                placeholder="https://api.example.com/data"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wide mb-2">
+                                URL Parameters <span className="normal-case font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                            </label>
+                            {/* Existing params as tags */}
+                            {params.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {params.map(p => (
+                                        <span key={p} className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-mono px-2 py-1 rounded-full border border-gray-300 dark:border-gray-600">
+                                            <Tag size={10} className="text-gray-400" />
+                                            {`{${p}}`}
+                                            <button onClick={() => removeParam(p)} className="text-gray-400 hover:text-red-500 transition leading-none">×</button>
+                                        </span>
+                                    ))}
                                 </div>
+                            )}
+                            {/* Add param input */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newParam}
+                                    onChange={(e) => setNewParam(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && addParam()}
+                                    placeholder="e.g. stop_id"
+                                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono"
+                                />
                                 <button
-                                    onClick={handleFetch}
-                                    disabled={fetching}
-                                    className="w-full bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-50"
+                                    onClick={addParam}
+                                    disabled={!newParam.trim()}
+                                    className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
                                 >
-                                    {fetching ? 'Fetching...' : 'Fetch Data'}
+                                    Add
                                 </button>
-                                <button
-                                    onClick={handleLoadRecord}
-                                    disabled={recordLoading}
-                                    className="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
-                                >
-                                    {recordLoading ? 'Loading...' : 'Load Saved Transformation'}
-                                </button>
-                                {recordError && (
-                                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                                        {recordError}
-                                    </div>
-                                )}
-                                {error && (
-                                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                                        {error}
-                                    </div>
-                                )}
-                                {saveMessage && (
-                                    <div className={`${saveMessage.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'} border px-4 py-3 rounded-lg`}>
-                                        {saveMessage.text}
-                                    </div>
-                                )}
                             </div>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                                Add params then use <code className="font-mono">&#123;param_name&#125;</code> as a placeholder in the URL above.
+                            </p>
                         </div>
 
-                        {/* Field Mapping Section */}
-                        {data && fieldMappings.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
-                                <div className="mb-6">
-                                    <h2 className="text-2xl font-bold">Transform Fields</h2>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">These mappings will be applied to all items in the list</p>
+                        {/* Test values — one input per param */}
+                        {params.length > 0 && (
+                            <div className="border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 rounded-lg p-4 space-y-3">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">Test Values</p>
+                                <div className="space-y-2">
+                                    {params.map(p => (
+                                        <div key={p} className="flex gap-2 items-center">
+                                            <code className="text-xs text-amber-600 dark:text-amber-400 font-mono bg-amber-100 dark:bg-amber-900 px-2 py-1 rounded border border-amber-200 dark:border-amber-700 shrink-0">
+                                                {`{${p}}`}
+                                            </code>
+                                            <span className="text-amber-400 text-xs shrink-0">=</span>
+                                            <input
+                                                type="text"
+                                                value={testParams[p] ?? ''}
+                                                onChange={(e) => setTestParams(prev => ({ ...prev, [p]: e.target.value }))}
+                                                placeholder={`test value for ${p}`}
+                                                className="flex-1 px-3 py-1.5 text-sm border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono"
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded p-4">
-                                    {fieldMappings.map((mapping, index) => {
-                                        const depth = (mapping.original.match(/\./g) || []).length;
-                                        const displayName = mapping.original.split('.').pop() || mapping.original;
-                                        const isNested = depth > 0;
-
-                                        return (
-                                            <div key={index} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-700 p-3 rounded">
-                                                <div className="flex-1">
-                                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
-                                                        {isNested && <span className="text-gray-500 dark:text-gray-400 block mb-1">📁 {mapping.original}</span>}
-                                                        {!isNested && <span className="text-gray-500 dark:text-gray-400">Field name</span>}
-                                                    </label>
-                                                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">{mapping.original}</div>
-                                                </div>
-                                                <div className="text-gray-400">→</div>
-                                                <div className="flex-1">
-                                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Rename to</label>
-                                                    <input
-                                                        type="text"
-                                                        value={mapping.transformed}
-                                                        onChange={(e) => updateFieldMapping(index, e.target.value)}
-                                                        placeholder={mapping.original}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none dark:bg-gray-700 dark:text-white"
-                                                    />
-                                                </div>
-                                                <button
-                                                    onClick={() => deleteFieldMapping(index)}
-                                                    className="bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 transition"
-                                                    title="Delete this field"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <button
-                                    onClick={handleTransform}
-                                    className="w-full bg-green-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-700 transition mt-6"
-                                >
-                                    Transform All Items
-                                </button>
+                                {url && params.some(p => testParams[p]) && (
+                                    <div className="text-xs text-amber-700 dark:text-amber-400 pt-1 border-t border-amber-200 dark:border-amber-800">
+                                        <span className="font-semibold">Effective URL: </span>
+                                        <code className="font-mono break-all">{buildEffectiveUrl(url, testParams)}</code>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        <section className='flex gap-6 flex-col lg:flex-row'>
+                        {recordError && (
+                            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
+                                {recordError}
+                            </div>
+                        )}
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
+                                {error}
+                            </div>
+                        )}
+                        {saveMessage && (
+                            <div className={`px-4 py-3 rounded-lg text-sm border ${saveMessage.type === 'success' ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'}`}>
+                                {saveMessage.text}
+                            </div>
+                        )}
 
-                            {/* Original Data Display */}
-                            {data && (
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-8">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-bold">Original Data</h2>
+                        <div className="flex gap-3 pt-1">
+                            <button
+                                onClick={handleFetch}
+                                disabled={fetching || !url}
+                                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <RefreshCw size={14} className={fetching ? 'animate-spin' : ''} />
+                                {fetching ? 'Fetching...' : 'Fetch Data'}
+                            </button>
+                            <button
+                                onClick={handleSaveTransformation}
+                                disabled={saving || !url}
+                                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Save size={14} />
+                                {saving ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Field Mapping Card */}
+                {data && fieldMappings.length > 0 && (
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                            <div>
+                                <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Field Mappings</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rename or remove fields — changes apply to all items</p>
+                            </div>
+                            <button
+                                onClick={handleTransform}
+                                className="flex items-center gap-2 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+                            >
+                                Apply
+                            </button>
+                        </div>
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto">
+                            {fieldMappings.map((mapping, index) => {
+                                const depth = (mapping.original.match(/\./g) || []).length;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                        style={{ paddingLeft: `${24 + depth * 16}px` }}
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate">{mapping.original}</p>
+                                        </div>
+                                        <span className="text-gray-300 dark:text-gray-600 text-sm">→</span>
+                                        <div className="flex-1">
+                                            <input
+                                                type="text"
+                                                value={mapping.transformed}
+                                                onChange={(e) => updateFieldMapping(index, e.target.value)}
+                                                className="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono"
+                                            />
+                                        </div>
                                         <button
-                                            onClick={() => downloadJSON(data, 'original-data.json')}
-                                            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                                            onClick={() => deleteFieldMapping(index)}
+                                            className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition p-1 rounded"
+                                            title="Remove field"
                                         >
-                                            Download
+                                            ✕
                                         </button>
                                     </div>
-                                    <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-150">
-                                        {JSON.stringify(data, null, 2)}
-                                    </pre>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Data Preview */}
+                {data && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Original */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                                <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Original Data</h3>
+                                <button
+                                    onClick={() => downloadJSON(data, 'original-data.json')}
+                                    className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                                >
+                                    <Download size={14} />
+                                    Download
+                                </button>
+                            </div>
+                            <div className="px-6 py-5">
+                                <pre className="text-xs bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto max-h-96 text-gray-700 dark:text-gray-300">
+                                    {JSON.stringify(data, null, 2)}
+                                </pre>
+                            </div>
+                        </div>
+
+                        {/* Transformed */}
+                        {transformedData && (
+                            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
+                                    <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Transformed Data</h3>
+                                    <button
+                                        onClick={() => downloadJSON(transformedData, 'transformed-data.json')}
+                                        className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                                    >
+                                        <Download size={14} />
+                                        Download
+                                    </button>
                                 </div>
-                            )}
-
-                            {/* Transformed Data Display */}
-                            {transformedData && (
-                                <div className="flex-1 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-2xl font-bold">Transformed Data</h2>
-                                        <button
-                                            onClick={() => downloadJSON(transformedData, 'transformed-data.json')}
-                                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                        >
-                                            Download
-                                        </button>
-                                    </div>
-                                    <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded overflow-auto max-h-150">
+                                <div className="px-6 py-5 space-y-3">
+                                    <pre className="text-xs bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-auto max-h-96 text-gray-700 dark:text-gray-300">
                                         {JSON.stringify(transformedData, null, 2)}
                                     </pre>
-                                    <div className="space-y-2 mt-4">
-                                        <button
-                                            onClick={handleValidate}
-                                            className="w-full bg-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-purple-700 transition"
-                                        >
-                                            Validate Against Compliance
-                                        </button>
-                                        <button
-                                            onClick={handleSaveTransformation}
-                                            disabled={saving}
-                                            className="w-full bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
-                                        >
-                                            {saving ? 'Saving...' : 'Save Transformation'}
-                                        </button>
-                                    </div>
+                                    <button
+                                        onClick={handleValidate}
+                                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition"
+                                    >
+                                        Validate Against Compliance
+                                    </button>
                                 </div>
-                            )}
-
-                        </section>
-                        {/* Compliance Validation Result */}
-                        {complianceResult && (
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mt-8">
-                                <h2 className="text-2xl font-bold mb-6">Compliance Validation Result</h2>
-
-                                {complianceResult.issues.length === 0 ? (
-                                    <div className="bg-green-50 dark:bg-green-200 border-l-4 border-green-600 p-4 mb-6">
-                                        <p className="text-green-800 font-semibold">✓ Data matches compliance schema!</p>
-                                    </div>
-                                ) : (
-                                    <div className="bg-red-50 dark:bg-red-200 border-l-4 border-red-600 p-4 mb-6">
-                                        <p className="text-red-800 font-semibold mb-3">✕ Compliance issues found:</p>
-                                        <ul className="space-y-2">
-                                            {complianceResult.issues.map((issue: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
-                                                <li key={idx} className="text-red-700 text-sm">• {issue}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {complianceResult.matches.length > 0 && (
-                                    <div className="bg-blue-50 dark:bg-blue-200 border-l-4 border-blue-600 p-4">
-                                        <p className="text-blue-800 font-semibold mb-3">Matching fields:</p>
-                                        <ul className="space-y-1">
-                                            {complianceResult.matches.map((match: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
-                                                <li key={idx} className="text-blue-700 text-sm">{match}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
-                </section>
-                <section className="compliance py-6 px-6">
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-200">Expected Data Format</h2>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">Schema that your transformed data should match</p>
+                )}
 
-                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                            {data_compliance && data_compliance.data && data_compliance.data.length > 0 && (
-                                <div className="space-y-6">
-                                    {/* Render compliance schema */}
-                                    <div className="bg-gradient-to-r from-custom-blue to-custom-red dark:from-custom-darkblue dark:to-custom-darkred text-white rounded-lg p-6 mb-6">
-                                        <h3 className="text-2xl font-bold">Root Schema</h3>
-                                    </div>
-
-                                    {/* Render total_count field */}
-                                    {data_compliance.total_count && (
-                                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">total_count</h4>
-                                                </div>
-                                                <div className="px-4 py-2 rounded border-2 font-bold text-center bg-green-100 text-green-800 border-green-300">
-                                                    {data_compliance.total_count}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Render data array field */}
-                                    {data_compliance.data && data_compliance.data.length > 0 && (
-                                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">data</h4>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">Array of objects</p>
-                                                </div>
-                                                <div className="px-4 py-2 rounded border-2 font-bold text-center bg-purple-100 text-purple-800 border-purple-300">
-                                                    Array
-                                                </div>
-                                            </div>
-
-                                            {/* Nested fields within data array */}
-                                            <div className="mt-4 ml-4 space-y-3 border-l-2 border-gray-300 pl-4">
-                                                {data_compliance.data[0] && Object.entries(data_compliance.data[0]).map(([key, type]: [string, any], fieldIdx: number) => {
-                                                    const getTypeColor = (t: any) => {
-                                                        if (t === 'String') return 'bg-blue-100 text-blue-800 border-blue-300';
-                                                        if (t === 'Int') return 'bg-green-100 text-green-800 border-green-300';
-                                                        if (t === 'Boolean') return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                                                        if (Array.isArray(t)) return 'bg-purple-100 text-purple-800 border-purple-300';
-                                                        if (t === 'Datetime') return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-                                                        if (typeof t === 'object') return 'bg-pink-100 text-pink-800 border-pink-300';
-                                                        if (t.substr(t.length - 1) == '?') return 'bg-amber-100 text-amber-800 border-amber-300';
-                                                        return 'bg-gray-100 text-gray-800 border-gray-300';
-                                                    };
-
-                                                    return (
-                                                        <div key={fieldIdx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded hover:shadow-md transition">
-                                                            <div className="flex-1">
-                                                                <h5 className="font-semibold text-gray-800 dark:text-gray-200">{key}</h5>
-                                                            </div>
-                                                            <span className={`text-xs px-2 py-1 rounded border font-bold ${getTypeColor(type)}`}>
-                                                                {typeof type === 'string' ? type : typeof type}
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
+                {/* Compliance Result */}
+                {complianceResult && (
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                            <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Compliance Result</h3>
+                        </div>
+                        <div className="px-6 py-5 space-y-4">
+                            {complianceResult.issues.length === 0 ? (
+                                <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3">
+                                    <span className="text-green-600 dark:text-green-400 font-bold text-lg">✓</span>
+                                    <p className="text-green-800 dark:text-green-300 font-semibold text-sm">Data matches the compliance schema</p>
+                                </div>
+                            ) : (
+                                <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                    <p className="text-red-700 dark:text-red-300 font-semibold text-sm mb-2">{complianceResult.issues.length} issue{complianceResult.issues.length > 1 ? 's' : ''} found</p>
+                                    <ul className="space-y-1">
+                                        {complianceResult.issues.map((issue: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
+                                            <li key={idx} className="text-red-700 dark:text-red-400 text-xs font-mono">• {issue}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {complianceResult.matches.length > 0 && (
+                                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                    <p className="text-blue-700 dark:text-blue-300 font-semibold text-sm mb-2">{complianceResult.matches.length} matching field{complianceResult.matches.length > 1 ? 's' : ''}</p>
+                                    <ul className="space-y-1">
+                                        {complianceResult.matches.map((match: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, idx: Key | null | undefined) => (
+                                            <li key={idx} className="text-blue-700 dark:text-blue-400 text-xs font-mono">{match}</li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )}
                         </div>
                     </div>
-                </section>
-            </main>
-        </>
-    )
+                )}
+
+                {/* Expected Format */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                        <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Expected Data Format</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Schema your transformed data must match</p>
+                    </div>
+                    <div className="px-6 py-5">
+                        {data_compliance && data_compliance.data && data_compliance.data.length > 0 ? (
+                            <div className="space-y-4">
+                                {data_compliance.total_count && (
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 font-mono">total_count</span>
+                                        <span className="text-xs px-2 py-1 rounded border font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700">
+                                            {data_compliance.total_count}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                    <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 font-mono">data</span>
+                                        <span className="text-xs px-2 py-1 rounded border font-bold bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:border-purple-700">Array</span>
+                                    </div>
+                                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                        {data_compliance.data[0] && Object.entries(data_compliance.data[0]).map(([key, type]: [string, any], fieldIdx: number) => {
+                                            const getTypeColor = (t: any) => {
+                                                if (t === 'String') return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-300 dark:border-blue-700';
+                                                if (t === 'Int') return 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-700';
+                                                if (t === 'Boolean') return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-300 dark:border-yellow-700';
+                                                if (Array.isArray(t)) return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-300 dark:border-purple-700';
+                                                if (t === 'Datetime') return 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-300 dark:border-indigo-700';
+                                                if (typeof t === 'object') return 'bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-900 dark:text-pink-300 dark:border-pink-700';
+                                                if (typeof t === 'string' && t.endsWith('?')) return 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-300 dark:border-amber-700';
+                                                return 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
+                                            };
+                                            return (
+                                                <div key={fieldIdx} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                    <span className="text-sm font-mono text-gray-800 dark:text-gray-200">{key}</span>
+                                                    <span className={`text-xs px-2 py-1 rounded border font-bold ${getTypeColor(type)}`}>
+                                                        {typeof type === 'string' ? type : typeof type}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">No schema fields defined.</p>
+                        )}
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    );
 }
