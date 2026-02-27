@@ -105,6 +105,38 @@ router.put("/", validateConnector, handleValidationErrors, authenticateToken, as
     }
 });
 
+router.patch("/", [
+    body('name').optional().isString().notEmpty().withMessage('Name must be a valid string'),
+    body('apiUrl').optional().isString().notEmpty().withMessage('API URL must be a valid string'),
+    body('transformation').optional().isArray().withMessage('Transformation must be an array'),
+], handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        const { name, apiUrl, transformation } = req.body;
+        const updateData: Record<string, any> = {};
+        if (name !== undefined) updateData.name = name;
+        if (apiUrl !== undefined) updateData.apiUrl = apiUrl;
+        if (transformation !== undefined) updateData.transformation = transformation;
+
+        const line = await prisma.line.upsert({
+            where: { connectorId: req.params.connectorId },
+            update: updateData,
+            create: {
+                name: updateData.name ?? '',
+                apiUrl: updateData.apiUrl ?? '',
+                transformation: updateData.transformation ?? [],
+                connector: { connect: { id: req.params.connectorId } },
+            },
+        });
+        res.status(200).json(line);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.delete("/", authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
