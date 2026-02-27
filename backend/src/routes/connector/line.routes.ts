@@ -109,16 +109,18 @@ router.patch("/", [
     body('name').optional().isString().notEmpty().withMessage('Name must be a valid string'),
     body('apiUrl').optional().isString().notEmpty().withMessage('API URL must be a valid string'),
     body('transformation').optional().isArray().withMessage('Transformation must be an array'),
+    body('params').optional().isArray().withMessage('Params must be an array of strings'),
 ], handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        const { name, apiUrl, transformation } = req.body;
+        const { name, apiUrl, transformation, params } = req.body;
         const updateData: Record<string, any> = {};
         if (name !== undefined) updateData.name = name;
         if (apiUrl !== undefined) updateData.apiUrl = apiUrl;
         if (transformation !== undefined) updateData.transformation = transformation;
+        if (params !== undefined) updateData.params = params;
 
         const line = await prisma.line.upsert({
             where: { connectorId: req.params.connectorId },
@@ -127,6 +129,7 @@ router.patch("/", [
                 name: updateData.name ?? '',
                 apiUrl: updateData.apiUrl ?? '',
                 transformation: updateData.transformation ?? [],
+                params: updateData.params ?? [],
                 connector: { connect: { id: req.params.connectorId } },
             },
         });

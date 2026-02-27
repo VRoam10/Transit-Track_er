@@ -11,7 +11,7 @@ const mainRouter = Router();
 mainRouter.use("/compliance", complianceRoutes);
 mainRouter.use("/:connectorId/line", lineConnectorRoutes);
 mainRouter.use("/:connectorId/stop", stopConnectorRoutes);
-mainRouter.use("/:connectorId/nextpassage", nxpassageConnectorRoutes);
+mainRouter.use("/:connectorId/nxpassage", nxpassageConnectorRoutes);
 mainRouter.use("/:connectorId/direction", directionConnectorRoutes);
 mainRouter.use("/", connectorRoutes);
 export default mainRouter;
