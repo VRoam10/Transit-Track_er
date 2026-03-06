@@ -84,7 +84,7 @@ export default function Home() {
               <button className="bg-custom-blue text-white px-8 py-4 rounded-full font-semibold hover:brightness-110 transition">
                 Download Now
               </button>
-              <a href="/#features" className="border border-gray-500 text-black px-8 py-4 rounded-full font-semibold hover:border-black transition">
+              <a href="/#features" className="border border-gray-500 px-8 py-4 rounded-full font-semibold hover:border-black transition">
                 Learn More
               </a>
             </div>
@@ -143,7 +143,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="tutorials" className="snap-center text-black dark:text-white h-screen flex flex-col justify-center">
+        <section id="tutorials" className="snap-center h-screen flex flex-col justify-center">
           <div className="text-center mb-10">
             <h2 className="text-4xl font-bold mb-3">How It Works</h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
@@ -244,10 +244,10 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Free */}
               <div className="border border-gray-700 rounded-3xl p-10 flex flex-col backdrop-blur-sm">
-                <p className="text-sm uppercase tracking-widest text-gray-900 mb-4">Free</p>
-                <p className="text-5xl font-bold mb-2">$0<span className="text-lg font-normal text-gray-800">/mo</span></p>
-                <p className="text-gray-700 mb-8">Everything you need to get started.</p>
-                <ul className="space-y-3 text-gray-600 mb-10 flex-1">
+                <p className="text-sm uppercase tracking-widest text-gray-900 dark:text-gray-300 mb-4">Free</p>
+                <p className="text-5xl font-bold mb-2">$0<span className="text-lg font-normal text-gray-800 dark:text-gray-400">/mo</span></p>
+                <p className="text-gray-700 dark:text-gray-300 mb-8">Everything you need to get started.</p>
+                <ul className="space-y-3 text-gray-600 dark:text-gray-400 mb-10 flex-1">
                   <li className="flex items-center gap-3"><span className="text-custom-blue text-lg">&#10003;</span>Real-time bus &amp; metro tracking</li>
                   <li className="flex items-center gap-3"><span className="text-custom-blue text-lg">&#10003;</span>Save up to 3 favorite routes</li>
                   <li className="flex items-center gap-3"><span className="text-custom-blue text-lg">&#10003;</span>Basic push notifications</li>
