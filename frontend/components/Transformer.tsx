@@ -67,6 +67,9 @@ export default function Transformer({ subroute, connectorId }: Props) {
             hasAutoFetched.current = true;
             setUrl(recordData.apiUrl);
             if (recordData.params && Array.isArray(recordData.params)) setParams(recordData.params);
+            if (recordData.transformation && Array.isArray(recordData.transformation) && recordData.transformation.length > 0) {
+                setFieldMappings(recordData.transformation);
+            }
             fetchFromUrl(recordData.apiUrl, recordData.transformation);
         }
     }, [recordData]);
@@ -505,7 +508,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
                 </div>
 
                 {/* Field Mapping Card */}
-                {data && fieldMappings.length > 0 && (
+                {fieldMappings.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
                             <div>
@@ -513,10 +516,15 @@ export default function Transformer({ subroute, connectorId }: Props) {
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rename or remove fields — changes apply to all items</p>
                             </div>
                             <button
-                                onClick={handleTransform}
-                                className="flex items-center gap-2 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition"
+                                onClick={() => {
+                                    if (recordData?.transformation && Array.isArray(recordData.transformation)) {
+                                        setFieldMappings(recordData.transformation);
+                                    }
+                                }}
+                                disabled={recordLoading || !recordData?.transformation}
+                                className="flex items-center gap-2 bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Apply
+                                Load
                             </button>
                         </div>
                         <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto">
