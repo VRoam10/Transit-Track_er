@@ -113,7 +113,7 @@ export default function Footer() {
                     <ul className="space-y-3">
                         <li><span className="text-zinc-400 flex items-center gap-2"><Train className="w-4 h-4 text-custom-blue" /> Metro Lines</span></li>
                         <li><span className="text-zinc-400 flex items-center gap-2"><Bus className="w-4 h-4 text-custom-red" /> Bus Routes</span></li>
-                        <li><span className="text-zinc-400 flex items-center gap-2"><MapPin className="w-4 h-4 text-green-500" /> Live Map</span></li>
+                        <li><Link href="/map" className="text-zinc-400 hover:text-white transition flex items-center gap-2"><MapPin className="w-4 h-4 text-green-500" /> Live Map</Link></li>
                     </ul>
                 </div>
                 <div>
