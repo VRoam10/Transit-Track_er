@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
 import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart'
     as bus_backend;
+import 'package:transit_track_er/src/connector_feature/connector_list_view.dart';
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart'
     as metro_backend;
@@ -114,7 +115,20 @@ class _HomePageState extends State<HomePage> {
                       child:
                           Text('${localizations.busStopListTitle} (Backend)'),
                     ),
-                  )
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          ConnectorListView.routeName,
+                        );
+                      },
+                      child: const Text('Connectors'),
+                    ),
+                  ),
                 ],
               )),
         ),
