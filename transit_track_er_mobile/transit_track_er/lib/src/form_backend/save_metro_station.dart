@@ -4,6 +4,7 @@ import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/types/timetable.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 Future<void> showAddFavoriteStationDialog(
     BuildContext context, MetroStation station) async {
@@ -44,19 +45,17 @@ Future<void> showAddFavoriteStationDialog(
 
   String token = await AuthService().getToken() ?? '';
   if (token.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.notAuthenticated)),
+    AppSnackbar.showError(
+      context,
+      AppLocalizations.of(context)!.notAuthenticated,
     );
     return;
   }
   await TimetableService().createTimetable(token, timetable);
 
   final localization = AppLocalizations.of(context)!;
-
-  // Optional: show confirmation
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-        content: Text(
-            '${localization.favoriteMetroStation} ${station.name} ${localization.addedFor} ${chosenDateTime.toLocal()}')),
+  AppSnackbar.showSuccess(
+    context,
+    '${localization.favoriteMetroStation} ${station.name} ${localization.addedFor} ${chosenDateTime.toLocal()}',
   );
 }

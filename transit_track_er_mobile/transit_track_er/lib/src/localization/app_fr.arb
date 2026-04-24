@@ -147,5 +147,77 @@
   "notAuthenticated": "Utilisateur non authentifié. Veuillez vous connecter.",
   "@notAuthenticated": {
     "description": "Message affiché lorsque l'utilisateur n'est pas authentifié"
+  },
+  "timetableListTitle": "Horaires",
+  "@timetableListTitle": {
+    "description": "Titre de la page de la liste des horaires"
+  },
+  "noTimetablesFound": "Aucun horaire trouvé",
+  "@noTimetablesFound": {
+    "description": "Message affiché lorsque aucun horaire n'est trouvé"
+  },
+  "timetableLoadError": "Échec du chargement des horaires",
+  "@timetableLoadError": {
+    "description": "Message affiché lorsque les horaires ne peuvent pas être chargés"
+  },
+  "timetableDeleted": "Horaire supprimé",
+  "@timetableDeleted": {
+    "description": "Message affiché lorsqu'un horaire est supprimé avec succès"
+  },
+  "timetableDeleteError": "Échec de la suppression de l'horaire",
+  "@timetableDeleteError": {
+    "description": "Message affiché lorsqu'un horaire ne peut pas être supprimé"
+  },
+  "timetableEnabled": "Notifications activées",
+  "@timetableEnabled": {
+    "description": "Message affiché lorsque les notifications d'un horaire sont activées"
+  },
+  "timetableDisabled": "Notifications désactivées",
+  "@timetableDisabled": {
+    "description": "Message affiché lorsque les notifications d'un horaire sont désactivées"
+  },
+  "timetableUpdateError": "Échec de la mise à jour de l'horaire",
+  "@timetableUpdateError": {
+    "description": "Message affiché lorsqu'un horaire ne peut pas être mis à jour"
+  },
+  "deleteTimetable": "Supprimer l'horaire",
+  "@deleteTimetable": {
+    "description": "Titre de la boîte de dialogue de confirmation de suppression d'un horaire"
+  },
+  "deleteTimetableConfirmation": "Êtes-vous sûr de vouloir supprimer cet horaire ?",
+  "@deleteTimetableConfirmation": {
+    "description": "Message de confirmation pour la suppression d'un horaire"
+  },
+  "weekdayMon": "Lun",
+  "@weekdayMon": {
+    "description": "Label court pour lundi"
+  },
+  "weekdayTue": "Mar",
+  "@weekdayTue": {
+    "description": "Label court pour mardi"
+  },
+  "weekdayWed": "Mer",
+  "@weekdayWed": {
+    "description": "Label court pour mercredi"
+  },
+  "weekdayThu": "Jeu",
+  "@weekdayThu": {
+    "description": "Label court pour jeudi"
+  },
+  "weekdayFri": "Ven",
+  "@weekdayFri": {
+    "description": "Label court pour vendredi"
+  },
+  "weekdaySat": "Sam",
+  "@weekdaySat": {
+    "description": "Label court pour samedi"
+  },
+  "weekdaySun": "Dim",
+  "@weekdaySun": {
+    "description": "Label court pour dimanche"
+  },
+  "weekdayEvery": "Tous les jours",
+  "@weekdayEvery": {
+    "description": "Label pour tous les jours de la semaine"
   }
 }

@@ -147,5 +147,77 @@
   "notAuthenticated": "User not authenticated. Please log in.",
   "@notAuthenticated": {
     "description": "Message displayed when the user is not authenticated"
+  },
+  "timetableListTitle": "Timetables",
+  "@timetableListTitle": {
+    "description": "Title for the timetable list page"
+  },
+  "noTimetablesFound": "No timetables found",
+  "@noTimetablesFound": {
+    "description": "Message displayed when no timetables are found"
+  },
+  "timetableLoadError": "Failed to load timetables",
+  "@timetableLoadError": {
+    "description": "Message displayed when timetables fail to load"
+  },
+  "timetableDeleted": "Timetable deleted",
+  "@timetableDeleted": {
+    "description": "Message displayed when a timetable is successfully deleted"
+  },
+  "timetableDeleteError": "Failed to delete timetable",
+  "@timetableDeleteError": {
+    "description": "Message displayed when a timetable fails to delete"
+  },
+  "timetableEnabled": "Notifications enabled",
+  "@timetableEnabled": {
+    "description": "Message displayed when a timetable's notifications are enabled"
+  },
+  "timetableDisabled": "Notifications disabled",
+  "@timetableDisabled": {
+    "description": "Message displayed when a timetable's notifications are disabled"
+  },
+  "timetableUpdateError": "Failed to update timetable",
+  "@timetableUpdateError": {
+    "description": "Message displayed when a timetable fails to update"
+  },
+  "deleteTimetable": "Delete Timetable",
+  "@deleteTimetable": {
+    "description": "Title for the delete timetable confirmation dialog"
+  },
+  "deleteTimetableConfirmation": "Are you sure you want to delete this timetable?",
+  "@deleteTimetableConfirmation": {
+    "description": "Confirmation message for deleting a timetable"
+  },
+  "weekdayMon": "Mon",
+  "@weekdayMon": {
+    "description": "Short label for Monday"
+  },
+  "weekdayTue": "Tue",
+  "@weekdayTue": {
+    "description": "Short label for Tuesday"
+  },
+  "weekdayWed": "Wed",
+  "@weekdayWed": {
+    "description": "Short label for Wednesday"
+  },
+  "weekdayThu": "Thu",
+  "@weekdayThu": {
+    "description": "Short label for Thursday"
+  },
+  "weekdayFri": "Fri",
+  "@weekdayFri": {
+    "description": "Short label for Friday"
+  },
+  "weekdaySat": "Sat",
+  "@weekdaySat": {
+    "description": "Short label for Saturday"
+  },
+  "weekdaySun": "Sun",
+  "@weekdaySun": {
+    "description": "Short label for Sunday"
+  },
+  "weekdayEvery": "Every day",
+  "@weekdayEvery": {
+    "description": "Label for every day of the week"
   }
 }

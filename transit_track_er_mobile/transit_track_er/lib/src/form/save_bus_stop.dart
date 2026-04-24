@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_bus.dart';
 import 'package:transit_track_er/src/types/bus_service_point.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 Future<void> showAddFavoriteBusStopDialog(BuildContext context,
     Box<FavoriteBusStop> box, BusServicePoint busStop) async {
@@ -47,10 +48,8 @@ Future<void> showAddFavoriteBusStopDialog(BuildContext context,
   await scheduleBusStopNotification(favoriteBusStop);
 
   final localization = AppLocalizations.of(context)!;
-  // Optional: show confirmation
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-        content: Text(
-            '${localization.favoriteBusStop} ${busStop.name} ${localization.addedFor} ${chosenDateTime.toLocal()}')),
+  AppSnackbar.showSuccess(
+    context,
+    '${localization.favoriteBusStop} ${busStop.name} ${localization.addedFor} ${chosenDateTime.toLocal()}',
   );
 }

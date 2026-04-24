@@ -5,6 +5,7 @@ import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/types/timetable.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 Future<void> showRemoveFavoriteStationDialog(
     BuildContext context, MetroStation station, Timetable timetable) async {
@@ -32,8 +33,9 @@ Future<void> showRemoveFavoriteStationDialog(
 
   String token = await AuthService().getToken() ?? '';
   if (token.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.notAuthenticated)),
+    AppSnackbar.showError(
+      context,
+      AppLocalizations.of(context)!.notAuthenticated,
     );
     return;
   }

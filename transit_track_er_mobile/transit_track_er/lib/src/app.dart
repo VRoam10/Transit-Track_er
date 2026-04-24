@@ -8,6 +8,7 @@ import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart' as metro_backend;
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/pages/register_page.dart';
+import 'package:transit_track_er/src/pages/timetable_list_page.dart';
 
 import 'pages/login_page.dart';
 import 'settings/settings_controller.dart';
@@ -89,6 +90,8 @@ class MyApp extends StatelessWidget {
                     return const metro_backend.MetroLineListView();
                   case ConnectorListView.routeName:
                     return const ConnectorListView();
+                  case TimetableListPage.routeName:
+                    return const TimetableListPage();
                   case HomePage.routeName:
                     return const HomePage();
                   case RegisterPage.routeName:

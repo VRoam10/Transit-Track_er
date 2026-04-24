@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/settings/settings_view.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -101,16 +102,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         await AuthService().register(_usernameController.text,
                             _emailController.text, _passwordController.text);
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
+                        AppSnackbar.showError(context, e.toString());
                         return;
                       }
                       if (!mounted) return;
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(localizations.loginSuccess)),
-                      );
+                      AppSnackbar.showSuccess(
+                          context, localizations.loginSuccess);
                       Navigator.pushReplacementNamed(
                           context, HomePage.routeName // navigates to /home
                           );

@@ -5,6 +5,7 @@ import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/pages/register_page.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/settings/settings_view.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -92,24 +93,20 @@ class _LoginPageState extends State<LoginPage> {
                             _usernameController.text, _passwordController.text);
                         if (!mounted) return;
                         if (!token) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(localizations.loginError)),
-                          );
+                          AppSnackbar.showError(
+                              context, localizations.loginError);
                           return;
                         } else {
                           if (!mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(localizations.loginSuccess)),
-                          );
+                          AppSnackbar.showSuccess(
+                              context, localizations.loginSuccess);
                           Navigator.pushReplacementNamed(
                               context, HomePage.routeName // navigates to /home
                               );
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
+                        AppSnackbar.showError(context, e.toString());
                       }
                     },
                     child: Text(localizations.connect),
