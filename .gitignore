@@ -7,6 +7,10 @@
 .buildlog/
 .history
 
+# Claude Code / superpowers scratch
+.claude/worktrees/
+.superpowers/
+
 
 
 # Flutter repo-specific
