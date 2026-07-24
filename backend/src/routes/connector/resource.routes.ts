@@ -62,11 +62,21 @@ export function createConnectorResourceRouter(): Router {
     const errors = validateDefinition(definition);
     if (errors.length) return res.status(422).json({ errors });
 
-    const encrypted = secrets && Object.keys(secrets).length ? encryptSecrets(secrets, getKey()) : undefined;
+    const existingRow = await loadResource(req.params.connectorId, kind);
+    let secretsBytes: Uint8Array<ArrayBuffer> | null | undefined = undefined; // undefined = leave unchanged
+    if (secrets !== undefined) {
+      const merged: Record<string, string> = existingRow?.secrets ? decrypt(existingRow.secrets as Buffer) : {};
+      for (const [k, v] of Object.entries(secrets as Record<string, string | null>)) {
+        if (v === null) delete merged[k];
+        else merged[k] = v;
+      }
+      secretsBytes = Object.keys(merged).length ? toBytes(encryptSecrets(merged, getKey())) : null;
+    }
+
     const row = await prisma.connectorResource.upsert({
       where: { connectorId_kind: { connectorId: req.params.connectorId, kind } },
-      update: { name, definition, ...(encrypted ? { secrets: toBytes(encrypted) } : {}) },
-      create: { connectorId: req.params.connectorId, kind, name: name ?? '', definition, secrets: encrypted ? toBytes(encrypted) : undefined },
+      update: { name, definition, ...(secretsBytes !== undefined ? { secrets: secretsBytes } : {}) },
+      create: { connectorId: req.params.connectorId, kind, name: name ?? '', definition, secrets: secretsBytes ?? undefined },
     });
     res.json({ id: row.id, kind: row.kind, name: row.name });
   });

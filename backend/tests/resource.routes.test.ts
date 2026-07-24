@@ -20,6 +20,7 @@ vi.mock('../src/middleware/auth', () => ({
 
 import { prisma } from '../src/lib/prisma';
 import { validateDefinition, requiredParams, createConnectorResourceRouter } from '../src/routes/connector/resource.routes';
+import { encryptSecrets, decryptSecrets } from '../src/connector/engine/secrets';
 
 process.env.CONNECTOR_SECRET_KEY = Buffer.alloc(32, 3).toString('base64');
 
@@ -140,5 +141,51 @@ describe('preview inline definition', () => {
       .post('/api/connector/c1/line/preview')
       .send({ definition: inlineDef, sampleResponse: { items: [] } });
     expect(res.status).toBe(404);
+  });
+});
+
+describe('PATCH merges secrets', () => {
+  beforeEach(() => vi.clearAllMocks());
+  const KEY = Buffer.from(process.env.CONNECTOR_SECRET_KEY!, 'base64');
+  const goodDef = { request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+    response: { format: 'json', rootPath: 'data' }, mapping: { fields: [{ target: 'id', source: 'a' }] } };
+
+  function capturedSecrets(): Buffer | null {
+    const call = (prisma.connectorResource.upsert as any).mock.calls[0][0];
+    const val = call.update.secrets;
+    return val == null ? null : Buffer.from(val);
+  }
+
+  it('merges a new secret while preserving existing ones', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { token: 'B' } });
+    expect(decryptSecrets(capturedSecrets()!, KEY)).toEqual({ apiKey: 'A', token: 'B' });
+  });
+
+  it('deletes a secret when its value is null', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A', token: 'B' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { token: null } });
+    expect(decryptSecrets(capturedSecrets()!, KEY)).toEqual({ apiKey: 'A' });
+  });
+
+  it('leaves secrets untouched when body.secrets is omitted', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef });
+    const call = (prisma.connectorResource.upsert as any).mock.calls[0][0];
+    expect('secrets' in call.update).toBe(false);
+  });
+
+  it('stores null when the merge empties the map', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { apiKey: null } });
+    expect(capturedSecrets()).toBeNull();
   });
 });
