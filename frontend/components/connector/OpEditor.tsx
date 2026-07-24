@@ -12,7 +12,10 @@ const inputClass =
 const labelClass = 'text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap';
 
 function parseList(value: string): string[] {
-    return value.split(',').map((part) => part.trim());
+    return value
+        .split(',')
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
 }
 
 function toDisplayString(value: unknown): string {
@@ -128,7 +131,7 @@ export default function OpEditor({ op, onChange }: Props) {
         case 'lookup': {
             const entries = Object.entries(op.map);
 
-            const updateEntry = (index: number, key: string, value: string) => {
+            const updateEntry = (index: number, key: string, value: unknown) => {
                 const next = entries.map<[string, unknown]>((entry, i) => (i === index ? [key, value] : entry));
                 onChange({ ...op, map: Object.fromEntries(next) });
             };
@@ -150,7 +153,7 @@ export default function OpEditor({ op, onChange }: Props) {
                                     className={`${inputClass} w-20`}
                                     placeholder="key"
                                     value={key}
-                                    onChange={(e) => updateEntry(index, e.target.value, toDisplayString(value))}
+                                    onChange={(e) => updateEntry(index, e.target.value, value)}
                                 />
                                 <span className="text-gray-300 dark:text-gray-600 text-xs">&rarr;</span>
                                 <input
