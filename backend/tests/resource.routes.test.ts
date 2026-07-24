@@ -91,3 +91,54 @@ describe('resource routes', () => {
     expect(prisma.connectorResource.findUnique).not.toHaveBeenCalled();
   });
 });
+
+describe('preview inline definition', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const inlineDef = {
+    request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+    response: { format: 'json', rootPath: 'items' },
+    mapping: { fields: [{ target: 'id', source: 'a', ops: [{ op: 'toString' }] }] },
+  };
+
+  it('runs the inline definition instead of the stored one', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({
+      connectorId: 'c1', kind: 'LINE', name: 'L', secrets: null,
+      definition: { request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+        response: { format: 'json', rootPath: 'data' }, mapping: { fields: [{ target: 'id', source: 'a' }] } },
+    });
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [{ a: 1 }], data: [{ a: 2 }] } });
+    expect(res.status).toBe(200);
+    expect(res.body.envelope.data[0]).toEqual({ id: '1' }); // from `items` (inline), not `data` (stored)
+  });
+
+  it('previews a not-yet-saved resource (stored row null) with an inline definition', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [{ a: 5 }] } });
+    expect(res.status).toBe(200);
+    expect(res.body.envelope.data[0]).toEqual({ id: '5' });
+  });
+
+  it('rejects a malformed inline definition with 422', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: { request: {} } });
+    expect(res.status).toBe(422);
+  });
+
+  it('404s a non-owner', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [] } });
+    expect(res.status).toBe(404);
+  });
+});

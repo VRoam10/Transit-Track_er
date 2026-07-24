@@ -78,14 +78,21 @@ export function createConnectorResourceRouter(): Router {
     res.json({ ok: true });
   });
 
-  // Preview / dry-run (authenticated)
+  // Preview / dry-run (authenticated). Accepts an inline definition + secrets so
+  // the back-office can test unsaved edits (and connectors not yet saved).
   router.post('/:kind/preview', authenticateToken, async (req: Request, res: Response) => {
     const kind = resolveKind(req, res); if (!kind) return;
     if (!(await assertOwner(req, res))) return;
     const row = await loadResource(req.params.connectorId, kind);
-    if (!row) return res.status(404).json({ error: 'Resource not found' });
-    const secrets = row.secrets ? decrypt(row.secrets as Buffer) : {};
-    const result = await runResource(row.definition as unknown as ConnectorDefinition, kind, {
+    const definition = (req.body.definition ?? row?.definition) as ConnectorDefinition | undefined;
+    if (!definition) return res.status(404).json({ error: 'No definition to preview' });
+    if (req.body.definition) {
+      const errors = validateDefinition(req.body.definition);
+      if (errors.length) return res.status(422).json({ errors });
+    }
+    const stored = row?.secrets ? decrypt(row.secrets as Buffer) : {};
+    const secrets = { ...stored, ...(req.body.secrets ?? {}) };
+    const result = await runResource(definition, kind, {
       params: req.body.params ?? {},
       page: req.body.page,
       secrets,
