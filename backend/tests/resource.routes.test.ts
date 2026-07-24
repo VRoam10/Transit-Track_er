@@ -4,6 +4,9 @@ import request from 'supertest';
 
 vi.mock('../src/lib/prisma', () => ({
   prisma: {
+    connector: {
+      findFirst: vi.fn(),
+    },
     connectorResource: {
       findUnique: vi.fn(),
       upsert: vi.fn(),
@@ -51,7 +54,11 @@ describe('requiredParams', () => {
 });
 
 describe('resource routes', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Default: the authenticated user (id: 1, injected by the mocked auth middleware) owns connector c1.
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+  });
 
   it('GET returns the resource with masked secrets and params', async () => {
     (prisma.connectorResource.findUnique as any).mockResolvedValue({ id: 'r1', connectorId: 'c1', kind: 'LINE', name: 'L', definition: goodDef, secrets: null });
@@ -74,5 +81,13 @@ describe('resource routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(false);
     expect(res.body.envelope.data.length).toBe(1);
+  });
+
+  it('GET returns 404 for a connector the user does not own (IDOR guard)', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue(null);
+    const res = await request(app()).get('/api/connector/c1/line');
+    expect(res.status).toBe(404);
+    expect(res.body.id).toBeUndefined();
+    expect(prisma.connectorResource.findUnique).not.toHaveBeenCalled();
   });
 });

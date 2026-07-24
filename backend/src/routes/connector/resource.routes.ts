@@ -28,12 +28,22 @@ async function loadResource(connectorId: string, kind: any) {
   return prisma.connectorResource.findUnique({ where: { connectorId_kind: { connectorId, kind } } });
 }
 
+async function assertOwner(req: Request, res: Response): Promise<boolean> {
+  const owned = await prisma.connector.findFirst({
+    where: { id: req.params.connectorId, userId: req.user!.id },
+    select: { id: true },
+  });
+  if (!owned) { res.status(404).json({ error: 'Connector not found' }); return false; }
+  return true;
+}
+
 export function createConnectorResourceRouter(): Router {
   const router = Router({ mergeParams: true });
 
   // GET config (back-compat: exposes params + masked secrets)
   router.get('/:kind', authenticateToken, async (req: Request, res: Response) => {
     const kind = resolveKind(req, res); if (!kind) return;
+    if (!(await assertOwner(req, res))) return;
     const row = await loadResource(req.params.connectorId, kind);
     if (!row) return res.status(404).json({ error: 'Resource not found' });
     res.json({
@@ -47,6 +57,7 @@ export function createConnectorResourceRouter(): Router {
   // Upsert config
   router.patch('/:kind', authenticateToken, async (req: Request, res: Response) => {
     const kind = resolveKind(req, res); if (!kind) return;
+    if (!(await assertOwner(req, res))) return;
     const { name, definition, secrets } = req.body;
     const errors = validateDefinition(definition);
     if (errors.length) return res.status(422).json({ errors });
@@ -62,6 +73,7 @@ export function createConnectorResourceRouter(): Router {
 
   router.delete('/:kind', authenticateToken, async (req: Request, res: Response) => {
     const kind = resolveKind(req, res); if (!kind) return;
+    if (!(await assertOwner(req, res))) return;
     await prisma.connectorResource.delete({ where: { connectorId_kind: { connectorId: req.params.connectorId, kind } } });
     res.json({ ok: true });
   });
@@ -69,6 +81,7 @@ export function createConnectorResourceRouter(): Router {
   // Preview / dry-run (authenticated)
   router.post('/:kind/preview', authenticateToken, async (req: Request, res: Response) => {
     const kind = resolveKind(req, res); if (!kind) return;
+    if (!(await assertOwner(req, res))) return;
     const row = await loadResource(req.params.connectorId, kind);
     if (!row) return res.status(404).json({ error: 'Resource not found' });
     const secrets = row.secrets ? decrypt(row.secrets as Buffer) : {};
