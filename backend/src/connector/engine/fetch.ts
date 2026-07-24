@@ -5,7 +5,16 @@ import { BuiltRequest } from './request';
 
 const httpAgent = new http.Agent({ keepAlive: true });
 const httpsAgent = new https.Agent({ keepAlive: true });
-const client = axios.create({ httpAgent, httpsAgent, validateStatus: () => true });
+const client = axios.create({
+  httpAgent,
+  httpsAgent,
+  validateStatus: () => true,
+  maxRedirects: 5,
+  beforeRedirect: (options: any) => {
+    const target = options.href ?? `${options.protocol}//${options.hostname}${options.path ?? ''}`;
+    assertPublicUrl(target);
+  },
+});
 
 function isPrivateIp(host: string): boolean {
   if (host === 'localhost') return true;
@@ -25,8 +34,15 @@ export function assertPublicUrl(url: string): void {
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error(`Blocked scheme: ${parsed.protocol}`);
   }
-  if (isPrivateIp(parsed.hostname) || parsed.hostname === '::1' || parsed.hostname === '[::1]') {
-    throw new Error(`Blocked private host: ${parsed.hostname}`);
+  const host = parsed.hostname;
+  // Phase 1: reject all IPv6 literals (covers ::1, IPv4-mapped ::ffff:a.b.c.d,
+  // link-local fe80::/10, ULA fc00::/7). Transit APIs use hostnames or IPv4;
+  // an IPv6-literal target is unsupported here.
+  if (host.startsWith('[') || host.includes(':')) {
+    throw new Error(`Blocked IPv6 literal host: ${host}`);
+  }
+  if (isPrivateIp(host)) {
+    throw new Error(`Blocked private host: ${host}`);
   }
 }
 
