@@ -43,7 +43,12 @@ export async function runResource(def: ConnectorDefinition, kind: ResourceKind, 
   const page = run.page ?? {};
   const secrets = run.secrets ?? {};
 
-  const req = buildRequest(def, run.params, secrets, page);
+  let req;
+  try {
+    req = buildRequest(def, run.params, secrets, page);
+  } catch (e: any) {
+    return { ok: false, stage: 'request', message: String(e?.message ?? e) };
+  }
   if (req.missing.length > 0) {
     return { ok: false, stage: 'request', message: `Missing required params: ${req.missing.join(', ')}` };
   }

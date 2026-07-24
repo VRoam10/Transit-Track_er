@@ -17,8 +17,8 @@ describe('convertResourceRow', () => {
     expect(def.request.query).toEqual({ network: '{network}' });
     expect(def.response).toEqual({ format: 'json', rootPath: 'data' });
     expect(def.mapping.fields).toEqual([
-      { target: 'data.id', source: 'data.line_id' },
-      { target: 'data.name', source: 'data.line_name' },
+      { target: 'id', source: 'line_id' },
+      { target: 'name', source: 'line_name' },
     ]);
   });
   it('uses style none for direction too', () => {

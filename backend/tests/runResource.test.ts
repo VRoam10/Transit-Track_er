@@ -40,4 +40,10 @@ describe('runResource', () => {
     expect(r.stage).toBe('parse');
     expect(r.message).toContain('bad key');
   });
+  it('reports request-stage failure instead of throwing when buildRequest gets an invalid URL', async () => {
+    const def = { ...lineDef, request: { ...lineDef.request, url: '/relative-no-scheme' } };
+    const r = await runResource(def, 'LINE', { params: {}, page: { offset: 0 }, sampleResponse: {} });
+    expect(r.ok).toBe(false);
+    expect(r.stage).toBe('request');
+  });
 });

@@ -50,7 +50,7 @@ export function createConnectorResourceRouter(): Router {
       id: row.id, connectorId: row.connectorId, kind: row.kind, name: row.name,
       definition: row.definition,
       params: requiredParams(row.definition as unknown as ConnectorDefinition),
-      secrets: maskSecrets(row.secrets as Buffer | null, getKey()),
+      secrets: row.secrets ? maskSecrets(row.secrets as Buffer, getKey()) : {},
     });
   });
 

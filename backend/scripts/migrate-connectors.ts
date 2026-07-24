@@ -8,9 +8,10 @@ export function convertResourceRow(
   const query: Record<string, string> = {};
   for (const p of row.params) query[p] = `{${p}}`;
 
+  const strip = (p: string) => (p.startsWith('data.') ? p.slice(5) : p);
   const fields = (row.transformation ?? []).map((t: any) => ({
-    target: t.transformed,
-    source: t.original,
+    target: strip(t.transformed),
+    source: strip(t.original),
   }));
 
   return {
