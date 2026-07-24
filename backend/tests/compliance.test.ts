@@ -10,5 +10,6 @@ describe('complianceFor', () => {
     const fields = complianceFor('NEXTPASSAGE');
     const coord = fields.find(f => f.name === 'coordonnees');
     expect(coord && 'object' in coord).toBe(true);
+    expect((coord as any).optional).toBe(true);
   });
 });
