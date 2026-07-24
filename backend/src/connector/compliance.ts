@@ -27,7 +27,7 @@ const SCHEMAS: Record<ResourceKind, ComplianceField[]> = {
     { name: 'name', type: 'String' },
     { name: 'direction', type: 'Int' },
     { name: 'nextTrain', type: 'Datetime' },
-    { name: 'coordonnees', object: [
+    { name: 'coordonnees', optional: true, object: [
       { name: 'lat', type: 'Float', optional: true },
       { name: 'lon', type: 'Float', optional: true },
     ] },
