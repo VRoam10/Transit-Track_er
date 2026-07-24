@@ -22,7 +22,18 @@ export function applyOps(value: unknown, ops: Op[] | undefined, ctx: OpContext):
       case 'toInt': v = v === null || v === undefined ? v : parseInt(String(v), 10); break;
       case 'toFloat': v = v === null || v === undefined ? v : parseFloat(String(v)); break;
       case 'toString': v = v === null || v === undefined ? v : String(v); break;
-      case 'toBool': v = v === 'false' ? false : Boolean(v); break;
+      case 'toBool': {
+        if (v === null || v === undefined) break;
+        if (typeof v === 'string') {
+          const s = v.trim().toLowerCase();
+          if (s === 'true' || s === '1' || s === 'yes') v = true;
+          else if (s === 'false' || s === '0' || s === 'no' || s === '') v = false;
+          else v = Boolean(v);
+        } else {
+          v = Boolean(v);
+        }
+        break;
+      }
       case 'parseDate': {
         if (v === null || v === undefined) break;
         if (op.from === 'unix') v = moment.unix(Number(v));
@@ -41,7 +52,7 @@ export function applyOps(value: unknown, ops: Op[] | undefined, ctx: OpContext):
         v = found === undefined ? v : found;
         break;
       }
-      case 'concat': v = fill(op.parts, ctx.item); if (op.sep) v = op.parts.map(p => fill([p], ctx.item)).join(op.sep); break;
+      case 'concat': v = op.parts.map(p => fill([p], ctx.item)).join(op.sep ?? ''); break;
       case 'prefix': v = `${op.value}${v ?? ''}`; break;
       case 'suffix': v = `${v ?? ''}${op.value}`; break;
       case 'lookup': v = Object.prototype.hasOwnProperty.call(op.map, String(v)) ? op.map[String(v)] : op.fallback; break;

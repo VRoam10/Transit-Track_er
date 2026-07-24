@@ -32,4 +32,22 @@ describe('applyOps', () => {
     expect(applyOps(3.14159, [{ op: 'round', decimals: 2 }], ctx({}))).toBe(3.14);
     expect(applyOps(2, [{ op: 'multiply', by: 1000 }], ctx({}))).toBe(2000);
   });
+  it('toBool handles string encodings', () => {
+    expect(applyOps('1', [{ op: 'toBool' }], ctx({}))).toBe(true);
+    expect(applyOps('0', [{ op: 'toBool' }], ctx({}))).toBe(false);
+    expect(applyOps('true', [{ op: 'toBool' }], ctx({}))).toBe(true);
+    expect(applyOps('false', [{ op: 'toBool' }], ctx({}))).toBe(false);
+    expect(applyOps('', [{ op: 'toBool' }], ctx({}))).toBe(false);
+  });
+  it('toString and suffix', () => {
+    expect(applyOps(5, [{ op: 'toString' }], ctx({}))).toBe('5');
+    expect(applyOps('a', [{ op: 'suffix', value: 'b' }], ctx({}))).toBe('ab');
+  });
+  it('parseDate unixMs -> ISO (absolute instant)', () => {
+    expect(applyOps(0, [{ op: 'parseDate', from: 'unixMs' }, { op: 'formatDate', to: 'iso' }], ctx({}))).toBe('1970-01-01T00:00:00.000Z');
+  });
+  it('parseDate + formatDate round-trip a custom format (local, tz-stable)', () => {
+    expect(applyOps('15/06/2020', [{ op: 'parseDate', from: 'DD/MM/YYYY' }, { op: 'formatDate', to: 'DD/MM/YYYY' }], ctx({}))).toBe('15/06/2020');
+    expect(applyOps('15/06/2020', [{ op: 'parseDate', from: 'DD/MM/YYYY' }, { op: 'formatDate', to: 'YYYY-MM-DD' }], ctx({}))).toBe('2020-06-15');
+  });
 });
