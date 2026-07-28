@@ -2,6 +2,7 @@
 
 import { useFetch } from '@/hooks/useFetch';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Globe } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -19,6 +20,7 @@ const subroutes = [
 ] as const;
 
 export default function Connector({ connector }: { connector: string }) {
+    const router = useRouter();
     const [token, setToken] = useState<string | null>(null);
     const { data, loading, error } = useFetch<ConnectorData>(
         `/api/connector/${connector}`,
@@ -26,8 +28,10 @@ export default function Connector({ connector }: { connector: string }) {
     );
 
     useEffect(() => {
-        setToken(localStorage.getItem('token'));
-    }, []);
+        const t = localStorage.getItem('token');
+        if (!t) { router.push('/'); return; }
+        setToken(t);
+    }, [router]);
 
     if (loading) {
         return (
