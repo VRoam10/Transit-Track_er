@@ -15,20 +15,28 @@ export default function Connectors() {
     const [token, setToken] = useState<string | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const { data, loading, error } = useFetch<Connector[]>('/api/connector', { token });
+    const { data, loading, error } = useFetch<Connector[]>('/api/connector', { token, skip: !token });
+    const [items, setItems] = useState<Connector[]>([]);
 
     useEffect(() => {
         setToken(localStorage.getItem('token'));
     }, []);
 
+    useEffect(() => {
+        setItems(data || []);
+    }, [data]);
+
     const handleDelete = async (id: string) => {
         if (!token) return;
         try {
-            await fetch(`${apiUrl}/api/connector/${id}`, {
+            const response = await fetch(`${apiUrl}/api/connector/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            window.location.reload();
+            if (!response.ok) {
+                throw new Error(`Delete failed: ${response.statusText}`);
+            }
+            setItems(prev => prev.filter(c => c.id !== id));
         } catch (err) {
             console.error('Delete failed:', err);
         }
@@ -69,7 +77,7 @@ export default function Connectors() {
             </div>
 
             {/* Table Board */}
-            {!data || data.length === 0 ? (
+            {items.length === 0 ? (
                 <div className="bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
                     <p className="text-gray-500 dark:text-gray-400 text-lg">No connectors found</p>
                     <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Create your first connector to get started</p>
@@ -84,11 +92,11 @@ export default function Connectors() {
                     </div>
 
                     {/* Table Rows */}
-                    {data.map((connector, index) => (
+                    {items.map((connector, index) => (
                         <div
                             key={connector.id}
                             className={`grid grid-cols-12 gap-4 px-6 py-4 items-center border-l-4 border-l-blue-500 ${
-                                index !== data.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
+                                index !== items.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
                             } hover:bg-gray-50 dark:hover:bg-gray-700 transition`}
                         >
                             {/* Name */}

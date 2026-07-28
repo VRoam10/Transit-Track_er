@@ -22,7 +22,7 @@ export default function Connector({ connector }: { connector: string }) {
     const [token, setToken] = useState<string | null>(null);
     const { data, loading, error } = useFetch<ConnectorData>(
         `/api/connector/${connector}`,
-        { token }
+        { token, skip: !token }
     );
 
     useEffect(() => {
