@@ -67,8 +67,12 @@ export default function Transformer({ subroute, connectorId }: Props) {
     }, [router]);
 
     // Hydrate the draft definition from the backend. Run imperatively (rather than
-    // via useFetch) so a 404 — meaning this resource hasn't been saved yet — can be
-    // treated as "start from an empty definition" instead of a hard error.
+    // via useFetch) so a "Resource not found" 404 — meaning this sub-resource hasn't
+    // been saved yet — can be treated as "start from an empty definition" instead of
+    // a hard error. This must be an EXACT match: `assertOwner` in
+    // backend/src/routes/connector/resource.routes.ts also 404s with "Connector not
+    // found" when connectorId doesn't exist or isn't owned by the caller, and that
+    // must surface as a real error rather than a blank, editable form.
     useEffect(() => {
         if (!token) return;
         let cancelled = false;
@@ -83,7 +87,7 @@ export default function Transformer({ subroute, connectorId }: Props) {
             } catch (err) {
                 if (cancelled) return;
                 const message = err instanceof Error ? err.message : 'Failed to load resource';
-                if (message.toLowerCase().includes('not found')) {
+                if (message === 'Resource not found') {
                     setDefinition(emptyDefinition());
                     setSecretNames([]);
                 } else {
@@ -140,15 +144,21 @@ export default function Transformer({ subroute, connectorId }: Props) {
         );
     }
 
-    return (
-        <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
-            <div className="py-6 px-6 max-w-6xl mx-auto space-y-6">
-                {loadError && (
+    if (loadError) {
+        return (
+            <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
+                <div className="py-6 px-6 max-w-6xl mx-auto">
                     <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
                         {loadError}
                     </div>
-                )}
+                </div>
+            </main>
+        );
+    }
 
+    return (
+        <main className='ml-64 flex-1 bg-gray-50 dark:bg-black'>
+            <div className="py-6 px-6 max-w-6xl mx-auto space-y-6">
                 <RequestPanel
                     request={definition.request}
                     secrets={secrets}
