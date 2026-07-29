@@ -20,7 +20,7 @@ class ConnectorLinesView extends StatefulWidget {
 
 class _ConnectorLinesViewState extends State<ConnectorLinesView> {
   final List<MetroLine> _lines = [];
-  int _offset = 0;
+  Object? _position;
   bool _isLoading = false;
   bool _hasMore = true;
   String? _error;
@@ -38,14 +38,15 @@ class _ConnectorLinesViewState extends State<ConnectorLinesView> {
       _error = null;
     });
     try {
-      final newLines = await fetchConnectorLines(
+      final result = await fetchConnectorLines(
         widget.connector.id,
-        offset: _offset,
+        widget.token,
+        position: _position,
       );
       setState(() {
-        _lines.addAll(newLines);
-        _offset += newLines.length;
-        if (newLines.isEmpty) _hasMore = false;
+        _lines.addAll(result.items);
+        _position = result.next;
+        _hasMore = result.next != null;
       });
     } catch (e) {
       setState(() => _error = e.toString());

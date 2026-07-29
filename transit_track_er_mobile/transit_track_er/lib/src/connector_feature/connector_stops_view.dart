@@ -25,7 +25,7 @@ class ConnectorStopsView extends StatefulWidget {
 
 class _ConnectorStopsViewState extends State<ConnectorStopsView> {
   final List<MetroStation> _stops = [];
-  int _offset = 0;
+  Object? _position;
   bool _isLoading = false;
   bool _hasMore = true;
   String? _error;
@@ -43,17 +43,17 @@ class _ConnectorStopsViewState extends State<ConnectorStopsView> {
       _error = null;
     });
     try {
-      final newStops = await fetchConnectorStops(
+      final result = await fetchConnectorStops(
         widget.connectorId,
         widget.line.id,
         widget.direction.sens.toString(),
         widget.token,
-        offset: _offset,
+        position: _position,
       );
       setState(() {
-        _stops.addAll(newStops);
-        _offset += newStops.length;
-        if (newStops.isEmpty) _hasMore = false;
+        _stops.addAll(result.items);
+        _position = result.next;
+        _hasMore = result.next != null;
       });
     } catch (e) {
       setState(() => _error = e.toString());
@@ -92,7 +92,7 @@ class _ConnectorStopsViewState extends State<ConnectorStopsView> {
                         }
                         final stop = _stops[index];
                         return ListTile(
-                          leading: const Icon(Icons.stop_circle_outlined),
+                          leading: const Icon(Icons.pin_drop),
                           title: Text(stop.name),
                           onTap: () {
                             Navigator.push(
