@@ -48,7 +48,7 @@ several things that cannot survive a move to Kubernetes:
 | Tooling | Kustomize, no Helm | `kubectl` already embeds Kustomize v5.8.1; plain YAML reads and reviews better |
 | Browser to API | Same origin through one Ingress | One portable frontend image; CORS stops applying to the web app |
 | Secrets | `secretGenerator` locally, SealedSecrets in prod | No `kubeseal` needed to iterate locally; prod state stays in git, encrypted |
-| Images | Local `docker build` + CI push to GHCR | Docker Desktop shares its image store with the cluster, so local needs no registry |
+| Images | Local `docker build` + explicit load into the node + CI push to GHCR | The cluster runs containerd, so Docker's image store is *not* shared (see below) |
 | Migrations | initContainer, not a Job | A fixed-name Job has immutable fields and fails re-apply after an image bump |
 
 ## Architecture
@@ -154,6 +154,49 @@ infra/
     seal-secrets.sh
 ```
 
+## Local images: the cluster is containerd, not dockerd
+
+Verified against the actual cluster on 2026-08-21:
+
+```
+kubectl get nodes -o wide
+desktop-control-plane   Ready   control-plane   v1.36.1   containerd://2.3.1
+```
+
+Docker Desktop now runs Kubernetes as a kind-style single node (the node's own images are
+`kindest/kindnetd`, `kindest/local-path-provisioner`). The consequence matters: **`docker build`
+output is invisible to the kubelet**, because Docker's image store and the node's containerd
+store are separate. An earlier assumption that the two are shared — true of the older
+dockerd-backed Docker Desktop Kubernetes — does not hold here.
+
+`build-images.sh` therefore builds and then explicitly loads. This round trip was tested
+end to end and works:
+
+```sh
+docker save "$IMAGE" | docker exec -i desktop-control-plane \
+  ctr --namespace k8s.io images import -
+```
+
+Two details this pins down:
+
+- Imported images are namespaced as `docker.io/library/...` (or `docker.io/<org>/...`), which is
+  exactly what a bare `transit-tracker/backend:dev` reference in a manifest resolves to. No
+  rewriting needed.
+- The `local` overlay sets `imagePullPolicy: Never`. If a load step were ever missed, `Never`
+  fails as an unmistakable `ErrImageNeverPull` rather than a confusing authentication error from
+  Docker Hub for a repository that does not exist.
+
+The node container is reachable via `docker exec` even though it does not appear in `docker ps`,
+so the script must not try to discover it by listing containers. Its name is treated as a
+variable at the top of the script, defaulting to `desktop-control-plane`.
+
+### Storage
+
+The cluster provides two StorageClasses, both `rancher.io/local-path`: `standard` (default) and
+`hostpath`. The base `volumeClaimTemplate` therefore **omits `storageClassName`** and inherits
+`standard`; only the `prod` overlay names one explicitly. Both use `WaitForFirstConsumer`, so a
+freshly applied PVC sits `Pending` until the Postgres pod is scheduled — expected, not a fault.
+
 ## Configuration and secrets
 
 **ConfigMap `app-config`** (non-secret): `NODE_ENV`, `PORT=3000`, `CORS_ORIGIN`,
@@ -238,7 +281,7 @@ unset compiles the literal `undefined` into the bundle and every request becomes
 
 | | `local` | `prod` |
 |---|---|---|
-| Images | `transit-tracker/{backend,frontend}:dev`, `IfNotPresent` | `ghcr.io/vroam10/transit-tracker-{backend,frontend}:<tag>` |
+| Images | `transit-tracker/{backend,frontend}:dev`, `imagePullPolicy: Never` (loaded into containerd) | `ghcr.io/vroam10/transit-tracker-{backend,frontend}:<tag>`, `IfNotPresent` |
 | Host | `transit.localtest.me`, HTTP | `transit.example.com`, HTTPS — a committed placeholder, since no production domain exists yet; replacing it is a one-line overlay edit |
 | TLS | none | `tls:` block with `secretName`, plus a documented cert-manager annotation |
 | Replicas | 1 backend, 1 frontend | 2 backend, 2 frontend (worker stays 1 everywhere) |
@@ -285,21 +328,27 @@ Offline, no cluster required:
    a throwaway `postgres:14` container and confirm all 13 migrations apply. This proves the
    `COPY prisma` change works rather than assuming it.
 
-Against Docker Desktop Kubernetes:
+Against Docker Desktop Kubernetes (cluster confirmed Ready, v1.36.1):
 
-4. `install-cluster-addons.sh`, then `deploy-local.sh`.
-5. All pods reach Ready; the backend's initContainer completes.
-6. `curl http://transit.localtest.me/api/health` returns `OK`.
-7. `curl -I http://transit.localtest.me/` returns 200 from the frontend, confirming both
+4. Both images load into the node's containerd and appear in `ctr images ls`.
+5. `install-cluster-addons.sh` brings up ingress-nginx and its Service becomes reachable from
+   the host — the one step that must be *observed* rather than assumed (see Risks).
+6. `deploy-local.sh`, then all pods reach Ready and the backend's initContainer completes.
+7. `curl http://transit.localtest.me/api/health` returns `OK`.
+8. `curl -I http://transit.localtest.me/` returns 200 from the frontend, confirming both
    Ingress rules resolve to the right Service.
 
-If the cluster is unavailable, steps 4-7 are reported as unverified rather than assumed.
+Any step that cannot be completed is reported as unverified rather than assumed.
 
 ## Risks
 
-- **Docker Desktop Kubernetes was mid-restart when this design was written** (kubeconfig
-  emptied, no contexts). Steps 4-7 depend on it coming back.
-- **`prod` cannot be fully validated** from here — no cluster, and sealed secrets are
+- **Host reachability of the Ingress is unverified.** The older Docker Desktop published
+  `LoadBalancer` Services on `localhost:80`, but this cluster is the kind-style containerd
+  build and that behaviour has not been confirmed here. If no external IP materialises, the
+  fallbacks in preference order are: ingress-nginx with `hostPort: 80`, then a NodePort plus
+  `kubectl port-forward`. This must be settled by observation during implementation, and the
+  README should document whichever path actually works.
+- **`prod` cannot be fully validated** from here — no prod cluster, and sealed secrets are
   cluster-bound. It is a reviewed, rendering skeleton, not a proven deployment.
 - **Addon manifest URLs** are external and can move; pinned versions must be checked, not
   trusted.
