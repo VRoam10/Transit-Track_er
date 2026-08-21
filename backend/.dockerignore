@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.*
+serviceAccountKey.json
+trace.log
+*.log
+*.png
+tests
+.git
