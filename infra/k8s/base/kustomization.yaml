@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: transit-tracker
+
+resources:
+  - namespace.yaml
+  - config.yaml
+  - postgres/service.yaml
+  - postgres/statefulset.yaml
+  - backend/service.yaml
+  - backend/deployment.yaml
+  - worker/deployment.yaml
+  - frontend/service.yaml
+  - frontend/deployment.yaml
+  - ingress.yaml
+# secrets.example.yaml is deliberately absent - documentation only.
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: transit-tracker

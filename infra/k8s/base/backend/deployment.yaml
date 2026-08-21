@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        # Applies pending Prisma migrations before the app starts. Idempotent, and
+        # safe with several replicas because Prisma takes a database advisory lock.
+        # If Postgres is not up yet this exits non-zero and the kubelet retries it.
+        - name: migrate
+          image: transit-tracker/backend:dev
+          imagePullPolicy: IfNotPresent
+          command: ["./node_modules/.bin/prisma", "migrate", "deploy"]
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      containers:
+        - name: backend
+          image: transit-tracker/backend:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: backend-secrets
+          volumeMounts:
+            - name: firebase-sa
+              mountPath: /run/secrets/firebase
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: firebase-sa
+          secret:
+            secretName: firebase-sa

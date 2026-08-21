@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: transit-tracker
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: transit.localtest.me
+      http:
+        paths:
+          # /api wins over / by longest-prefix match. No rewriting: the backend
+          # already mounts every route under /api.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000

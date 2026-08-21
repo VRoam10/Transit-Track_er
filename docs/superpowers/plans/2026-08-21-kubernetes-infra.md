@@ -893,11 +893,14 @@ Expected: PASS — valid YAML for all 10 resources, every one carrying `namespac
 
 - [ ] **Step 11: Validate against the real API server**
 
+The Namespace must exist first. A server dry-run does not persist the Namespace it would create, so every namespaced object in the same pass fails with `namespaces "transit-tracker" not found`. Create it for real — the deploy would anyway — then validate:
+
 ```bash
+kubectl apply -f infra/k8s/base/namespace.yaml
 kubectl apply --dry-run=server -k infra/k8s/base
 ```
 
-Expected: every object reports `(server dry run)`. This catches schema errors that rendering alone cannot. Nothing is persisted.
+Expected: every object reports `(server dry run)`. This catches schema errors that rendering alone cannot. Nothing but the Namespace is persisted.
 
 - [ ] **Step 12: Commit**
 

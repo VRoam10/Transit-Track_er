@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  # DO NOT SCALE THIS. src/worker/scheduler.ts polls every 60s, evaluates every
+  # saved timetable's cron expression and sends push notifications. It holds no
+  # lease and does not deduplicate, so a second copy sends every notification
+  # twice. Recreate matters as much as replicas: 1 - the default RollingUpdate
+  # briefly runs the old and new pods together, which is exactly that overlap.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: transit-tracker/backend:dev
+          imagePullPolicy: IfNotPresent
+          command: ["node", "dist/worker/scheduler.js"]
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: backend-secrets
+          volumeMounts:
+            - name: firebase-sa
+              mountPath: /run/secrets/firebase
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
+      volumes:
+        - name: firebase-sa
+          secret:
+            secretName: firebase-sa
