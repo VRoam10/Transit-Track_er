@@ -30,10 +30,10 @@ kubectl wait --namespace ingress-nginx \
 if [ "$WITH_SEALED" -eq 1 ]; then
   echo "==> installing sealed-secrets ${SEALED_SECRETS_VERSION}"
   kubectl apply -f "$SEALED_URL"
-  kubectl wait --namespace kube-system \
-    --for=condition=available deployment \
-    --selector=app.kubernetes.io/name=sealed-secrets \
-    --timeout=300s
+  # Wait by name, not by selector: the upstream manifest labels this deployment
+  # only `name=sealed-secrets-controller`, with no app.kubernetes.io/* labels.
+  kubectl --namespace kube-system \
+    rollout status deployment/sealed-secrets-controller --timeout=300s
 fi
 
 echo "==> done"

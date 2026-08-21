@@ -182,9 +182,12 @@ Two details this pins down:
 - Imported images are namespaced as `docker.io/library/...` (or `docker.io/<org>/...`), which is
   exactly what a bare `transit-tracker/backend:dev` reference in a manifest resolves to. No
   rewriting needed.
-- The `local` overlay sets `imagePullPolicy: Never`. If a load step were ever missed, `Never`
-  fails as an unmistakable `ErrImageNeverPull` rather than a confusing authentication error from
-  Docker Hub for a repository that does not exist.
+- `imagePullPolicy: IfNotPresent` is used everywhere, and `deploy-local.sh` **preflights** that
+  both images are present in the node's containerd before applying. This supersedes an earlier
+  plan to set `imagePullPolicy: Never` locally: the preflight catches a missed load earlier and
+  with a more actionable message, and it avoids three patch files whose only job was setting one
+  field per container. Verified in practice — running `deploy-local.sh` before `build-images.sh`
+  aborts with `transit-tracker/backend:dev is not in the node's containerd`.
 
 The node container is reachable via `docker exec` even though it does not appear in `docker ps`,
 so the script must not try to discover it by listing containers. Its name is treated as a
@@ -342,12 +345,15 @@ Any step that cannot be completed is reported as unverified rather than assumed.
 
 ## Risks
 
-- **Host reachability of the Ingress is unverified.** The older Docker Desktop published
-  `LoadBalancer` Services on `localhost:80`, but this cluster is the kind-style containerd
-  build and that behaviour has not been confirmed here. If no external IP materialises, the
-  fallbacks in preference order are: ingress-nginx with `hostPort: 80`, then a NodePort plus
-  `kubectl port-forward`. This must be settled by observation during implementation, and the
-  README should document whichever path actually works.
+- ~~**Host reachability of the Ingress is unverified.**~~ **Resolved by measurement.** Docker
+  Desktop does fulfil the `LoadBalancer` on this kind-style containerd build: the controller
+  Service received `EXTERNAL-IP 172.21.0.5` and `http://transit.localtest.me/` answers on port
+  80. No `hostPort` or `port-forward` fallback was needed. Both fallbacks remain documented in
+  `infra/k8s/bootstrap/README.md` for clusters that behave differently.
+- **The upstream sealed-secrets deployment carries no `app.kubernetes.io/*` labels** — only
+  `name=sealed-secrets-controller`. Waiting on it by label selector silently matches nothing;
+  `install-cluster-addons.sh` waits by name instead. Its controller name matches the default
+  `seal-secrets.sh` expects.
 - **`prod` cannot be fully validated** from here — no prod cluster, and sealed secrets are
   cluster-bound. It is a reviewed, rendering skeleton, not a proven deployment.
 - **Addon manifest URLs** are external and can move; pinned versions must be checked, not
