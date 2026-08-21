@@ -42,3 +42,23 @@ kubectl -n transit-tracker rollout status deployment/frontend  --timeout=300s
 kubectl -n transit-tracker rollout status deployment/worker    --timeout=300s
 
 kubectl -n transit-tracker get pods
+
+# Pods being Ready is not the same as the Ingress serving: nginx needs a moment to
+# observe the new endpoints, and returns 503 until it does. Do not report success
+# before traffic actually works.
+HOST="${HOST:-transit.localtest.me}"
+echo "==> waiting for http://${HOST}/api/health to serve"
+code=""
+for _ in $(seq 1 45); do
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://${HOST}/api/health" || true)"
+  [ "$code" = "200" ] && break
+  sleep 2
+done
+
+if [ "$code" = "200" ]; then
+  echo "==> ready: http://${HOST}/  (API at /api)"
+else
+  echo "WARNING: pods are up but the ingress returned '${code:-no response}'." >&2
+  echo "Check: kubectl -n ingress-nginx get svc ingress-nginx-controller" >&2
+  exit 1
+fi
