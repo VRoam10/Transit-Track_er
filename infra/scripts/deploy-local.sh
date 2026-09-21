@@ -15,8 +15,15 @@ echo "==> generating ${OVERLAY}/.env"
 # Only these three come from the developer's file. DATABASE_URL is deliberately
 # NOT copied: backend/.env points at localhost, which inside a pod is the pod
 # itself. tr -d '\r' is required - a trailing CR ends up inside the secret value.
+#
+# The sed strips surrounding quotes for the same reason. dotenv removes them when
+# the app loads backend/.env directly, but Kustomize's secretGenerator takes the
+# value literally, so JWT_EXPIRES_IN="7d" reaches the pod as the 4-character
+# string "7d" and jwt.sign rejects it with an opaque 500 on every login.
 grep -E '^(JWT_SECRET|JWT_EXPIRES_IN|CONNECTOR_SECRET_KEY)=' "$SRC_ENV" \
-  | tr -d '\r' > "${OVERLAY}/.env"
+  | tr -d '\r' \
+  | sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/\1=\2/; s/^([A-Za-z_][A-Za-z0-9_]*)='"'"'(.*)'"'"'$/\1=\2/' \
+  > "${OVERLAY}/.env"
 echo 'DATABASE_URL=postgres://transit:transit@postgres:5432/transit' >> "${OVERLAY}/.env"
 
 echo "==> copying serviceAccountKey.json"
