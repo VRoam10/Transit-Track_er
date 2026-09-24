@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response, Router } from "express";
 import { body, validationResult } from "express-validator";
 import util from "util";
@@ -126,6 +126,9 @@ router.delete("/:id", authenticateToken, async (req, res) => {
         res.status(200).json(deletedConnector);
     }
     catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+            return res.status(404).json({ error: "Connector not found" });
+        }
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
