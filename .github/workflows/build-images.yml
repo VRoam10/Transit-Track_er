@@ -42,7 +42,7 @@ jobs:
 
       - name: Derive tags
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           # Hardcoded lowercase: GHCR rejects uppercase, and the owner is "VRoam10".
           images: ghcr.io/vroam10/transit-tracker-${{ matrix.name }}
