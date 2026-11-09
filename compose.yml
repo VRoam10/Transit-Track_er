@@ -15,7 +15,7 @@ services:
       - CORS_ORIGIN=http://localhost:3000
 
   postgres:
-    image: postgres:14
+    image: postgres:18
     ports:
       - "5432:5432"
     volumes:
