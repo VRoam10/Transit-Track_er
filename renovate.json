@@ -16,6 +16,16 @@
       ],
       "automerge": true,
       "automergeType": "pr"
+    },
+    {
+      "description": "The Flutter plugin loader is provided by the local Flutter SDK (includeBuild in settings.gradle), not a Maven repository, so Renovate cannot look it up",
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchDepNames": [
+        "dev.flutter.flutter-plugin-loader"
+      ],
+      "enabled": false
     }
   ]
 }
