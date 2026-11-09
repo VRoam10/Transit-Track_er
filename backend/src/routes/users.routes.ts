@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 import bcrypt from "bcrypt";
 import { NextFunction, Request, Response, Router } from "express";
 import { check, validationResult } from "express-validator";
@@ -8,7 +8,6 @@ import { authenticateToken } from "../middleware/auth";
 import { sendNotification } from "../services/firebase.services";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const validation = [
   check("name")

@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import busRouter from "./routes/bus/mainRouter";
@@ -7,7 +7,6 @@ import timetablesRoutes from "./routes/timetables.routes";
 import connectorRoutes from "./routes/connector/mainRouter";
 import userRoutes from "./routes/users.routes";
 
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 

@@ -26,6 +26,16 @@
         "dev.flutter.flutter-plugin-loader"
       ],
       "enabled": false
+    },
+    {
+      "description": "typescript-eslint (via eslint-config-next) and Next.js need the TypeScript JS API, which TypeScript 7 no longer ships; keep the web app below 6.1 until they support it",
+      "matchFileNames": [
+        "frontend/package.json"
+      ],
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "allowedVersions": "<6.1"
     }
   ]
 }

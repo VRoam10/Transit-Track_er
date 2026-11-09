@@ -8,5 +8,5 @@ export default defineConfig({
     // Component and hook tests opt into jsdom with a `@vitest-environment jsdom` docblock.
     setupFiles: ['./vitest.setup.ts'],
   },
-  resolve: { alias: { '@': path.resolve(__dirname) } },
+  resolve: { alias: { '@': path.resolve(import.meta.dirname) } },
 });

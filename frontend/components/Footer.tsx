@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Train, Bus, MapPin, Bell, Github, Twitter, Mail, ArrowUpRight, ChevronUp } from 'lucide-react';
+import { Train, Bus, MapPin, Bell, GitBranch, AtSign, Mail, ArrowUpRight, ChevronUp } from 'lucide-react';
 
 export default function Footer() {
     const [token, setToken] = useState<string | null>(null);
@@ -126,13 +126,14 @@ export default function Footer() {
                 <div>
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-5">Connect</h3>
                     <div className="flex gap-3">
-                        <a href="#" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
-                            <Github className="w-5 h-5 text-zinc-400" />
+                        {/* lucide-react 1.x removed brand icons, so GitHub and X/Twitter use generic glyphs. */}
+                        <a href="#" aria-label="GitHub" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
+                            <GitBranch className="w-5 h-5 text-zinc-400" />
                         </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
-                            <Twitter className="w-5 h-5 text-zinc-400" />
+                        <a href="#" aria-label="X (Twitter)" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
+                            <AtSign className="w-5 h-5 text-zinc-400" />
                         </a>
-                        <a href="#" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
+                        <a href="#" aria-label="Email" className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 transition flex items-center justify-center">
                             <Mail className="w-5 h-5 text-zinc-400" />
                         </a>
                     </div>
