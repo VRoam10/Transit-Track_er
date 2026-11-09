@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 import { NextFunction, Request, Response, Router } from "express";
 import { body, validationResult } from "express-validator";
 import util from "util";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const validateSchedule = [
   body('timetable')

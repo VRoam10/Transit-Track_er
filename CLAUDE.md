@@ -10,10 +10,10 @@ Transit Tracker is a full-stack transit tracking application (bus & metro) with 
 
 ### Backend (`backend/`)
 ```bash
-npm run dev                       # Start dev server with hot reload (ts-node-dev, port 3000)
+npm run dev                       # Start dev server with hot reload (tsx watch, port 3000)
 npm run build                     # Compile TypeScript to dist/
 npm start                         # Run compiled production server
-npm run worker                    # Start background scheduler (ts-node-dev)
+npm run worker                    # Start background scheduler (tsx watch)
 npm run prisma:generate           # Generate Prisma client after schema changes
 npm run prisma:migrate <name>     # Create a new migration
 npm run prisma:deploy             # Apply pending migrations
@@ -93,7 +93,7 @@ Structure under `lib/src/`:
 ## Conventions
 
 - Backend TypeScript compiles to ES2020 with CommonJS modules
-- Backend uses `PrismaClient` instantiated per-file (no shared singleton)
+- Backend uses one shared `PrismaClient` from `src/lib/prisma.ts` (Prisma 7 with the `@prisma/adapter-pg` driver adapter); the connection URL for the CLI lives in `backend/prisma.config.ts`, not in `schema.prisma`
 - Frontend uses `"use client"` directive for interactive components
 - Commit messages follow conventional style: `feat:`, `fix:`, `build:`, `style:`
 

@@ -15,11 +15,14 @@ services:
       - CORS_ORIGIN=http://localhost:3000
 
   postgres:
-    image: postgres:14
+    image: postgres:18
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data_hub:/var/lib/postgresql/data
+      # Postgres 18+ images keep data under /var/lib/postgresql/<major>/docker,
+      # so the volume is mounted one level up. A volume created by postgres:14
+      # cannot be read by 18: dump it first, or `docker compose down -v`.
+      - postgres_data_hub:/var/lib/postgresql
     environment:
       - POSTGRES_USER=transit
       - POSTGRES_PASSWORD=transit

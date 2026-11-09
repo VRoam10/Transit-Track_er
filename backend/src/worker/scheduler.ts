@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { prisma } from "../lib/prisma";
 import axios from 'axios';
 import { CronExpressionParser } from 'cron-parser';
 import moment from "moment";
 import { sendNotification } from "../services/firebase.services";
 
-const prisma = new PrismaClient();
 
 const URL_SERVER = process.env.URL_SERVER || `http://localhost:3000`;
 

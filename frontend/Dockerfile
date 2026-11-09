@@ -1,4 +1,4 @@
-FROM node:20-bullseye-slim AS builder
+FROM node:26-bullseye-slim AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-FROM node:20-bullseye-slim AS runner
+FROM node:26-bullseye-slim AS runner
 
 WORKDIR /usr/src/app
 USER node

@@ -9,10 +9,10 @@
     "prisma:studio": "prisma studio --port 5556",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset --force",
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "worker": "ts-node-dev --respawn src/worker/scheduler.ts",
+    "worker": "tsx watch src/worker/scheduler.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,19 +20,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "6.19.3",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "axios": "^1.12.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "cron-parser": "^5.4.0",
-    "dotenv": "^17.2.1",
+    "dotenv": "^18.0.10",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
-    "firebase-admin": "^13.5.0",
+    "firebase-admin": "^14.5.0",
     "jsonata": "^2.2.2",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
-    "prisma": "6.19.3",
+    "prisma": "7.10.1",
     "validator": "^13.15.15"
   },
   "devDependencies": {
@@ -43,8 +44,8 @@
     "@types/supertest": "^7.2.1",
     "@types/validator": "^13.15.2",
     "supertest": "^7.2.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2",
-    "vitest": "^4.1.10"
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   }
 }

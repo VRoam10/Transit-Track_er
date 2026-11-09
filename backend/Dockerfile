@@ -1,4 +1,4 @@
-FROM node:20-bullseye-slim AS builder
+FROM node:26-bullseye-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm run build
 
 RUN npm prune --omit=dev
 
-FROM node:20.20.2-bullseye-slim AS runner
+FROM node:26.8.1-bullseye-slim AS runner
 
 WORKDIR /usr/src/app
 USER node
@@ -23,6 +23,7 @@ ENV NODE_ENV=production
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/prisma ./prisma
+COPY --from=builder --chown=node:node /app/prisma.config.ts ./
 COPY --from=builder --chown=node:node /app/package*.json ./
 
 EXPOSE 3000
