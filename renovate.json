@@ -2,5 +2,20 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "baseBranches": [
+    "dev"
+  ],
+  "prCreation": "immediate",
+  "packageRules": [
+    {
+      "description": "Open the PR and merge it automatically once checks pass when Renovate rates the update high or very high merge confidence",
+      "matchConfidence": [
+        "high",
+        "very high"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    }
   ]
 }
