@@ -147,5 +147,20 @@
   "notAuthenticated": "Utilisateur non authentifié. Veuillez vous connecter.",
   "@notAuthenticated": {
     "description": "Message affiché lorsque l'utilisateur n'est pas authentifié"
-  }
+  },
+  "retry": "Réessayer",
+  "arrivingNow": "Maintenant",
+  "inMinutes": "{minutes} min",
+  "metro": "Métro",
+  "bus": "Bus",
+  "chooseTransport": "Où allez-vous ?",
+  "welcomeSubtitle": "Passages en temps réel du métro et des bus de Rennes",
+  "liveData": "Données en direct",
+  "backendData": "Via serveur",
+  "appearance": "Apparence",
+  "savedAlarms": "Alarmes enregistrées",
+  "noSavedAlarms": "Aucune alarme. Appuyez sur l'icône d'alarme d'un arrêt pour en ajouter une.",
+  "nextPassage": "Prochain passage",
+  "towards": "Vers {destination}",
+  "updatedAt": "Mis à jour à {time}"
 }

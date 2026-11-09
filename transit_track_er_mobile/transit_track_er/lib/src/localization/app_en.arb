@@ -147,5 +147,80 @@
   "notAuthenticated": "User not authenticated. Please log in.",
   "@notAuthenticated": {
     "description": "Message displayed when the user is not authenticated"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button to retry a failed request"
+  },
+  "arrivingNow": "Now",
+  "@arrivingNow": {
+    "description": "Shown when a vehicle is arriving now"
+  },
+  "inMinutes": "{minutes} min",
+  "@inMinutes": {
+    "description": "Minutes until the next arrival",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "metro": "Metro",
+  "@metro": {
+    "description": "Metro transport mode"
+  },
+  "bus": "Bus",
+  "@bus": {
+    "description": "Bus transport mode"
+  },
+  "chooseTransport": "Where are you heading?",
+  "@chooseTransport": {
+    "description": "Home page headline"
+  },
+  "welcomeSubtitle": "Real-time passages for Rennes metro & bus",
+  "@welcomeSubtitle": {
+    "description": "Subtitle on login and home pages"
+  },
+  "liveData": "Live data",
+  "@liveData": {
+    "description": "Badge for data fetched straight from STAR open data"
+  },
+  "backendData": "Via server",
+  "@backendData": {
+    "description": "Badge for data fetched through the backend"
+  },
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Settings section title for the theme"
+  },
+  "savedAlarms": "Saved alarms",
+  "@savedAlarms": {
+    "description": "Settings section title for saved alarms"
+  },
+  "noSavedAlarms": "No alarms yet. Tap the alarm icon on a stop to add one.",
+  "@noSavedAlarms": {
+    "description": "Empty state for saved alarms"
+  },
+  "nextPassage": "Next passage",
+  "@nextPassage": {
+    "description": "Title of the next passage card"
+  },
+  "towards": "Towards {destination}",
+  "@towards": {
+    "description": "Destination of a vehicle",
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedAt": "Updated at {time}",
+  "@updatedAt": {
+    "description": "Time of the last data refresh",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

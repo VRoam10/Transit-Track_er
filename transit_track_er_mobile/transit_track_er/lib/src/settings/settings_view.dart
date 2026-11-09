@@ -6,6 +6,7 @@ import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/timetable.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 import 'settings_controller.dart';
 
@@ -19,17 +20,16 @@ class SettingsView extends StatefulWidget {
 
   const SettingsView({super.key, required this.controller});
   @override
-  State<SettingsView> createState() => _SettingsViewState(this.controller);
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  _SettingsViewState(this.controller);
   late Box<FavoriteBusStop> busBox;
   late Box<FavoriteStation> stationBox;
   late List<Timetable> timetables = [];
   late String token = '';
 
-  final SettingsController controller;
+  SettingsController get controller => widget.controller;
 
   @override
   void initState() {
@@ -41,12 +41,16 @@ class _SettingsViewState extends State<SettingsView> {
 
   Future<void> _loadTimetables() async {
     final token = await AuthService().getToken() ?? '';
-    if (token.isNotEmpty) {
+    if (token.isEmpty) return;
+    try {
       final loaded = await TimetableService().fetchTimetable(token);
+      if (!mounted) return;
       setState(() {
         timetables = loaded;
         this.token = token;
       });
+    } catch (_) {
+      // Server alarms are optional here; local ones are still shown.
     }
   }
 
@@ -69,94 +73,92 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final hasAlarms =
+        busBox.isNotEmpty || stationBox.isNotEmpty || timetables.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.settingsTitle),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DropdownButton<ThemeMode>(
-                // Read the selected themeMode from the controller
-                value: controller.themeMode,
-                // Call the updateThemeMode method any time the user selects a theme.
-                onChanged: controller.updateThemeMode,
-                items: [
-                  DropdownMenuItem(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        children: [
+          SectionTitle(localizations.appearance),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SegmentedButton<ThemeMode>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
                     value: ThemeMode.system,
-                    child: Text(localizations.systemTheme),
+                    label: Text(localizations.systemTheme),
                   ),
-                  DropdownMenuItem(
+                  ButtonSegment(
                     value: ThemeMode.light,
-                    child: Text(localizations.lightTheme),
+                    label: Text(localizations.lightTheme),
                   ),
-                  DropdownMenuItem(
+                  ButtonSegment(
                     value: ThemeMode.dark,
-                    child: Text(localizations.darkTheme),
+                    label: Text(localizations.darkTheme),
                   ),
                 ],
+                selected: {controller.themeMode},
+                onSelectionChanged: (selection) =>
+                    controller.updateThemeMode(selection.first),
               ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: busBox.length,
-                itemBuilder: (context, index) {
-                  final bus = busBox.getAt(index);
-                  return ListTile(
-                    title: Text(bus?.name ?? ''),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteBus(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: stationBox.length,
-                itemBuilder: (context, index) {
-                  final station = stationBox.getAt(index);
-                  return ListTile(
-                    title: Text(station?.nomCourtLigne ?? ''),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteMetro(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: timetables.length,
-                itemBuilder: (context, index) {
-                  final timetable = timetables[index];
-                  return ListTile(
-                    title: Text(timetable.idLine),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteTimetable(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
-        ),
+          SectionTitle(localizations.savedAlarms),
+          if (!hasAlarms)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Icon(Icons.alarm_off_rounded,
+                        color: theme.colorScheme.outline),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        localizations.noSavedAlarms,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Card(
+              child: Column(
+                children: [
+                  for (var i = 0; i < busBox.length; i++)
+                    AlarmTile(
+                      title: busBox.getAt(i)?.name ?? '',
+                      subtitle:
+                          '${localizations.bus} ${busBox.getAt(i)?.nomCourtLigne ?? ''} · ${formatClock(busBox.getAt(i)!.alarmTime)}',
+                      onDelete: () => _deleteBus(i),
+                    ),
+                  for (var i = 0; i < stationBox.length; i++)
+                    AlarmTile(
+                      title: stationBox.getAt(i)?.nomCourtLigne ?? '',
+                      subtitle:
+                          '${localizations.metro} · ${formatClock(stationBox.getAt(i)!.alarmTime)}',
+                      onDelete: () => _deleteMetro(i),
+                    ),
+                  for (var i = 0; i < timetables.length; i++)
+                    AlarmTile(
+                      title: describeCron(timetables[i].cron),
+                      subtitle:
+                          '${timetables[i].mode} · ${timetables[i].idLine}',
+                      onDelete: () => _deleteTimetable(i),
+                    ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

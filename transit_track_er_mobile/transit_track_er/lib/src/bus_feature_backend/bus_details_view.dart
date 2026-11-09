@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature_backend/api_call.dart';
@@ -7,36 +9,72 @@ import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/bus_service_point.dart';
 import 'package:transit_track_er/src/types/bus_stop.dart';
 import 'package:transit_track_er/src/types/timetable.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
-/// Displays detailed information about a Bus Stop.
+/// Displays the next passage at a bus stop (via the backend) and the
+/// user's alarms for it.
 class BusStopDetailsView extends StatefulWidget {
-  const BusStopDetailsView({super.key, required this.bus});
+  const BusStopDetailsView({
+    super.key,
+    required this.bus,
+    this.lineName,
+    this.lineColor,
+  });
 
   static const routeName = '/bus_stop_details_backend';
   final BusServicePoint bus;
+  final String? lineName;
+  final Color? lineColor;
 
   @override
   State<BusStopDetailsView> createState() => _BusStopDetailsViewState();
 }
 
 class _BusStopDetailsViewState extends State<BusStopDetailsView> {
-  late List<Timetable> timetables = [];
-  late String token = '';
+  static const _refreshInterval = Duration(seconds: 30);
+
+  List<Timetable> timetables = [];
+  String token = '';
+  late Future<BusStop> _future;
+  Timer? _autoRefresh;
 
   @override
   void initState() {
     super.initState();
+    // Requests are created once here. Previously build() fired a token read,
+    // a timetable request and a next-passage request on every rebuild.
+    _future = _fetch();
     _loadTimetables();
+    _autoRefresh = Timer.periodic(_refreshInterval, (_) => _refresh());
+  }
+
+  @override
+  void dispose() {
+    _autoRefresh?.cancel();
+    super.dispose();
+  }
+
+  Future<BusStop> _fetch() =>
+      fetchNextPassageBus(widget.bus.id, widget.bus.idLigne);
+
+  Future<void> _refresh() {
+    if (!mounted) return Future.value();
+    setState(() => _future = _fetch());
+    return _future.then((_) {}, onError: (_) {});
   }
 
   Future<void> _loadTimetables() async {
     final token = await AuthService().getToken() ?? '';
-    if (token.isNotEmpty) {
+    if (token.isEmpty || !mounted) return;
+    setState(() => this.token = token);
+    try {
       final loaded = await TimetableService().fetchTimetable(token);
+      if (!mounted) return;
       setState(() {
         timetables = loaded.where((t) => t.idLine == widget.bus.id).toList();
-        this.token = token;
       });
+    } catch (_) {
+      // Alarms are optional on this screen; keep showing the passages.
     }
   }
 
@@ -51,83 +89,53 @@ class _BusStopDetailsViewState extends State<BusStopDetailsView> {
     final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${localizations.busStopDetails} #${widget.bus.idLigne}'),
+        title: Text(widget.bus.name),
         actions: [
-          FutureBuilder<String?>(
-            // Don't show button while loading token
-            future: AuthService().getToken(),
-            builder: (context, tokenSnapshot) {
-              if (tokenSnapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox(width: 48);
-              }
-
-              final isConnected = tokenSnapshot.hasData &&
-                  tokenSnapshot.data != null &&
-                  tokenSnapshot.data!.isNotEmpty;
-
-              if (!isConnected) {
-                return const SizedBox.shrink();
-              }
-
-              return FutureBuilder<List<Timetable>>(
-                future: TimetableService().fetchTimetable(tokenSnapshot.data!),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(width: 48);
-                  } else if (snapshot.hasError) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return IconButton(
-                    icon: const Icon(Icons.alarm_on),
-                    onPressed: () {
-                      showAddFavoriteBusStopDialog(context, widget.bus)
-                          .then((_) {
-                        _loadTimetables();
-                      });
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<BusStop>(
-        future: fetchNextPassageBus(widget.bus.id, widget.bus.idLigne),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text(localizations.noBusFound));
-          }
-
-          final busStop = snapshot.data!;
-
-          return ListView(padding: const EdgeInsets.all(8), children: [
-            BusDetailsView(busStopFull: busStop),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: timetables.length,
-              itemBuilder: (context, index) {
-                final timetable = timetables[index];
-                return ListTile(
-                  title: Text(timetable.idLine),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      _deleteTimetable(index);
-                    },
-                  ),
-                );
+          if (token.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.alarm_add_rounded),
+              onPressed: () {
+                showAddFavoriteBusStopDialog(context, widget.bus).then((_) {
+                  _loadTimetables();
+                });
               },
             ),
-          ]);
-        },
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: AsyncBody<BusStop>(
+          future: _future,
+          emptyMessage: localizations.noBusFound,
+          onRetry: _refresh,
+          isEmpty: (_) => false,
+          builder: (context, data) => ListView(
+            padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              BusDetailsView(
+                busStopFull: data,
+                lineName: widget.lineName,
+                lineColor: widget.lineColor,
+              ),
+              if (timetables.isNotEmpty) ...[
+                SectionTitle(localizations.savedAlarms),
+                Card(
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < timetables.length; i++)
+                        AlarmTile(
+                          title: describeCron(timetables[i].cron),
+                          subtitle: timetables[i].mode,
+                          onDelete: () => _deleteTimetable(i),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

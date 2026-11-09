@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class BusStop {
   final String? id;
@@ -86,41 +86,32 @@ class Coordonnees {
   }
 }
 
-// The main widget displaying the metro information
+/// Next-passage card for a bus stop. [upcoming] lists the following
+/// passages, if known.
 class BusDetailsView extends StatelessWidget {
   final BusStop busStopFull;
+  final String? lineName;
+  final Color? lineColor;
+  final List<DateTime> upcoming;
 
-  const BusDetailsView({super.key, required this.busStopFull});
+  const BusDetailsView({
+    super.key,
+    required this.busStopFull,
+    this.lineName,
+    this.lineColor,
+    this.upcoming = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${localizations.line}: ${busStopFull.idLigne}',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.station}: ${busStopFull.nomArret}',
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.arrivalTime}: ${busStopFull.arriveeBus}',
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.direction}: ${busStopFull.sens}',
-            style: const TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
+    return ArrivalCard(
+      lineLabel: lineName ?? busStopFull.idLigne,
+      lineColor: lineColor ?? Theme.of(context).colorScheme.primary,
+      stopName: busStopFull.nomArret,
+      arrival: busStopFull.arriveeBus,
+      destination: busStopFull.destination,
+      extraArrivals: upcoming,
+      updatedAt: DateTime.tryParse(busStopFull.heureExtraction),
     );
   }
 }

@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
-import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart' as bus_backend;
+import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart'
+    as bus_backend;
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
-import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart' as metro_backend;
+import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart'
+    as metro_backend;
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/pages/register_page.dart';
+import 'package:transit_track_er/src/theme/app_theme.dart';
 
 import 'pages/login_page.dart';
 import 'settings/settings_controller.dart';
 import 'settings/settings_view.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// Built once: ThemeData construction is not free and MaterialApp is rebuilt
+// every time the settings change.
+final ThemeData _lightTheme = AppTheme.light();
+final ThemeData _darkTheme = AppTheme.dark();
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
@@ -65,8 +73,8 @@ class MyApp extends StatelessWidget {
           // Define a light and dark color theme. Then, read the user's
           // preferred ThemeMode (light, dark, or system default) from the
           // SettingsController to display the correct theme.
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
+          theme: _lightTheme,
+          darkTheme: _darkTheme,
           themeMode: settingsController.themeMode,
 
           // Define a function to handle named routes in order to support

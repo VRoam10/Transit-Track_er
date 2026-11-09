@@ -16,46 +16,48 @@ import 'src/settings/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Permission.notification.isDenied.then((value) {
-    if (value) {
-      Permission.notification.request();
-    }
-  });
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
 
-  // Load the user's preferred theme while the splash screen is displayed.
-  // This prevents a sudden theme change when the app is first displayed.
-  await settingsController.loadSettings();
-
-  // Initialize Hive and open a box
-  await Hive.initFlutter();
   Hive.registerAdapter(FavoriteStationAdapter());
   Hive.registerAdapter(FavoriteBusStopAdapter());
-
-  await Hive.openBox<FavoriteStation>('stationsBox');
-  await Hive.openBox<FavoriteBusStop>('busBox');
-
   configureLocalTimeZone();
-  await initializeNotifications();
 
-  await Firebase.initializeApp();
-
-  // Initialize notifications
-  final notificationService = NotificationService();
-  await notificationService.initialize();
-
-  // Remove old auth token if expired
-  final authToken = await AuthService().getToken();
-
-  if (authToken != null && JwtDecoder.isExpired(authToken)) {
-    await AuthService().logout();
-  }
+  // Independent start-up work runs in parallel instead of one after the
+  // other, so the splash screen is shown for less time.
+  await Future.wait<void>([
+    // Load the user's preferred theme while the splash screen is displayed.
+    // This prevents a sudden theme change when the app is first displayed.
+    settingsController.loadSettings(),
+    Hive.initFlutter().then((_) => Future.wait([
+          Hive.openBox<FavoriteStation>('stationsBox'),
+          Hive.openBox<FavoriteBusStop>('busBox'),
+        ])),
+    // Kept in this order: the local-notification plugin is a singleton and
+    // NotificationService re-initializes it.
+    initializeNotifications().then((_) => Firebase.initializeApp()),
+    _dropExpiredToken(),
+  ]);
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   runApp(MyApp(settingsController: settingsController));
+
+  // Push setup and the notification permission prompt do not need to block
+  // the first frame.
+  NotificationService().initialize().catchError((Object _) {});
+  Permission.notification.isDenied.then((denied) {
+    if (denied) Permission.notification.request();
+  });
+}
+
+/// Removes the stored auth token if it has expired.
+Future<void> _dropExpiredToken() async {
+  final authToken = await AuthService().getToken();
+  if (authToken != null && JwtDecoder.isExpired(authToken)) {
+    await AuthService().logout();
+  }
 }

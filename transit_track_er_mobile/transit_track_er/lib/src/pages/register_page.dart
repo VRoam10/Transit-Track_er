@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
-import 'package:transit_track_er/src/settings/settings_view.dart';
+import 'package:transit_track_er/src/pages/auth_layout.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,6 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final storage = const FlutterSecureStorage();
+  bool _loading = false;
 
   @override
   void initState() {
@@ -47,78 +48,73 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  Future<void> _register() async {
+    final localizations = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    setState(() => _loading = true);
+    try {
+      await AuthService().register(_usernameController.text,
+          _emailController.text, _passwordController.text);
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text(localizations.loginSuccess)),
+    );
+    navigator.pushReplacementNamed(HomePage.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
 
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(localizations.appTitle),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.restorablePushNamed(context, SettingsView.routeName);
-              },
-            ),
-          ],
+    return AuthLayout(
+      title: localizations.createAccount,
+      showBack: true,
+      children: [
+        TextField(
+          controller: _usernameController,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.username],
+          decoration: InputDecoration(
+            labelText: localizations.username,
+            prefixIcon: const Icon(Icons.person_outline_rounded),
+          ),
         ),
-        body: Center(
-          child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: localizations.username,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: localizations.email,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: localizations.password,
-                      border: const OutlineInputBorder(),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await AuthService().register(_usernameController.text,
-                            _emailController.text, _passwordController.text);
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
-                        return;
-                      }
-                      if (!mounted) return;
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(localizations.loginSuccess)),
-                      );
-                      Navigator.pushReplacementNamed(
-                          context, HomePage.routeName // navigates to /home
-                          );
-                    },
-                    child: Text(localizations.createAccount),
-                  ),
-                ],
-              )),
-        ));
+        const SizedBox(height: 14),
+        TextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.email],
+          decoration: InputDecoration(
+            labelText: localizations.email,
+            prefixIcon: const Icon(Icons.alternate_email_rounded),
+          ),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.newPassword],
+          onSubmitted: (_) => _register(),
+          decoration: InputDecoration(
+            labelText: localizations.password,
+            prefixIcon: const Icon(Icons.lock_outline_rounded),
+          ),
+        ),
+        const SizedBox(height: 24),
+        LoadingButton(
+          label: localizations.createAccount,
+          loading: _loading,
+          onPressed: _register,
+        ),
+      ],
+    );
   }
 }

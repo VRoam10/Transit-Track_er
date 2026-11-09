@@ -2,154 +2,161 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature_backend/api_call.dart';
 import 'package:transit_track_er/src/bus_feature_backend/bus_details_view.dart';
-import 'package:transit_track_er/src/types/bus_direction.dart';
 import 'package:transit_track_er/src/types/bus_service_point.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
-/// Displays a list of Bus.
+/// Displays the stops of a bus line for the selected direction.
 class BusStopListView extends StatefulWidget {
-  const BusStopListView({super.key, required this.idLigne});
+  const BusStopListView({
+    super.key,
+    required this.idLigne,
+    this.lineName,
+    this.lineColor,
+  });
 
   final String idLigne;
+  final String? lineName;
+  final Color? lineColor;
 
   @override
-  State<BusStopListView> createState() => _BusStopListViewState(idLigne);
+  State<BusStopListView> createState() => _BusStopListViewState();
 
   static const routeName = '/bus_list_backend';
 }
 
 class _BusStopListViewState extends State<BusStopListView> {
-  _BusStopListViewState(this.idLigne);
-
-  final String idLigne;
-  late Future<List<BusServicePoint>> _futureStations;
-  late Future<List<BusRouteDirection>> _futureDirections;
-
-  int selectedSens = 0; // Default to sens 0
-  List<BusRouteDirection> directions = [];
+  late Future<List<DirectionItem>> _futureDirections;
+  Future<List<BusServicePoint>>? _futureStops;
+  int? _selectedSens;
 
   @override
   void initState() {
     super.initState();
-    _futureDirections = fetchLineDirection(idLigne);
-    _futureDirections.then((dirList) {
-      if (dirList.isNotEmpty) {
-        setState(() {
-          directions = dirList;
-          selectedSens = dirList.first.sens;
-          // Fetch stations after we know the first direction
-          _futureStations = fetchAllBusLigne(idLigne, selectedSens);
-        });
-      }
-    });
-    // Initialize with default sens
-    _futureStations = fetchAllBusLigne(idLigne, selectedSens);
+    _load();
   }
 
-  void toggleSens() {
-    if (directions.length < 2) return; // Only toggle if 2 directions exist
+  void _load() {
+    // Stops are requested once the first direction is known (previously two
+    // requests were fired on start-up, one of them thrown away).
+    _futureDirections = fetchLineDirection(widget.idLigne).then((dirs) {
+      final items = dirs
+          .map((d) => DirectionItem(d.sens, d.nomarretarrivee))
+          .toList(growable: false);
+      _selectedSens ??= items.isNotEmpty ? items.first.sens : 0;
+      _futureStops = fetchAllBusLigne(widget.idLigne, _selectedSens!);
+      return items;
+    });
+  }
+
+  void _selectSens(int sens) {
+    if (sens == _selectedSens) return;
     setState(() {
-      selectedSens = selectedSens == directions[0].sens
-          ? directions[1].sens
-          : directions[0].sens;
-      // Recall the API with the new direction
-      _futureStations = fetchAllBusLigne(idLigne, selectedSens);
+      _selectedSens = sens;
+      _futureStops = fetchAllBusLigne(widget.idLigne, sens);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final color = widget.lineColor ?? Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      appBar: AppBar(title: Text(localizations.appTitle)),
-      body: FutureBuilder<List<BusServicePoint>>(
-        future: _futureStations,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text(localizations.noBusFound));
-          }
-
-          final stations = snapshot.data!;
-
-          // Remove filtering by sens since the API call already filters
-          final uniqueStationsByIdarret = <String, dynamic>{};
-
-          for (var station in stations) {
-            if (!uniqueStationsByIdarret.containsKey(station.id)) {
-              uniqueStationsByIdarret[station.id] = station;
-            }
-          }
-
-          final oneStationPerIdarret = uniqueStationsByIdarret.values.toList();
-
-          // Get name of selected direction
-          final directionName = directions
-              .firstWhere(
-                (d) => d.sens == selectedSens,
-                orElse: () =>
-                    BusRouteDirection(sens: selectedSens, nomarretarrivee: ''),
-              )
-              .nomarretarrivee;
-
-          return Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 60.0), // Offset to show list below the box
-                child: ListView.builder(
-                  restorationId: 'BusStopListView',
-                  itemCount: oneStationPerIdarret.length,
-                  itemBuilder: (context, index) {
-                    final station = oneStationPerIdarret[index];
-                    return ListTile(
-                      title: Text(station.name),
-                      leading: const CircleAvatar(
-                        foregroundImage:
-                            AssetImage('assets/images/flutter_logo.png'),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                BusStopDetailsView(bus: station),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+      appBar: AppBar(title: _LineTitle(widget: widget, color: color)),
+      body: AsyncBody<List<DirectionItem>>(
+        future: _futureDirections,
+        emptyMessage: localizations.noBusFound,
+        onRetry: () => setState(_load),
+        isEmpty: (_) => false,
+        builder: (context, directions) => Column(
+          children: [
+            DirectionSelector(
+              directions: directions,
+              selected: _selectedSens ?? 0,
+              color: color,
+              onChanged: _selectSens,
+            ),
+            Expanded(
+              child: AsyncBody<List<BusServicePoint>>(
+                future: _futureStops,
+                emptyMessage: localizations.noBusFound,
+                onRetry: () => setState(() => _futureStops =
+                    fetchAllBusLigne(widget.idLigne, _selectedSens ?? 0)),
+                builder: (context, stops) {
+                  // Keep a single entry per stop.
+                  final seen = <String>{};
+                  final unique = stops.where((s) => seen.add(s.id)).toList();
+                  return _StopList(stops: unique, color: color, widget: widget);
+                },
               ),
-              // Fixed Top Box
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: toggleSens,
-                  child: Container(
-                    height: 60,
-                    color: selectedSens == 0 ? Colors.blue : Colors.green,
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${localizations.direction}: $directionName (${localizations.tapToSwitch})',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _LineTitle extends StatelessWidget {
+  const _LineTitle({required this.widget, required this.color});
+
+  final BusStopListView widget;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final name = widget.lineName;
+    if (name == null) return Text(localizations.busStopListTitle);
+    return Row(
+      children: [
+        LineBadge(label: name, color: color, size: 32),
+        const SizedBox(width: 12),
+        Flexible(child: Text('${localizations.line} ${name.toUpperCase()}')),
+      ],
+    );
+  }
+}
+
+class _StopList extends StatelessWidget {
+  const _StopList({
+    required this.stops,
+    required this.color,
+    required this.widget,
+  });
+
+  final List<BusServicePoint> stops;
+  final Color color;
+  final BusStopListView widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      restorationId: 'BusStopListView',
+      padding: const EdgeInsets.only(top: 4, bottom: 24),
+      itemExtent: 56,
+      itemCount: stops.length,
+      itemBuilder: (context, index) {
+        final stop = stops[index];
+        return StopTile(
+          name: stop.name,
+          color: color,
+          isFirst: index == 0,
+          isLast: index == stops.length - 1,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BusStopDetailsView(
+                  bus: stop,
+                  lineName: widget.lineName,
+                  lineColor: widget.lineColor,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
