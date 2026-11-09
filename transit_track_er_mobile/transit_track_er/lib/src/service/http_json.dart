@@ -1,12 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// One shared HTTP client for every API call: keeps connections alive
 /// (no new TCP/TLS handshake per request) instead of `http.get` which opens
 /// a fresh client each time.
-final http.Client _client = http.Client();
+http.Client _client = http.Client();
+
+/// Replaces the shared client and empties the cache (tests only).
+@visibleForTesting
+void debugSetHttpClient(http.Client client) {
+  _client = client;
+  _cache.clear();
+}
 
 class _CacheEntry {
   _CacheEntry(this.future, this.expiresAt);

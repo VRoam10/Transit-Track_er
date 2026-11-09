@@ -1,14 +1,14 @@
+import { PrismaClient } from "@prisma/client";
 import axios from 'axios';
 import { CronExpressionParser } from 'cron-parser';
+import moment from "moment";
 import { sendNotification } from "../services/firebase.services";
 
-const { PrismaClient } = require("@prisma/client");
-const moment = require("moment");
 const prisma = new PrismaClient();
 
 const URL_SERVER = process.env.URL_SERVER || `http://localhost:3000`;
 
-async function runScheduledTasks() {
+export async function runScheduledTasks() {
     const now = new Date();
     const nowMinute = moment(now).format("YYYY-MM-DD HH:mm");
 
@@ -18,7 +18,7 @@ async function runScheduledTasks() {
     });
 
     for (const schedule of schedules) {
-        const task = schedule.timetable;
+        const task = schedule.timetable as any;
         try {
             const interval = CronExpressionParser.parse(task.cron, { currentDate: new Date() });
 
@@ -39,7 +39,6 @@ async function runScheduledTasks() {
                             task.message || "Scheduled task",
                             `Next Train at ${passages.name}: ${passages.nextTrain}`
                         );
-                        break;
                     } catch (err) {
                         throw new Error(`Error fetching next passages from external API: ${err}`);
                     }
@@ -47,7 +46,7 @@ async function runScheduledTasks() {
             }
         } catch (err: Error | any) {
             console.error(
-                `Invalid cron "${task.cron}" in schedule ID ${schedule.id}:`,
+                `Schedule ${schedule.id} (cron "${task.cron}") failed:`,
                 err.message
             );
         }
