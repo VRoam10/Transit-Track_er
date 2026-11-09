@@ -28,6 +28,7 @@ class _SettingsViewState extends State<SettingsView> {
   late Box<FavoriteStation> stationBox;
   late List<Timetable> timetables = [];
   late String token = '';
+  String? _email;
 
   SettingsController get controller => widget.controller;
 
@@ -39,7 +40,15 @@ class _SettingsViewState extends State<SettingsView> {
     _loadTimetables();
   }
 
+  Future<void> _signOut() async {
+    await AuthService().logout();
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
+
   Future<void> _loadTimetables() async {
+    final email = await AuthService().getEmail();
+    if (mounted && email != null) setState(() => _email = email);
     final token = await AuthService().getToken() ?? '';
     if (token.isEmpty) return;
     try {
@@ -84,6 +93,13 @@ class _SettingsViewState extends State<SettingsView> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
+          SectionTitle(localizations.account),
+          AccountCard(
+            email: _email,
+            onSignOut: _signOut,
+            onSignIn: () => Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (route) => false),
+          ),
           SectionTitle(localizations.appearance),
           Card(
             child: Padding(
@@ -133,28 +149,41 @@ class _SettingsViewState extends State<SettingsView> {
           else
             Card(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (busBox.isNotEmpty || stationBox.isNotEmpty)
+                    GroupLabel(localizations.onThisDevice),
                   for (var i = 0; i < busBox.length; i++)
-                    AlarmTile(
-                      title: busBox.getAt(i)?.name ?? '',
-                      subtitle:
-                          '${localizations.bus} ${busBox.getAt(i)?.nomCourtLigne ?? ''} · ${formatClock(busBox.getAt(i)!.alarmTime)}',
-                      onDelete: () => _deleteBus(i),
-                    ),
+                    if (busBox.getAt(i) case final bus?)
+                      AlarmTile(
+                        icon: Icons.directions_bus_rounded,
+                        color: modeColor('bus'),
+                        title: bus.name,
+                        subtitle:
+                            '${localizations.bus} ${bus.nomCourtLigne} · ${formatAlarmDate(context, bus.alarmTime)}',
+                        onDelete: () => _deleteBus(i),
+                      ),
                   for (var i = 0; i < stationBox.length; i++)
-                    AlarmTile(
-                      title: stationBox.getAt(i)?.nomCourtLigne ?? '',
-                      subtitle:
-                          '${localizations.metro} · ${formatClock(stationBox.getAt(i)!.alarmTime)}',
-                      onDelete: () => _deleteMetro(i),
-                    ),
+                    if (stationBox.getAt(i) case final station?)
+                      AlarmTile(
+                        icon: Icons.subway_rounded,
+                        color: modeColor('metro'),
+                        title: station.nomCourtLigne,
+                        subtitle:
+                            '${localizations.metro} · ${formatAlarmDate(context, station.alarmTime)}',
+                        onDelete: () => _deleteMetro(i),
+                      ),
+                  if (timetables.isNotEmpty)
+                    GroupLabel(localizations.onYourAccount),
                   for (var i = 0; i < timetables.length; i++)
                     AlarmTile(
-                      title: describeCron(timetables[i].cron),
-                      subtitle:
-                          '${timetables[i].mode} · ${timetables[i].idLine}',
+                      icon: modeIcon(timetables[i].mode),
+                      color: modeColor(timetables[i].mode),
+                      title: describeCron(context, timetables[i].cron),
+                      subtitle: localizations.stopId(timetables[i].idLine),
                       onDelete: () => _deleteTimetable(i),
                     ),
+                  const SizedBox(height: 6),
                 ],
               ),
             ),

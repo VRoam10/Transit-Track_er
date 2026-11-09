@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/theme/app_theme.dart';
 
 /// Picks black or white text for the best contrast on [background].
 Color onColor(Color background) =>
@@ -605,15 +606,209 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-/// Turns a "m h * * d" cron expression into "HH:mm" (falls back to the raw
-/// expression when it does not match that shape).
-String describeCron(String cron) {
+/// Turns a "m h * * d" cron expression into "Mon · 08:15" (or "08:15" when
+/// it repeats every day). Falls back to the raw expression otherwise.
+String describeCron(BuildContext context, String cron) {
   final parts = cron.split(' ');
   if (parts.length < 2) return cron;
   final m = int.tryParse(parts[0]);
   final h = int.tryParse(parts[1]);
   if (m == null || h == null) return cron;
-  return '${_two(h)}:${_two(m)}';
+  final time = '${_two(h)}:${_two(m)}';
+  final day = parts.length >= 5 ? int.tryParse(parts[4]) : null;
+  if (day == null) return time;
+  final names = AppLocalizations.of(context)!.weekdaysShort.split(',');
+  // Cron uses 0 or 7 for Sunday.
+  return '${names[day % 7]} · $time';
+}
+
+/// Formats a one-off alarm date as e.g. "Nov 10 · 08:15" in the user's locale.
+String formatAlarmDate(BuildContext context, DateTime date) {
+  final l = MaterialLocalizations.of(context);
+  return '${l.formatShortMonthDay(date)} · ${formatClock(date)}';
+}
+
+/// Icon for a transport mode ("metro" / "bus").
+IconData modeIcon(String mode) => mode.toLowerCase() == 'bus'
+    ? Icons.directions_bus_rounded
+    : Icons.subway_rounded;
+
+/// Accent color for a transport mode ("metro" / "bus").
+Color modeColor(String mode) =>
+    mode.toLowerCase() == 'bus' ? AppColors.brandBlue : AppColors.brandRed;
+
+/// Time picker in 24-hour format, matching the HH:mm times shown everywhere
+/// else in the app.
+Future<TimeOfDay?> showTime24Picker(BuildContext context) {
+  return showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+      child: child!,
+    ),
+  );
+}
+
+/// Shows the floating confirmation used after an alarm is saved.
+void showAlarmSetSnackBar(BuildContext context, String stop, DateTime time) {
+  final l10n = AppLocalizations.of(context)!;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(Icons.alarm_on_rounded,
+              color: Theme.of(context).colorScheme.onInverseSurface),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(l10n.alarmSet(stop, formatAlarmDate(context, time))),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Asks whether the user wants to set a custom alarm. Returns true to go on.
+Future<bool> showAlarmConfirmDialog(BuildContext context) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      final l10n = AppLocalizations.of(context)!;
+      final scheme = Theme.of(context).colorScheme;
+      return AlertDialog(
+        icon: CircleAvatar(
+          radius: 28,
+          backgroundColor: scheme.primaryContainer,
+          foregroundColor: scheme.onPrimaryContainer,
+          child: const Icon(Icons.alarm_add_rounded, size: 28),
+        ),
+        title: Text(l10n.setAlarm),
+        content: Text(l10n.setAlarmConfirmation, textAlign: TextAlign.center),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(120, 44)),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.continueAction),
+          ),
+        ],
+      );
+    },
+  );
+  return result == true;
+}
+
+/// Shows who is signed in (with a sign-out action), or invites a guest to
+/// sign in.
+class AccountCard extends StatelessWidget {
+  const AccountCard({
+    super.key,
+    required this.email,
+    required this.onSignOut,
+    required this.onSignIn,
+  });
+
+  /// Null for guests.
+  final String? email;
+  final VoidCallback onSignOut;
+  final VoidCallback onSignIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final signedIn = email != null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor:
+                  signedIn ? scheme.primary : scheme.surfaceVariant,
+              foregroundColor:
+                  signedIn ? scheme.onPrimary : scheme.onSurfaceVariant,
+              child: signedIn
+                  ? Text(
+                      email!.isEmpty ? '?' : email![0].toUpperCase(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w700),
+                    )
+                  : const Icon(Icons.person_outline_rounded),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: signedIn
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          email!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Icon(Icons.verified_rounded,
+                                size: 14, color: scheme.primary),
+                            const SizedBox(width: 4),
+                            Text(l10n.signedIn,
+                                style: theme.textTheme.bodySmall),
+                          ],
+                        ),
+                      ],
+                    )
+                  : Text(l10n.guestAccountHint,
+                      style: theme.textTheme.bodySmall),
+            ),
+            const SizedBox(width: 8),
+            signedIn
+                ? TextButton.icon(
+                    onPressed: onSignOut,
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: Text(l10n.signOut),
+                  )
+                : FilledButton.tonal(
+                    style:
+                        FilledButton.styleFrom(minimumSize: const Size(0, 40)),
+                    onPressed: onSignIn,
+                    child: Text(l10n.connect),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small grey heading inside an alarms card ("On this device"...).
+class GroupLabel extends StatelessWidget {
+  const GroupLabel(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+      child: Text(
+        text,
+        style: theme.textTheme.labelMedium
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
 }
 
 /// A saved alarm row with a delete action.
@@ -622,11 +817,17 @@ class AlarmTile extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
+    this.icon = Icons.alarm_rounded,
+    this.color,
     required this.onDelete,
   });
 
   final String title;
   final String? subtitle;
+  final IconData icon;
+
+  /// Accent for the leading icon (defaults to the theme's primary color).
+  final Color? color;
   final VoidCallback onDelete;
 
   @override
@@ -634,9 +835,11 @@ class AlarmTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: scheme.primaryContainer,
-        foregroundColor: scheme.onPrimaryContainer,
-        child: const Icon(Icons.alarm_rounded),
+        backgroundColor: (color ?? scheme.primary).withOpacity(0.14),
+        foregroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Color.lerp(color ?? scheme.primary, Colors.white, 0.45)
+            : (color ?? scheme.primary),
+        child: Icon(icon),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: subtitle == null ? null : Text(subtitle!),

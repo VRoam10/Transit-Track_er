@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 import 'package:transit_track_er/src/form_backend/save_metro_station.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
@@ -9,26 +10,7 @@ import 'package:transit_track_er/src/types/timetable.dart';
 Future<void> showRemoveFavoriteStationDialog(
     BuildContext context, MetroStation station, Timetable timetable) async {
   // Step 1: Ask the user if they want to continue
-  final bool? continueAction = await showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      final localizations = AppLocalizations.of(context)!;
-      return AlertDialog(
-        title: Text(localizations.setAlarm),
-        content: Text(localizations.setAlarmConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(localizations.cancelAction),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(localizations.continueAction),
-          ),
-        ],
-      );
-    },
-  );
+  final bool continueAction = await showAlarmConfirmDialog(context);
 
   String token = await AuthService().getToken() ?? '';
   if (token.isEmpty) {
@@ -39,7 +21,7 @@ Future<void> showRemoveFavoriteStationDialog(
   }
   await TimetableService().deleteTimetable(token, timetable);
 
-  if (continueAction != true) return; // user canceled
+  if (!continueAction) return; // user canceled
 
   showAddFavoriteStationDialog(context, station);
 }

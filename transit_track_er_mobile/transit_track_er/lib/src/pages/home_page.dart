@@ -10,6 +10,7 @@ import 'package:transit_track_er/src/service/api_service.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/settings/settings_view.dart';
 import 'package:transit_track_er/src/theme/app_theme.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,9 +22,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? _email;
+
   @override
   void initState() {
     super.initState();
+    AuthService().getEmail().then((email) {
+      if (mounted && email != null) setState(() => _email = email);
+    });
     // Fire-and-forget: never block the UI on push registration, and don't
     // let a failure surface as an unhandled async error.
     initFirebaseAndRegisterToken().catchError((Object _) {});
@@ -59,7 +65,14 @@ class _HomePageState extends State<HomePage> {
             title: localizations.chooseTransport,
             subtitle: localizations.welcomeSubtitle,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
+          AccountCard(
+            email: _email,
+            onSignOut: logout,
+            onSignIn: () => Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (route) => false),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(

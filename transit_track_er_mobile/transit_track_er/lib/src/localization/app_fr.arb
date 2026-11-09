@@ -162,5 +162,14 @@
   "noSavedAlarms": "Aucune alarme. Appuyez sur l'icône d'alarme d'un arrêt pour en ajouter une.",
   "nextPassage": "Prochain passage",
   "towards": "Vers {destination}",
-  "updatedAt": "Mis à jour à {time}"
+  "updatedAt": "Mis à jour à {time}",
+  "weekdaysShort": "dim.,lun.,mar.,mer.,jeu.,ven.,sam.",
+  "account": "Compte",
+  "signedIn": "Connecté",
+  "signOut": "Se déconnecter",
+  "guestAccountHint": "Connectez-vous pour garder vos alarmes sur votre compte et recevoir les notifications.",
+  "onThisDevice": "Sur cet appareil",
+  "onYourAccount": "Sur votre compte",
+  "alarmSet": "Alarme définie : {stop} · {time}",
+  "stopId": "Arrêt {id}"
 }

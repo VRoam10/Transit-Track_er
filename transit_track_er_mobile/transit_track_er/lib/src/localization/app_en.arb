@@ -222,5 +222,54 @@
         "type": "String"
       }
     }
+  },
+  "weekdaysShort": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+  "@weekdaysShort": {
+    "description": "Comma-separated short weekday names, starting on Sunday"
+  },
+  "account": "Account",
+  "@account": {
+    "description": "Settings section title for the account"
+  },
+  "signedIn": "Signed in",
+  "@signedIn": {
+    "description": "Shown under the user's email when signed in"
+  },
+  "signOut": "Sign out",
+  "@signOut": {
+    "description": "Button to sign out"
+  },
+  "guestAccountHint": "Sign in to keep your alarms on your account and get push notifications.",
+  "@guestAccountHint": {
+    "description": "Shown to guests in the account card"
+  },
+  "onThisDevice": "On this device",
+  "@onThisDevice": {
+    "description": "Group title for alarms saved locally"
+  },
+  "onYourAccount": "On your account",
+  "@onYourAccount": {
+    "description": "Group title for alarms saved on the server"
+  },
+  "alarmSet": "Alarm set: {stop} · {time}",
+  "@alarmSet": {
+    "description": "Confirmation after saving an alarm",
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stopId": "Stop {id}",
+  "@stopId": {
+    "description": "Label for a stop identified only by its id",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

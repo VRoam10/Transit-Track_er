@@ -126,8 +126,9 @@ class _MetroStationDetailsViewState extends State<MetroStationDetailsView> {
                     children: [
                       for (var i = 0; i < timetables.length; i++)
                         AlarmTile(
-                          title: describeCron(timetables[i].cron),
-                          subtitle: timetables[i].mode,
+                          icon: modeIcon(timetables[i].mode),
+                          color: modeColor(timetables[i].mode),
+                          title: describeCron(context, timetables[i].cron),
                           onDelete: () => _deleteTimetable(i),
                         ),
                     ],
