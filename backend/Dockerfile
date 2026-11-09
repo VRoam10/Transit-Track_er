@@ -1,4 +1,4 @@
-FROM node:20-bullseye-slim AS builder
+FROM node:26-bullseye-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm run build
 
 RUN npm prune --omit=dev
 
-FROM node:20.20.2-bullseye-slim AS runner
+FROM node:26.8.1-bullseye-slim AS runner
 
 WORKDIR /usr/src/app
 USER node
