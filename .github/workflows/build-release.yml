@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest # we can select macos-latest to be able to get ios build
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Create google-services.json
         working-directory: ./transit_track_er_mobile/transit_track_er
