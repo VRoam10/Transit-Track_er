@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/connector_feature/api_call.dart';
 import 'package:transit_track_er/src/connector_feature/connector_directions_view.dart';
 import 'package:transit_track_er/src/types/connector.dart';
 import 'package:transit_track_er/src/types/metro_line.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class ConnectorLinesView extends StatefulWidget {
   const ConnectorLinesView({
@@ -43,62 +45,62 @@ class _ConnectorLinesViewState extends State<ConnectorLinesView> {
         widget.token,
         position: _position,
       );
+      if (!mounted) return;
       setState(() {
         _lines.addAll(result.items);
         _position = result.next;
         _hasMore = result.next != null;
       });
     } catch (e) {
-      setState(() => _error = e.toString());
+      if (mounted) setState(() => _error = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final Widget body;
+    if (_lines.isEmpty && _isLoading) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (_lines.isEmpty && _error != null) {
+      body = StateMessage(
+        icon: Icons.cloud_off_rounded,
+        message: _error!.replaceFirst('Exception: ', ''),
+        onRetry: _loadMore,
+      );
+    } else if (_lines.isEmpty) {
+      body = StateMessage(
+          icon: Icons.search_off_rounded, message: l10n.noLinesFound);
+    } else {
+      body = LineGrid(
+        lines: [
+          for (final l in _lines)
+            LineItem(id: l.id, name: l.shortName, color: l.lineColor),
+        ],
+        footer: _hasMore
+            ? LoadMoreButton(loading: _isLoading, onPressed: _loadMore)
+            : null,
+        onTap: (item) {
+          final line = _lines.firstWhere((l) => l.id == item.id);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ConnectorDirectionsView(
+                connectorId: widget.connector.id,
+                line: line,
+                token: widget.token,
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.connector.name)),
-      body: _lines.isEmpty && _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _lines.isEmpty && _error != null
-              ? Center(child: Text('Error: $_error'))
-              : _lines.isEmpty
-                  ? const Center(child: Text('No lines found'))
-                  : ListView.builder(
-                      itemCount: _lines.length + (_hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == _lines.length) {
-                          return _isLoading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                )
-                              : TextButton(
-                                  onPressed: _loadMore,
-                                  child: const Text('Load more'),
-                                );
-                        }
-                        final line = _lines[index];
-                        return ListTile(
-                          leading: Icon(Icons.circle, color: line.lineColor),
-                          title: Text(line.shortName),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ConnectorDirectionsView(
-                                  connectorId: widget.connector.id,
-                                  line: line,
-                                  token: widget.token,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+      body: body,
     );
   }
 }

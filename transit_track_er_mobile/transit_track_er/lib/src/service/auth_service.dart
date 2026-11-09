@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:transit_track_er/src/environment.dart';
 
 class AuthService {
@@ -49,6 +50,16 @@ class AuthService {
   Future<String?> getToken() async {
     const storage = FlutterSecureStorage();
     return await storage.read(key: 'auth_token');
+  }
+
+  /// Email of the signed-in user, read from the stored JWT (null if the
+  /// user is a guest or the token cannot be decoded).
+  Future<String?> getEmail() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) return null;
+    final payload = JwtDecoder.tryDecode(token);
+    final email = payload?['email'];
+    return email is String ? email : null;
   }
 
   Future<void> logout() async {

@@ -148,6 +148,126 @@
   "@notAuthenticated": {
     "description": "Message displayed when the user is not authenticated"
   },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button to retry a failed request"
+  },
+  "arrivingNow": "Now",
+  "@arrivingNow": {
+    "description": "Shown when a vehicle is arriving now"
+  },
+  "inMinutes": "{minutes} min",
+  "@inMinutes": {
+    "description": "Minutes until the next arrival",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "metro": "Metro",
+  "@metro": {
+    "description": "Metro transport mode"
+  },
+  "bus": "Bus",
+  "@bus": {
+    "description": "Bus transport mode"
+  },
+  "chooseTransport": "Where are you heading?",
+  "@chooseTransport": {
+    "description": "Home page headline"
+  },
+  "welcomeSubtitle": "Real-time passages for Rennes metro & bus",
+  "@welcomeSubtitle": {
+    "description": "Subtitle on login and home pages"
+  },
+  "liveData": "Live data",
+  "@liveData": {
+    "description": "Badge for data fetched straight from STAR open data"
+  },
+  "backendData": "Via server",
+  "@backendData": {
+    "description": "Badge for data fetched through the backend"
+  },
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Settings section title for the theme"
+  },
+  "savedAlarms": "Saved alarms",
+  "@savedAlarms": {
+    "description": "Settings section title for saved alarms"
+  },
+  "noSavedAlarms": "No alarms yet. Tap the alarm icon on a stop to add one.",
+  "@noSavedAlarms": {
+    "description": "Empty state for saved alarms"
+  },
+  "nextPassage": "Next passage",
+  "@nextPassage": {
+    "description": "Title of the next passage card"
+  },
+  "towards": "Towards {destination}",
+  "@towards": {
+    "description": "Destination of a vehicle",
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "updatedAt": "Updated at {time}",
+  "@updatedAt": {
+    "description": "Time of the last data refresh",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "account": "Account",
+  "@account": {
+    "description": "Settings section title for the account"
+  },
+  "signedIn": "Signed in",
+  "@signedIn": {
+    "description": "Shown under the user's email when signed in"
+  },
+  "signOut": "Sign out",
+  "@signOut": {
+    "description": "Button to sign out"
+  },
+  "guestAccountHint": "Sign in to keep your alarms on your account and get push notifications.",
+  "@guestAccountHint": {
+    "description": "Shown to guests in the account card"
+  },
+  "onThisDevice": "On this device",
+  "@onThisDevice": {
+    "description": "Group title for alarms saved locally"
+  },
+  "onYourAccount": "On your account",
+  "@onYourAccount": {
+    "description": "Group title for alarms saved on the server"
+  },
+  "alarmSet": "Alarm set: {stop} · {time}",
+  "@alarmSet": {
+    "description": "Confirmation after saving an alarm",
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "stopId": "Stop {id}",
+  "@stopId": {
+    "description": "Label for a stop identified only by its id",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "timetableListTitle": "Timetables",
   "@timetableListTitle": {
     "description": "Title for the timetable list page"
@@ -219,5 +339,45 @@
   "weekdayEvery": "Every day",
   "@weekdayEvery": {
     "description": "Label for every day of the week"
+  },
+  "connectors": "Connectors",
+  "@connectors": {
+    "description": "Title of the connectors page and home entry"
+  },
+  "connectorsSubtitle": "Other networks via custom APIs",
+  "@connectorsSubtitle": {
+    "description": "Subtitle of the connectors entry on home"
+  },
+  "noConnectors": "No connectors yet",
+  "@noConnectors": {
+    "description": "Empty state title on the connectors page"
+  },
+  "noConnectorsHint": "Connectors you create on the Transit Track_er website will show up here.",
+  "@noConnectorsHint": {
+    "description": "Empty state hint on the connectors page"
+  },
+  "loadMore": "Load more",
+  "@loadMore": {
+    "description": "Button to load the next page of results"
+  },
+  "noLinesFound": "No lines found",
+  "@noLinesFound": {
+    "description": "Empty state for connector lines"
+  },
+  "noDirectionsFound": "No directions found",
+  "@noDirectionsFound": {
+    "description": "Empty state for connector directions"
+  },
+  "noStopsFound": "No stops found",
+  "@noStopsFound": {
+    "description": "Empty state for connector stops"
+  },
+  "noPassageFound": "No upcoming passage",
+  "@noPassageFound": {
+    "description": "Empty state for connector next passage"
+  },
+  "chooseDirection": "Choose a direction",
+  "@chooseDirection": {
+    "description": "Heading above the list of directions"
   }
 }

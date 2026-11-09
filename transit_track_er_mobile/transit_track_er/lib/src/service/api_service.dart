@@ -7,8 +7,8 @@ import 'package:transit_track_er/src/environment.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 
 Future<void> initFirebaseAndRegisterToken() async {
-  // Initialize Firebase (only once)
-  await Firebase.initializeApp();
+  // Firebase is already initialized in main(); only do it if it isn't.
+  if (Firebase.apps.isEmpty) await Firebase.initializeApp();
 
   // Get FCM token
   FirebaseMessaging messaging = FirebaseMessaging.instance;

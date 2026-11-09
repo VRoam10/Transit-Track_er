@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/notification/local_notification.dart';
 import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
-import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 Future<void> showAddFavoriteStationDialog(BuildContext context,
     Box<FavoriteStation> box, MetroStation station) async {
@@ -19,10 +18,7 @@ Future<void> showAddFavoriteStationDialog(BuildContext context,
   if (pickedDate == null) return; // user cancelled
 
   // Step 2: Let the user choose a time
-  final TimeOfDay? pickedTime = await showTimePicker(
-    context: context,
-    initialTime: TimeOfDay.now(),
-  );
+  final TimeOfDay? pickedTime = await showTime24Picker(context);
 
   if (pickedTime == null) return; // user cancelled
 
@@ -45,9 +41,6 @@ Future<void> showAddFavoriteStationDialog(BuildContext context,
 
   await scheduleStationNotification(favoriteStation);
 
-  final localization = AppLocalizations.of(context)!;
-  AppSnackbar.showSuccess(
-    context,
-    '${localization.favoriteMetroStation} ${station.name} ${localization.addedFor} ${chosenDateTime.toLocal()}',
-  );
+  if (!context.mounted) return;
+  showAlarmSetSnackBar(context, station.name, chosenDateTime);
 }

@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/connector_feature/api_call.dart';
+import 'package:transit_track_er/src/types/metro_line.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
 import 'package:transit_track_er/src/types/station.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class ConnectorNxpassageView extends StatefulWidget {
   const ConnectorNxpassageView({
@@ -11,11 +14,15 @@ class ConnectorNxpassageView extends StatefulWidget {
     required this.connectorId,
     required this.stop,
     required this.token,
+    this.line,
   });
 
   final String connectorId;
   final MetroStation stop;
   final String token;
+
+  /// Line the stop belongs to, used for the card's badge and color.
+  final MetroLine? line;
 
   @override
   State<ConnectorNxpassageView> createState() => _ConnectorNxpassageViewState();
@@ -78,20 +85,33 @@ class _ConnectorNxpassageViewState extends State<ConnectorNxpassageView> {
     }
     if (_passage == null) {
       // Error/empty states are scrollable so pull-to-refresh still works.
+      final l10n = AppLocalizations.of(context)!;
       return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(_error != null ? 'Error: $_error' : 'No passage data found'),
-            ),
+          const SizedBox(height: 80),
+          StateMessage(
+            icon: _error != null
+                ? Icons.cloud_off_rounded
+                : Icons.schedule_rounded,
+            message: _error != null
+                ? _error!.replaceFirst('Exception: ', '')
+                : l10n.noPassageFound,
+            onRetry: _refresh,
           ),
         ],
       );
     }
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: [MetroDetailsView(metro: _passage!)],
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        MetroDetailsView(
+          metro: _passage!,
+          lineName: widget.line?.shortName,
+          lineColor: widget.line?.lineColor,
+        ),
+      ],
     );
   }
 }

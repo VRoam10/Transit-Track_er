@@ -27,8 +27,7 @@ class TimetableService {
     }
   }
 
-  Future<Timetable> createTimetable(
-      String token, Timetable timetable) async {
+  Future<Timetable> createTimetable(String token, Timetable timetable) async {
     final response = await http
         .post(
       Uri.parse('${Environment.baseUrl}/api/timetables'),

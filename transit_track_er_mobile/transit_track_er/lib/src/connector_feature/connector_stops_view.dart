@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/connector_feature/api_call.dart';
 import 'package:transit_track_er/src/connector_feature/connector_nxpassage_view.dart';
 import 'package:transit_track_er/src/types/metro_direction.dart';
 import 'package:transit_track_er/src/types/metro_line.dart';
 import 'package:transit_track_er/src/types/metro_station.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class ConnectorStopsView extends StatefulWidget {
   const ConnectorStopsView({
@@ -50,65 +52,87 @@ class _ConnectorStopsViewState extends State<ConnectorStopsView> {
         widget.token,
         position: _position,
       );
+      if (!mounted) return;
       setState(() {
         _stops.addAll(result.items);
         _position = result.next;
         _hasMore = result.next != null;
       });
     } catch (e) {
-      setState(() => _error = e.toString());
+      if (mounted) setState(() => _error = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final color = widget.line.lineColor;
+
+    final Widget body;
+    if (_stops.isEmpty && _isLoading) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (_stops.isEmpty && _error != null) {
+      body = StateMessage(
+        icon: Icons.cloud_off_rounded,
+        message: _error!.replaceFirst('Exception: ', ''),
+        onRetry: _loadMore,
+      );
+    } else if (_stops.isEmpty) {
+      body = StateMessage(
+          icon: Icons.search_off_rounded, message: l10n.noStopsFound);
+    } else {
+      body = ListView.builder(
+        padding: const EdgeInsets.only(top: 4, bottom: 24),
+        itemCount: _stops.length + (_hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _stops.length) {
+            return LoadMoreButton(loading: _isLoading, onPressed: _loadMore);
+          }
+          final stop = _stops[index];
+          return StopTile(
+            name: stop.name,
+            color: color,
+            isFirst: index == 0,
+            // While more pages exist, the route continues past this stop.
+            isLast: !_hasMore && index == _stops.length - 1,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ConnectorNxpassageView(
+                    connectorId: widget.connectorId,
+                    stop: stop,
+                    token: widget.token,
+                    line: widget.line,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            '${widget.line.shortName} → ${widget.direction.nomarretarrivee}'),
+        title: Row(
+          children: [
+            LineBadge(label: widget.line.shortName, color: color, size: 32),
+            const SizedBox(width: 12),
+            const Icon(Icons.arrow_forward_rounded, size: 20),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                widget.direction.nomarretarrivee,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
-      body: _stops.isEmpty && _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _stops.isEmpty && _error != null
-              ? Center(child: Text('Error: $_error'))
-              : _stops.isEmpty
-                  ? const Center(child: Text('No stops found'))
-                  : ListView.builder(
-                      itemCount: _stops.length + (_hasMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == _stops.length) {
-                          return _isLoading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                )
-                              : TextButton(
-                                  onPressed: _loadMore,
-                                  child: const Text('Load more'),
-                                );
-                        }
-                        final stop = _stops[index];
-                        return ListTile(
-                          leading: const Icon(Icons.pin_drop),
-                          title: Text(stop.name),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ConnectorNxpassageView(
-                                  connectorId: widget.connectorId,
-                                  stop: stop,
-                                  token: widget.token,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+      body: body,
     );
   }
 }

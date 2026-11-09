@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class Station {
   final String idjdd;
@@ -10,6 +10,7 @@ class Station {
   final String nomArret;
   final Coordonnees coordonnees;
   final DateTime arriveeFirstTrain;
+  final DateTime? arriveeSecondTrain;
   final String heureExtraction;
 
   const Station(
@@ -21,6 +22,7 @@ class Station {
       required this.nomArret,
       required this.coordonnees,
       required this.arriveeFirstTrain,
+      this.arriveeSecondTrain,
       required this.heureExtraction});
 
   factory Station.fromStarJson(Map<String, dynamic> json) {
@@ -45,6 +47,9 @@ class Station {
             nomArret: nomArret,
             coordonnees: Coordonnees.fromJson(coordonnees),
             arriveeFirstTrain: DateTime.parse(arriveeFirstTrain),
+            arriveeSecondTrain: json['arriveesecondtrain'] is String
+                ? DateTime.tryParse(json['arriveesecondtrain'])
+                : null,
             heureExtraction: heureExtraction),
       _ => throw const FormatException('Invalid JSON format for Station'),
     };
@@ -88,41 +93,26 @@ class Coordonnees {
   }
 }
 
-// The main widget displaying the metro information
+/// Next-passage card for a metro station.
 class MetroDetailsView extends StatelessWidget {
   final Station metro;
+  final String? lineName;
+  final Color? lineColor;
 
-  const MetroDetailsView({super.key, required this.metro});
+  const MetroDetailsView(
+      {super.key, required this.metro, this.lineName, this.lineColor});
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${localizations.line}: ${metro.idLigne}',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.station}: ${metro.nomArret}',
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.arrivalTime}: ${metro.arriveeFirstTrain}',
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${localizations.direction}: ${metro.sens}',
-            style: const TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
+    final second = metro.arriveeSecondTrain;
+    return ArrivalCard(
+      lineLabel: lineName ?? metro.idLigne,
+      lineColor: lineColor ?? Theme.of(context).colorScheme.primary,
+      stopName: metro.nomArret,
+      arrival: metro.arriveeFirstTrain,
+      destination: metro.destination,
+      extraArrivals: second != null ? [second] : const [],
+      updatedAt: DateTime.tryParse(metro.heureExtraction),
     );
   }
 }

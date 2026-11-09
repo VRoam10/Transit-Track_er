@@ -6,6 +6,7 @@ import 'package:transit_track_er/src/save_favorite/favorite_station.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
 import 'package:transit_track_er/src/types/timetable.dart';
+import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 import 'settings_controller.dart';
 
@@ -19,17 +20,17 @@ class SettingsView extends StatefulWidget {
 
   const SettingsView({super.key, required this.controller});
   @override
-  State<SettingsView> createState() => _SettingsViewState(this.controller);
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  _SettingsViewState(this.controller);
   late Box<FavoriteBusStop> busBox;
   late Box<FavoriteStation> stationBox;
   late List<Timetable> timetables = [];
   late String token = '';
+  String? _email;
 
-  final SettingsController controller;
+  SettingsController get controller => widget.controller;
 
   @override
   void initState() {
@@ -39,14 +40,26 @@ class _SettingsViewState extends State<SettingsView> {
     _loadTimetables();
   }
 
+  Future<void> _signOut() async {
+    await AuthService().logout();
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
+
   Future<void> _loadTimetables() async {
+    final email = await AuthService().getEmail();
+    if (mounted && email != null) setState(() => _email = email);
     final token = await AuthService().getToken() ?? '';
-    if (token.isNotEmpty) {
+    if (token.isEmpty) return;
+    try {
       final loaded = await TimetableService().fetchTimetable(token);
+      if (!mounted) return;
       setState(() {
         timetables = loaded;
         this.token = token;
       });
+    } catch (_) {
+      // Server alarms are optional here; local ones are still shown.
     }
   }
 
@@ -69,94 +82,112 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final hasAlarms =
+        busBox.isNotEmpty || stationBox.isNotEmpty || timetables.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.settingsTitle),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DropdownButton<ThemeMode>(
-                // Read the selected themeMode from the controller
-                value: controller.themeMode,
-                // Call the updateThemeMode method any time the user selects a theme.
-                onChanged: controller.updateThemeMode,
-                items: [
-                  DropdownMenuItem(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        children: [
+          SectionTitle(localizations.account),
+          AccountCard(
+            email: _email,
+            onSignOut: _signOut,
+            onSignIn: () => Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (route) => false),
+          ),
+          SectionTitle(localizations.appearance),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SegmentedButton<ThemeMode>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
                     value: ThemeMode.system,
-                    child: Text(localizations.systemTheme),
+                    label: Text(localizations.systemTheme),
                   ),
-                  DropdownMenuItem(
+                  ButtonSegment(
                     value: ThemeMode.light,
-                    child: Text(localizations.lightTheme),
+                    label: Text(localizations.lightTheme),
                   ),
-                  DropdownMenuItem(
+                  ButtonSegment(
                     value: ThemeMode.dark,
-                    child: Text(localizations.darkTheme),
+                    label: Text(localizations.darkTheme),
                   ),
                 ],
+                selected: {controller.themeMode},
+                onSelectionChanged: (selection) =>
+                    controller.updateThemeMode(selection.first),
               ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: busBox.length,
-                itemBuilder: (context, index) {
-                  final bus = busBox.getAt(index);
-                  return ListTile(
-                    title: Text(bus?.name ?? ''),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteBus(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: stationBox.length,
-                itemBuilder: (context, index) {
-                  final station = stationBox.getAt(index);
-                  return ListTile(
-                    title: Text(station?.nomCourtLigne ?? ''),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteMetro(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: timetables.length,
-                itemBuilder: (context, index) {
-                  final timetable = timetables[index];
-                  return ListTile(
-                    title: Text(timetable.idLine),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteTimetable(index);
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
-        ),
+          SectionTitle(localizations.savedAlarms),
+          if (!hasAlarms)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Icon(Icons.alarm_off_rounded,
+                        color: theme.colorScheme.outline),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        localizations.noSavedAlarms,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (busBox.isNotEmpty || stationBox.isNotEmpty)
+                    GroupLabel(localizations.onThisDevice),
+                  for (var i = 0; i < busBox.length; i++)
+                    if (busBox.getAt(i) case final bus?)
+                      AlarmTile(
+                        icon: Icons.directions_bus_rounded,
+                        color: modeColor('bus'),
+                        title: bus.name,
+                        subtitle:
+                            '${localizations.bus} ${bus.nomCourtLigne} · ${formatAlarmDate(context, bus.alarmTime)}',
+                        onDelete: () => _deleteBus(i),
+                      ),
+                  for (var i = 0; i < stationBox.length; i++)
+                    if (stationBox.getAt(i) case final station?)
+                      AlarmTile(
+                        icon: Icons.subway_rounded,
+                        color: modeColor('metro'),
+                        title: station.nomCourtLigne,
+                        subtitle:
+                            '${localizations.metro} · ${formatAlarmDate(context, station.alarmTime)}',
+                        onDelete: () => _deleteMetro(i),
+                      ),
+                  if (timetables.isNotEmpty)
+                    GroupLabel(localizations.onYourAccount),
+                  for (var i = 0; i < timetables.length; i++)
+                    AlarmTile(
+                      icon: modeIcon(timetables[i].mode),
+                      color: modeColor(timetables[i].mode),
+                      title: describeCron(context, timetables[i].cron),
+                      subtitle: localizations.stopId(timetables[i].idLine),
+                      onDelete: () => _deleteTimetable(i),
+                    ),
+                  const SizedBox(height: 6),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
