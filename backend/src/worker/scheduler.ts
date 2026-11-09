@@ -39,7 +39,6 @@ export async function runScheduledTasks() {
                             task.message || "Scheduled task",
                             `Next Train at ${passages.name}: ${passages.nextTrain}`
                         );
-                        break;
                     } catch (err) {
                         throw new Error(`Error fetching next passages from external API: ${err}`);
                     }
@@ -47,7 +46,7 @@ export async function runScheduledTasks() {
             }
         } catch (err: Error | any) {
             console.error(
-                `Invalid cron "${task.cron}" in schedule ID ${schedule.id}:`,
+                `Schedule ${schedule.id} (cron "${task.cron}") failed:`,
                 err.message
             );
         }

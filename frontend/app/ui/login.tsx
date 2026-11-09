@@ -30,7 +30,8 @@ export default function Login() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.message || 'Login failed');
+                // The API reports failures as { error }; keep `message` as a fallback.
+                setError(data.error || data.message || 'Login failed');
                 return;
             }
 

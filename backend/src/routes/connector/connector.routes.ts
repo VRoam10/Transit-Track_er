@@ -71,7 +71,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
     }
 });
 
-router.post("/", validateConnector, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
+router.post("/", authenticateToken, validateConnector, handleValidationErrors, async (req: Request, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ error: "Unauthorized" });
@@ -90,7 +90,7 @@ router.post("/", validateConnector, handleValidationErrors, authenticateToken, a
     }
 });
 
-router.put("/:id", validateConnector, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
+router.put("/:id", authenticateToken, validateConnector, handleValidationErrors, async (req: Request, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ error: "Unauthorized" });

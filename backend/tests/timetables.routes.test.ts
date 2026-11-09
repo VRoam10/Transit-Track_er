@@ -12,8 +12,13 @@ const db = vi.hoisted(() => ({
   },
 }));
 vi.mock('@prisma/client', () => ({ PrismaClient: vi.fn(function () { return db; }) }));
+const auth = vi.hoisted(() => ({ signedIn: true }));
 vi.mock('../src/middleware/auth', () => ({
-  authenticateToken: (req: any, _res: any, next: any) => { req.user = { id: 1 }; next(); },
+  authenticateToken: (req: any, res: any, next: any) => {
+    if (!auth.signedIn) return res.sendStatus(401);
+    req.user = { id: 1 };
+    next();
+  },
 }));
 
 import timetablesRoutes from '../src/routes/timetables.routes';
@@ -30,6 +35,7 @@ const timetable = { id: 'B5', api: 'data.explore.star.fr', cron: '15 8 * * 1', m
 describe('timetables routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auth.signedIn = true;
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -89,6 +95,34 @@ describe('timetables routes', () => {
   it('POST / rejects a body without a timetable object', async () => {
     const res = await request(app()).post('/api/timetables').send({ timetable: 'nope' });
     expect(res.status).toBe(422);
+  });
+
+  it('PUT /:id updates the timetable with the same shape as POST', async () => {
+    const updated = { ...timetable, cron: '30 9 * * 2' };
+    db.savedTimetable.update.mockResolvedValue({ id: 't1', timetable: updated });
+
+    const res = await request(app()).put('/api/timetables/t1').send({ timetable: updated });
+
+    expect(res.status).toBe(200);
+    expect(db.savedTimetable.update).toHaveBeenCalledWith({
+      where: { id: 't1', userId: 1 },
+      data: { timetable: updated },
+    });
+  });
+
+  it('PUT /:id rejects an invalid timetable', async () => {
+    const res = await request(app()).put('/api/timetables/t1').send({ timetable: { ...timetable, cron: '' } });
+    expect(res.status).toBe(422);
+    expect(db.savedTimetable.update).not.toHaveBeenCalled();
+  });
+
+  it.each(['post', 'put'] as const)('%s returns 401, not 422, when signed out', async (method) => {
+    auth.signedIn = false;
+    const url = method === 'post' ? '/api/timetables' : '/api/timetables/t1';
+
+    const res = await request(app())[method](url).send({});
+
+    expect(res.status).toBe(401);
   });
 
   it('PATCH /:id toggles enabled', async () => {

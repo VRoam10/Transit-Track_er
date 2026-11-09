@@ -15,8 +15,13 @@ vi.mock('@prisma/client', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@prisma/client')>();
   return { ...actual, PrismaClient: vi.fn(function () { return db; }) };
 });
+const auth = vi.hoisted(() => ({ signedIn: true }));
 vi.mock('../src/middleware/auth', () => ({
-  authenticateToken: (req: any, _res: any, next: any) => { req.user = { id: 1 }; next(); },
+  authenticateToken: (req: any, res: any, next: any) => {
+    if (!auth.signedIn) return res.sendStatus(401);
+    req.user = { id: 1 };
+    next();
+  },
 }));
 
 import { Prisma } from '@prisma/client';
@@ -32,6 +37,7 @@ function app() {
 describe('connector CRUD routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auth.signedIn = true;
     vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -103,6 +109,16 @@ describe('connector CRUD routes', () => {
       where: { id: 'c1', userId: 1 },
       data: { name: 'New', apiUrl: 'https://n' },
     });
+  });
+
+  it.each(['post', 'put'] as const)('%s returns 401, not 422, when signed out', async (method) => {
+    auth.signedIn = false;
+    const url = method === 'post' ? '/api/connector' : '/api/connector/c1';
+
+    const res = await request(app())[method](url).send({});
+
+    expect(res.status).toBe(401);
+    expect(db.connector.create).not.toHaveBeenCalled();
   });
 
   it('DELETE /:id deletes the connector', async () => {

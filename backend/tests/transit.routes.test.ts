@@ -160,3 +160,22 @@ describe('GET /api/bus/stops/:idLigne/:sens', () => {
     expect(axiosGet).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('when the STAR API fails', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    axiosGet.mockRejectedValue(new Error('ECONNRESET'));
+  });
+
+  it.each([
+    ['metro lines', '/api/metro/lines'],
+    ['bus next passages', '/api/bus/nextpassages/0001-0-1234'],
+    ['bus stops', '/api/bus/stops/0001/0'],
+  ])('%s answers 502 instead of hanging', async (_label, url) => {
+    const res = await request(app()).get(url).timeout(2000);
+
+    expect(res.status).toBe(502);
+    expect(res.body.error).toMatch(/transit data provider/);
+  });
+});

@@ -87,7 +87,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/", validateSchedule, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
+router.post("/", authenticateToken, validateSchedule, handleValidationErrors, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -109,21 +109,14 @@ router.post("/", validateSchedule, handleValidationErrors, authenticateToken, as
   }
 });
 
-router.put("/:id", validateSchedule, handleValidationErrors, authenticateToken, async (req: Request, res: Response) => {
+router.put("/:id", authenticateToken, validateSchedule, handleValidationErrors, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    // `timetable` is already validated by validateSchedule (same shape as POST).
     const { timetable } = req.body;
-
-    const isValid = Array.isArray(timetable) && timetable.every(item =>
-      item.cron && item.api && item.id
-    );
-
-    if (!isValid) {
-      return res.status(400).json({ error: "Invalid timetable format" });
-    }
 
     const updatedTimetable = await prisma.savedTimetable.update({
       where: {

@@ -60,6 +60,15 @@ describe('Login form', () => {
     expect(localStorage.getItem('token')).toBeNull();
   });
 
+  it('shows the API error, which is sent as { error }', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ error: 'Invalid email or password.' }, 401));
+    render(<Login />);
+
+    await fillAndSubmit();
+
+    expect(await screen.findByText('Invalid email or password.')).toBeTruthy();
+  });
+
   it('falls back to a generic message when the error has no message', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 401));
     render(<Login />);

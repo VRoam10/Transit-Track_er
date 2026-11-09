@@ -49,6 +49,33 @@ describe('runScheduledTasks', () => {
     expect(sendNotification).toHaveBeenCalledWith('fcm', 'Scheduled task', 'Next Train at République: 08:19');
   });
 
+  it('notifies every schedule that is due in the same minute', async () => {
+    db.savedTimetable.findMany.mockResolvedValue([
+      { ...schedule('15 8 * * 1'), id: 'a', user: { token: 'fcm-a' } },
+      { ...schedule('15 8 * * 1'), id: 'b', user: { token: 'fcm-b' } },
+      { ...schedule('15 8 * * 1'), id: 'c', user: { token: 'fcm-c' } },
+    ]);
+
+    await runScheduledTasks();
+
+    expect(sendNotification.mock.calls.map((c) => c[0])).toEqual(['fcm-a', 'fcm-b', 'fcm-c']);
+  });
+
+  it('keeps notifying the others when one schedule fails', async () => {
+    axiosGet
+      .mockRejectedValueOnce(new Error('upstream down'))
+      .mockResolvedValue({ data: { data: { name: 'Gares', nextTrain: '08:20' } } });
+    db.savedTimetable.findMany.mockResolvedValue([
+      { ...schedule('15 8 * * 1'), id: 'a', user: { token: 'fcm-a' } },
+      { ...schedule('15 8 * * 1'), id: 'b', user: { token: 'fcm-b' } },
+    ]);
+
+    await runScheduledTasks();
+
+    expect(sendNotification).toHaveBeenCalledTimes(1);
+    expect(sendNotification.mock.calls[0][0]).toBe('fcm-b');
+  });
+
   it('uses the timetable message as the notification title when set', async () => {
     db.savedTimetable.findMany.mockResolvedValue([schedule('15 8 * * 1', { message: 'Leave now' })]);
 

@@ -133,6 +133,24 @@ describe('POST /api/users/login', () => {
 describe('authenticated user routes', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('GET / never selects password hashes or push tokens', async () => {
+    db.user.findMany.mockResolvedValue([{ id: 1, name: 'Alice', email: 'alice@example.com' }]);
+
+    const res = await request(app()).get('/api/users');
+
+    expect(res.status).toBe(200);
+    const select = db.user.findMany.mock.calls[0][0].select;
+    expect(select).toEqual({ id: true, name: true, email: true, createdAt: true });
+    expect(select.password).toBeUndefined();
+    expect(select.token).toBeUndefined();
+  });
+
+  it('GET / returns 500 when the database fails', async () => {
+    db.user.findMany.mockRejectedValue(new Error('db down'));
+    const res = await request(app()).get('/api/users');
+    expect(res.status).toBe(500);
+  });
+
   it('POST /register-token stores the FCM token on the current user', async () => {
     db.user.update.mockResolvedValue({});
 

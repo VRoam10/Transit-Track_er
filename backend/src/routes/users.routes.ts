@@ -46,8 +46,15 @@ function handleValidationErrors(
 }
 
 router.get("/", authenticateToken, async (_req, res) => {
-  const users = await prisma.user.findMany();
-  res.json({ users });
+  try {
+    // Never send password hashes or push tokens to clients.
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, email: true, createdAt: true },
+    });
+    res.json({ users });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 router.post(
