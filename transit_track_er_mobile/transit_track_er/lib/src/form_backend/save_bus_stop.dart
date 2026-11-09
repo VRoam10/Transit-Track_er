@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/service/timetable_service.dart';
@@ -42,8 +43,9 @@ Future<void> showAddFavoriteBusStopDialog(
 
   String token = await AuthService().getToken() ?? '';
   if (token.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.notAuthenticated)),
+    AppSnackbar.showError(
+      context,
+      AppLocalizations.of(context)!.notAuthenticated,
     );
     return;
   }
@@ -51,9 +53,7 @@ Future<void> showAddFavoriteBusStopDialog(
     await TimetableService().createTimetable(token, timetable);
   } catch (e) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$e'.replaceFirst('Exception: ', ''))),
-    );
+    AppSnackbar.showError(context, '$e'.replaceFirst('Exception: ', ''));
     return;
   }
 

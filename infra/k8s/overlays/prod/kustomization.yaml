@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: transit-tracker
+
+resources:
+  - ../../base
+  - sealed
+
+images:
+  - name: transit-tracker/backend
+    newName: ghcr.io/vroam10/transit-tracker-backend
+    newTag: main
+  - name: transit-tracker/frontend
+    newName: ghcr.io/vroam10/transit-tracker-frontend
+    newTag: main
+
+replicas:
+  - name: backend
+    count: 2
+  - name: frontend
+    count: 2
+
+patches:
+  - path: patches/ingress.yaml
+  - path: patches/config.yaml

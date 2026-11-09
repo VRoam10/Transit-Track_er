@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Populates the local overlay's secrets, checks preconditions, and deploys.
+set -euo pipefail
+
+NODE_CONTAINER="${NODE_CONTAINER:-desktop-control-plane}"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+OVERLAY="${ROOT}/infra/k8s/overlays/local"
+SRC_ENV="${ROOT}/backend/.env"
+SRC_KEY="${ROOT}/backend/serviceAccountKey.json"
+
+[ -f "$SRC_ENV" ] || { echo "missing ${SRC_ENV}" >&2; exit 1; }
+[ -f "$SRC_KEY" ] || { echo "missing ${SRC_KEY}" >&2; exit 1; }
+
+echo "==> generating ${OVERLAY}/.env"
+# Only these three come from the developer's file. DATABASE_URL is deliberately
+# NOT copied: backend/.env points at localhost, which inside a pod is the pod
+# itself. tr -d '\r' is required - a trailing CR ends up inside the secret value.
+#
+# The sed strips surrounding quotes for the same reason. dotenv removes them when
+# the app loads backend/.env directly, but Kustomize's secretGenerator takes the
+# value literally, so JWT_EXPIRES_IN="7d" reaches the pod as the 4-character
+# string "7d" and jwt.sign rejects it with an opaque 500 on every login.
+grep -E '^(JWT_SECRET|JWT_EXPIRES_IN|CONNECTOR_SECRET_KEY)=' "$SRC_ENV" \
+  | tr -d '\r' \
+  | sed -E 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/\1=\2/; s/^([A-Za-z_][A-Za-z0-9_]*)='"'"'(.*)'"'"'$/\1=\2/' \
+  > "${OVERLAY}/.env"
+echo 'DATABASE_URL=postgres://transit:transit@postgres:5432/transit' >> "${OVERLAY}/.env"
+
+echo "==> copying serviceAccountKey.json"
+cp "$SRC_KEY" "${OVERLAY}/serviceAccountKey.json"
+
+echo "==> preflight: are both images loaded into the node?"
+present="$(docker exec "$NODE_CONTAINER" ctr --namespace k8s.io images ls -q || true)"
+for name in backend frontend; do
+  if ! printf '%s\n' "$present" | grep -q "transit-tracker/${name}:dev"; then
+    echo "ERROR: transit-tracker/${name}:dev is not in the node's containerd." >&2
+    echo "Run infra/scripts/build-images.sh first." >&2
+    exit 1
+  fi
+done
+
+echo "==> applying the local overlay"
+kubectl apply -k "$OVERLAY"
+
+echo "==> waiting for rollouts"
+kubectl -n transit-tracker rollout status statefulset/postgres --timeout=300s
+kubectl -n transit-tracker rollout status deployment/backend   --timeout=300s
+kubectl -n transit-tracker rollout status deployment/frontend  --timeout=300s
+kubectl -n transit-tracker rollout status deployment/worker    --timeout=300s
+
+kubectl -n transit-tracker get pods
+
+# Pods being Ready is not the same as the Ingress serving: nginx needs a moment to
+# observe the new endpoints, and returns 503 until it does. Do not report success
+# before traffic actually works.
+HOST="${HOST:-transit.localtest.me}"
+echo "==> waiting for http://${HOST}/api/health to serve"
+code=""
+for _ in $(seq 1 45); do
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://${HOST}/api/health" || true)"
+  [ "$code" = "200" ] && break
+  sleep 2
+done
+
+if [ "$code" = "200" ]; then
+  echo "==> ready: http://${HOST}/  (API at /api)"
+else
+  echo "WARNING: pods are up but the ingress returned '${code:-no response}'." >&2
+  echo "Check: kubectl -n ingress-nginx get svc ingress-nginx-controller" >&2
+  exit 1
+fi

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  # In-cluster Service DNS. The worker calls the backend through this.
+  URL_SERVER: "http://backend:3000"
+  # firebase-admin resolves this as a filesystem path, so firebase-sa is mounted, not env-injected.
+  GOOGLE_APPLICATION_CREDENTIALS: "/run/secrets/firebase/serviceAccountKey.json"
+  # Browser traffic is same-origin through the Ingress, so this matters only for
+  # non-browser clients such as the Flutter app. Overlays patch it per environment.
+  CORS_ORIGIN: "http://transit.localtest.me"

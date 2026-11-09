@@ -5,7 +5,7 @@ class Environment {
     if (isProduction) {
       return "https://api.myproductionserver.com"; // Prod
     } else {
-      return "http://10.0.2.2:3000"; // Dev (Emulator)
+      return "http://10.0.2.2:3001"; // Dev (Emulator)
     }
   }
 }

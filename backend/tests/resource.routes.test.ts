@@ -1,0 +1,191 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import express from 'express';
+import request from 'supertest';
+
+vi.mock('../src/lib/prisma', () => ({
+  prisma: {
+    connector: {
+      findFirst: vi.fn(),
+    },
+    connectorResource: {
+      findUnique: vi.fn(),
+      upsert: vi.fn(),
+      delete: vi.fn(),
+    },
+  },
+}));
+vi.mock('../src/middleware/auth', () => ({
+  authenticateToken: (req: any, _res: any, next: any) => { req.user = { id: 1 }; next(); },
+}));
+
+import { prisma } from '../src/lib/prisma';
+import { validateDefinition, requiredParams, createConnectorResourceRouter } from '../src/routes/connector/resource.routes';
+import { encryptSecrets, decryptSecrets } from '../src/connector/engine/secrets';
+
+process.env.CONNECTOR_SECRET_KEY = Buffer.alloc(32, 3).toString('base64');
+
+function app() {
+  const a = express();
+  a.use(express.json());
+  a.use('/api/connector/:connectorId', createConnectorResourceRouter());
+  return a;
+}
+
+const goodDef = {
+  request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+  response: { format: 'json', rootPath: 'data' },
+  mapping: { fields: [{ target: 'id', source: 'lid' }] },
+};
+
+describe('validateDefinition', () => {
+  it('accepts a well-formed definition', () => {
+    expect(validateDefinition(goodDef)).toEqual([]);
+  });
+  it('rejects a missing request.url', () => {
+    const bad = { ...goodDef, request: { ...goodDef.request, url: undefined } };
+    expect(validateDefinition(bad).length).toBeGreaterThan(0);
+  });
+});
+
+describe('requiredParams', () => {
+  it('lists non-secret tokens from url + query', () => {
+    const def: any = { request: { url: 'https://x/{lineId}', query: { d: '{dir}' }, pagination: { style: 'none' } }, response: { format: 'json', rootPath: '' }, mapping: { fields: [] } };
+    expect(requiredParams(def).sort()).toEqual(['dir', 'lineId']);
+  });
+});
+
+describe('resource routes', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Default: the authenticated user (id: 1, injected by the mocked auth middleware) owns connector c1.
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+  });
+
+  it('GET returns the resource with masked secrets and params', async () => {
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ id: 'r1', connectorId: 'c1', kind: 'LINE', name: 'L', definition: goodDef, secrets: null });
+    const res = await request(app()).get('/api/connector/c1/line');
+    expect(res.status).toBe(200);
+    expect(res.body.params).toEqual([]);
+    expect(res.body.secrets).toEqual({});
+  });
+
+  it('PATCH rejects a malformed definition', async () => {
+    const res = await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: { request: {} } });
+    expect(res.status).toBe(422);
+  });
+
+  it('preview returns diagnostics for a broken mapping', async () => {
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', name: 'L', definition: goodDef, secrets: null });
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ sampleResponse: { data: [{ nope: 1 }] } });
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.envelope.data.length).toBe(1);
+  });
+
+  it('GET returns 404 for a connector the user does not own (IDOR guard)', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue(null);
+    const res = await request(app()).get('/api/connector/c1/line');
+    expect(res.status).toBe(404);
+    expect(res.body.id).toBeUndefined();
+    expect(prisma.connectorResource.findUnique).not.toHaveBeenCalled();
+  });
+});
+
+describe('preview inline definition', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const inlineDef = {
+    request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+    response: { format: 'json', rootPath: 'items' },
+    mapping: { fields: [{ target: 'id', source: 'a', ops: [{ op: 'toString' }] }] },
+  };
+
+  it('runs the inline definition instead of the stored one', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({
+      connectorId: 'c1', kind: 'LINE', name: 'L', secrets: null,
+      definition: { request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+        response: { format: 'json', rootPath: 'data' }, mapping: { fields: [{ target: 'id', source: 'a' }] } },
+    });
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [{ a: 1 }], data: [{ a: 2 }] } });
+    expect(res.status).toBe(200);
+    expect(res.body.envelope.data[0]).toEqual({ id: '1' }); // from `items` (inline), not `data` (stored)
+  });
+
+  it('previews a not-yet-saved resource (stored row null) with an inline definition', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [{ a: 5 }] } });
+    expect(res.status).toBe(200);
+    expect(res.body.envelope.data[0]).toEqual({ id: '5' });
+  });
+
+  it('rejects a malformed inline definition with 422', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: { request: {} } });
+    expect(res.status).toBe(422);
+  });
+
+  it('404s a non-owner', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue(null);
+    const res = await request(app())
+      .post('/api/connector/c1/line/preview')
+      .send({ definition: inlineDef, sampleResponse: { items: [] } });
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('PATCH merges secrets', () => {
+  beforeEach(() => vi.clearAllMocks());
+  const KEY = Buffer.from(process.env.CONNECTOR_SECRET_KEY!, 'base64');
+  const goodDef = { request: { method: 'GET', url: 'https://api.x.com/l', pagination: { style: 'none' } },
+    response: { format: 'json', rootPath: 'data' }, mapping: { fields: [{ target: 'id', source: 'a' }] } };
+
+  function capturedSecrets(): Buffer | null {
+    const call = (prisma.connectorResource.upsert as any).mock.calls[0][0];
+    const val = call.update.secrets;
+    return val == null ? null : Buffer.from(val);
+  }
+
+  it('merges a new secret while preserving existing ones', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { token: 'B' } });
+    expect(decryptSecrets(capturedSecrets()!, KEY)).toEqual({ apiKey: 'A', token: 'B' });
+  });
+
+  it('deletes a secret when its value is null', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A', token: 'B' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { token: null } });
+    expect(decryptSecrets(capturedSecrets()!, KEY)).toEqual({ apiKey: 'A' });
+  });
+
+  it('leaves secrets untouched when body.secrets is omitted', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef });
+    const call = (prisma.connectorResource.upsert as any).mock.calls[0][0];
+    expect('secrets' in call.update).toBe(false);
+  });
+
+  it('stores null when the merge empties the map', async () => {
+    (prisma.connector.findFirst as any).mockResolvedValue({ id: 'c1' });
+    (prisma.connectorResource.findUnique as any).mockResolvedValue({ connectorId: 'c1', kind: 'LINE', secrets: encryptSecrets({ apiKey: 'A' }, KEY) });
+    (prisma.connectorResource.upsert as any).mockResolvedValue({ id: 'r1', kind: 'LINE', name: 'L' });
+    await request(app()).patch('/api/connector/c1/line').send({ name: 'L', definition: goodDef, secrets: { apiKey: null } });
+    expect(capturedSecrets()).toBeNull();
+  });
+});

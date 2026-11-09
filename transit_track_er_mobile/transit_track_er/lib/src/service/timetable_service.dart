@@ -27,8 +27,7 @@ class TimetableService {
     }
   }
 
-  Future<Timetable> createTimetable(
-      String token, Timetable timetable) async {
+  Future<Timetable> createTimetable(String token, Timetable timetable) async {
     final response = await http
         .post(
       Uri.parse('${Environment.baseUrl}/api/timetables'),
@@ -56,6 +55,33 @@ class TimetableService {
       return Timetable.fromBackendJson(data);
     } else {
       throw Exception('Failed to create timetable');
+    }
+  }
+
+  Future<Timetable> setTimetableEnabled(
+      String token, Timetable timetable, bool enabled) async {
+    final response = await http
+        .patch(
+      Uri.parse('${Environment.baseUrl}/api/timetables/${timetable.id}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, Object>{
+        'enabled': enabled,
+      }),
+    )
+        .timeout(
+      const Duration(seconds: 2),
+      onTimeout: () {
+        throw TimeoutException('Request timed out after 2 seconds');
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return Timetable.fromBackendJson(data);
+    } else {
+      throw Exception('Failed to update timetable');
     }
   }
 

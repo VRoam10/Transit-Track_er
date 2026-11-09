@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/pages/auth_layout.dart';
@@ -50,21 +51,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _register() async {
     final localizations = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     setState(() => _loading = true);
     try {
       await AuthService().register(_usernameController.text,
           _emailController.text, _passwordController.text);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) AppSnackbar.showError(context, e.toString());
       if (mounted) setState(() => _loading = false);
       return;
     }
     if (!mounted) return;
-    messenger.showSnackBar(
-      SnackBar(content: Text(localizations.loginSuccess)),
-    );
+    AppSnackbar.showSuccess(context, localizations.loginSuccess);
     navigator.pushReplacementNamed(HomePage.routeName);
   }
 

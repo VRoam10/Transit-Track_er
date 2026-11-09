@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/theme/app_theme.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 
 /// Picks black or white text for the best contrast on [background].
 Color onColor(Color background) =>
@@ -168,36 +169,86 @@ class LineItem {
   final Color color;
 }
 
-/// Grid of tappable line badges.
+/// Grid of tappable line badges, with an optional [footer] (e.g. a
+/// "load more" button) below it.
 class LineGrid extends StatelessWidget {
-  const LineGrid({super.key, required this.lines, required this.onTap});
+  const LineGrid({
+    super.key,
+    required this.lines,
+    required this.onTap,
+    this.footer,
+  });
 
   final List<LineItem> lines;
   final void Function(LineItem line) onTap;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 120,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1,
-      ),
-      itemCount: lines.length,
-      itemBuilder: (context, index) {
-        final line = lines[index];
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => onTap(line),
-            child: Center(
-                child:
-                    LineBadge(label: line.name, color: line.color, size: 52)),
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final line = lines[index];
+                return Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => onTap(line),
+                    child: Center(
+                      child: LineBadge(
+                          label: line.name, color: line.color, size: 52),
+                    ),
+                  ),
+                );
+              },
+              childCount: lines.length,
+            ),
           ),
-        );
-      },
+        ),
+        if (footer != null) SliverToBoxAdapter(child: footer),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
+    );
+  }
+}
+
+/// "Load more" footer for paged lists: a spinner while [loading].
+class LoadMoreButton extends StatelessWidget {
+  const LoadMoreButton({
+    super.key,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Center(
+        child: loading
+            ? const Padding(
+                padding: EdgeInsets.all(8),
+                child: CircularProgressIndicator(),
+              )
+            : OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                onPressed: onPressed,
+                icon: const Icon(Icons.expand_more_rounded),
+                label: Text(AppLocalizations.of(context)!.loadMore),
+              ),
+      ),
     );
   }
 }
@@ -617,8 +668,17 @@ String describeCron(BuildContext context, String cron) {
   final time = '${_two(h)}:${_two(m)}';
   final day = parts.length >= 5 ? int.tryParse(parts[4]) : null;
   if (day == null) return time;
-  final names = AppLocalizations.of(context)!.weekdaysShort.split(',');
+  final l = AppLocalizations.of(context)!;
   // Cron uses 0 or 7 for Sunday.
+  final names = [
+    l.weekdaySun,
+    l.weekdayMon,
+    l.weekdayTue,
+    l.weekdayWed,
+    l.weekdayThu,
+    l.weekdayFri,
+    l.weekdaySat,
+  ];
   return '${names[day % 7]} · $time';
 }
 
@@ -650,23 +710,11 @@ Future<TimeOfDay?> showTime24Picker(BuildContext context) {
   );
 }
 
-/// Shows the floating confirmation used after an alarm is saved.
+/// Shows the confirmation used after an alarm is saved.
 void showAlarmSetSnackBar(BuildContext context, String stop, DateTime time) {
   final l10n = AppLocalizations.of(context)!;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Row(
-        children: [
-          Icon(Icons.alarm_on_rounded,
-              color: Theme.of(context).colorScheme.onInverseSurface),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(l10n.alarmSet(stop, formatAlarmDate(context, time))),
-          ),
-        ],
-      ),
-    ),
-  );
+  AppSnackbar.showSuccess(
+      context, l10n.alarmSet(stop, formatAlarmDate(context, time)));
 }
 
 /// Asks whether the user wants to set a custom alarm. Returns true to go on.

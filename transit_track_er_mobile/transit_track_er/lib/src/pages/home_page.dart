@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:transit_track_er/src/bus_feature/bus_line_list_view.dart';
 import 'package:transit_track_er/src/bus_feature_backend/bus_line_list_view.dart'
     as bus_backend;
+import 'package:transit_track_er/src/connector_feature/connector_list_view.dart';
 import 'package:transit_track_er/src/metro_feature/metro_line_list_view.dart';
 import 'package:transit_track_er/src/metro_feature_backend/metro_line_list_view.dart'
     as metro_backend;
@@ -10,6 +11,7 @@ import 'package:transit_track_er/src/service/api_service.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
 import 'package:transit_track_er/src/settings/settings_view.dart';
 import 'package:transit_track_er/src/theme/app_theme.dart';
+import 'package:transit_track_er/src/widgets/bottom_nav_bar.dart';
 import 'package:transit_track_er/src/widgets/transit_widgets.dart';
 
 class HomePage extends StatefulWidget {
@@ -125,40 +127,20 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          Card(
+            child: _BackendTile(
+              icon: Icons.hub_outlined,
+              title: localizations.connectors,
+              subtitle: localizations.connectorsSubtitle,
+              onTap: () =>
+                  Navigator.pushNamed(context, ConnectorListView.routeName),
+            ),
+          ),
         ],
       ),
       extendBody: true,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Color.alphaBlend(
-                    scheme.primary.withOpacity(0.16), scheme.surface)
-                : AppColors.brandBlue,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                  icon: Icons.home_rounded, isActive: true, onPressed: () {}),
-              _NavItem(icon: Icons.calendar_today_rounded, onPressed: () {}),
-              _NavItem(
-                  icon: Icons.chat_bubble_outline_rounded, onPressed: () {}),
-              _NavItem(icon: Icons.logout_rounded, onPressed: logout),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const BottomNavBar(currentRoute: HomePage.routeName),
     );
   }
 }
@@ -334,41 +316,6 @@ class _BackendTile extends StatelessWidget {
       subtitle: Text(subtitle),
       trailing: Icon(Icons.chevron_right_rounded, color: scheme.outline),
       onTap: onTap,
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.onPressed,
-    this.isActive = false,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeBg = isDark ? Colors.white.withOpacity(0.16) : Colors.white;
-    final activeFg = isDark ? Colors.white : AppColors.brandBlue;
-    final inactiveFg = Colors.white.withOpacity(0.75);
-
-    // 48x48 touch target (the previous icons were only 24x24 tappable).
-    return Material(
-      color: isActive ? activeBg : Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onPressed,
-        child: SizedBox(
-          width: 56,
-          height: 48,
-          child: Icon(icon, color: isActive ? activeFg : inactiveFg),
-        ),
-      ),
     );
   }
 }

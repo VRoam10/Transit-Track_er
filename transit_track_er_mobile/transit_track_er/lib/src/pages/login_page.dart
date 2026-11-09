@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:transit_track_er/src/widgets/app_snackbar.dart';
 import 'package:transit_track_er/src/pages/home_page.dart';
 import 'package:transit_track_er/src/pages/register_page.dart';
 import 'package:transit_track_er/src/service/auth_service.dart';
@@ -49,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _signIn() async {
     final localizations = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     setState(() => _loading = true);
     try {
@@ -57,17 +57,13 @@ class _LoginPageState extends State<LoginPage> {
           .loginIsValid(_usernameController.text, _passwordController.text);
       if (!mounted) return;
       if (!ok) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(localizations.loginError)),
-        );
+        AppSnackbar.showError(context, localizations.loginError);
         return;
       }
-      messenger.showSnackBar(
-        SnackBar(content: Text(localizations.loginSuccess)),
-      );
+      AppSnackbar.showSuccess(context, localizations.loginSuccess);
       navigator.pushReplacementNamed(HomePage.routeName);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) AppSnackbar.showError(context, e.toString());
     } finally {
       if (mounted) setState(() => _loading = false);
     }

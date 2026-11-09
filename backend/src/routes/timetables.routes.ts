@@ -142,6 +142,35 @@ router.put("/:id", validateSchedule, handleValidationErrors, authenticateToken, 
   }
 });
 
+router.patch("/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { enabled } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: "enabled must be a boolean" });
+    }
+
+    const updatedTimetable = await prisma.savedTimetable.update({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+      data: {
+        enabled,
+      },
+    });
+
+    res.json(updatedTimetable);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     if (!req.user) {

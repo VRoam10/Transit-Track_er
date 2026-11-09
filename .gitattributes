@@ -1,0 +1,9 @@
+# Shell scripts MUST keep LF. core.autocrlf=true would otherwise check them out
+# with CRLF, and Git Bash then fails with: $'\r': command not found
+*.sh text eol=lf
+
+# Kubernetes manifests and container files: LF everywhere for tooling consistency.
+*.yaml text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
