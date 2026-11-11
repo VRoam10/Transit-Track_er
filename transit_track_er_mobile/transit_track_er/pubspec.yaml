@@ -14,7 +14,7 @@ dependencies:
   firebase_messaging: ^15.1.0
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^14.0.0
+  flutter_local_notifications: ^23.0.0
   flutter_localizations:
     sdk: flutter
   flutter_secure_storage: ^4.2.1
