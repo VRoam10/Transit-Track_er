@@ -48,7 +48,7 @@ jobs:
         run: flutter build appbundle
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Releases
           path: |
